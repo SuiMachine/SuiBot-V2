@@ -246,7 +246,6 @@ namespace SuiBot_Core.Components
 
         public void Dispose()
         {
-            ChannelQuotes.Save();
         }
     }
 }

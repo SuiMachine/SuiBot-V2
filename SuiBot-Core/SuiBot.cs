@@ -56,6 +56,7 @@ namespace SuiBot_Core
         public System.Timers.Timer IntervalTimer;
         public System.Timers.Timer StatusUpdateTimer;
         private Task BotTask;
+        private Thread BotThread;
         public bool IsRunning = false;
 
         /// <summary>
@@ -121,6 +122,7 @@ namespace SuiBot_Core
             MeebyIrcClient.Connect(BotConnectionConfig.Server, BotConnectionConfig.Port);
             BotTask = Task.Factory.StartNew(() =>
             {
+                BotThread = Thread.CurrentThread;
                 MeebyIrcClient.Listen();
             });
             
@@ -194,12 +196,8 @@ namespace SuiBot_Core
                 channel.Value.ShutdownTask();
             }
 
-            Task.Factory.StartNew(() =>
-            {
-                MeebyIrcClient.Disconnect();
-            });
+            MeebyIrcClient.Disconnect();
             System.Threading.Thread.Sleep(2000);
-            BotTask.Dispose();
             IsRunning = false;
         }
 

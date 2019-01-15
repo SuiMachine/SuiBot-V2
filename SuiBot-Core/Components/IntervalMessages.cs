@@ -122,7 +122,6 @@ namespace SuiBot_Core.Components
 
         public void Dispose()
         {
-            IntervalMessagesStorage.Save();
         }
     }
 }
