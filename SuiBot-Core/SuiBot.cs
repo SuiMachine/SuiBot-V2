@@ -189,11 +189,18 @@ namespace SuiBot_Core
 
         public void Close()
         {
-            foreach(var channel in ActiveChannels)
+            foreach (var channel in ActiveChannels)
             {
                 channel.Value.ShutdownTask();
             }
-            MeebyIrcClient.Disconnect();
+
+            Task.Factory.StartNew(() =>
+            {
+                MeebyIrcClient.Disconnect();
+            });
+            System.Threading.Thread.Sleep(2000);
+            BotTask.Dispose();
+            IsRunning = false;
         }
 
         private void StatusUpdateTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
@@ -230,7 +237,6 @@ namespace SuiBot_Core
         internal void LeaveChannel(string channelToLeave)
         {
             MeebyIrcClient.RfcPart("#" + channelToLeave);
-            ActiveChannels.Remove("#" + channelToLeave);
         }
 
         private void IrcClient_OnPart(object sender, PartEventArgs e)
@@ -287,6 +293,7 @@ namespace SuiBot_Core
 
         public void Shutdown()
         {
+            ErrorLogging.WriteLine("Planned shutdown performed ");
             Close();
             ErrorLogging.Close();
         }

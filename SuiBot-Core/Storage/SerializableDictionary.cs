@@ -24,7 +24,10 @@ namespace SuiBot_Core.SerializableDictionary
             using (XmlReader subtreeReader = reader.ReadSubtree())
             {
                 if (reader.IsEmptyElement)
+                {
                     doc = new XDocument();
+                    return;
+                }
                 doc = XDocument.Load(subtreeReader);
             }
             XmlSerializer serializer = new XmlSerializer(typeof(SerializableKeyValuePair<TKey, TValue>));

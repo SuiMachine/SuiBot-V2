@@ -84,13 +84,13 @@ namespace SuiBot_Core.Storage
         /// Saves config to Bot/Config.suixml.
         /// </summary>
         /// <param name="obj">Instance of SuiBot_Config object.</param>
-        public static void Save(ConnectionConfig obj)
+        public void Save()
         {
             XmlSerializer serializer = new XmlSerializer(typeof(ConnectionConfig));
             if (!Directory.Exists("Bot"))
                 Directory.CreateDirectory("Bot");
             StreamWriter fw = new StreamWriter("Bot/ConnectionConfig.suixml");
-            serializer.Serialize(fw, obj);
+            serializer.Serialize(fw, this);
             fw.Close();
         }
     }
@@ -106,6 +106,14 @@ namespace SuiBot_Core.Storage
         [XmlArrayItem(ElementName = "User")]
         public List<string> IgnoredUsers { get; set; }
 
+        public CoreConfig()
+        {
+            if (ChannelsToJoin == null)
+                ChannelsToJoin = new List<string>();
+            if (IgnoredUsers == null)
+                IgnoredUsers = new List<string>();
+        }
+
         /// <summary>
         /// Loads config from Bot/Config.suixml.
         /// </summary>
@@ -117,32 +125,20 @@ namespace SuiBot_Core.Storage
             FileStream fs = new FileStream("Bot/Config.xml", FileMode.Open);
             obj = (CoreConfig)serializer.Deserialize(fs);
             fs.Close();
-            obj.FillEmpty();
             return obj;
-        }
-
-        /// <summary>
-        /// Filling is needed in case of bot updates, since it would be a pain to write checks each time a bot function is used after bot update.
-        /// </summary>
-        private void FillEmpty()
-        {
-            if(ChannelsToJoin == null)
-                ChannelsToJoin = new List<string>();
-            if(IgnoredUsers == null)
-                IgnoredUsers = new List<string>();
         }
 
         /// <summary>
         /// Saves config to Bot/Config.suixml.
         /// </summary>
         /// <param name="obj">Instance of SuiBot_Config object.</param>
-        public static void Save(CoreConfig obj)
+        public void Save()
         {
             XmlSerializer serializer = new XmlSerializer(typeof(CoreConfig));
             if (!Directory.Exists("Bot"))
                 Directory.CreateDirectory("Bot");
             StreamWriter fw = new StreamWriter("Bot/Config.xml");
-            serializer.Serialize(fw, obj);
+            serializer.Serialize(fw, this);
             fw.Close();
         }
     }
