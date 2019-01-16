@@ -151,7 +151,8 @@ namespace SuiBot_Core.Components
 
             if (lastMessage.Message == "")
             {
-                GetWR(CurrentGame, "", "", new string[0]);
+                channelInstance.SendChatMessageResponse(lastMessage, GetWR(CurrentGame, "", "", new string[0]));
+
             }
             else
             {
@@ -193,6 +194,8 @@ namespace SuiBot_Core.Components
                 if (category == "" && CategoryOverride != "")
                     category = CategoryOverride;
 
+                if (game == "")
+                    return "No game provided";
 
                 var srSearch = new SpeedrunComClient();
                 var srGame = srSearch.Games.SearchGame(game);
