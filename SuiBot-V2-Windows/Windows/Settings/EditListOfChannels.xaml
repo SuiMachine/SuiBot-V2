@@ -1,0 +1,24 @@
+﻿<Window x:Class="SuiBot_V2_Windows.Windows.Settings.EditListOfChannels"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SuiBot_V2_Windows.Windows.Settings"
+        mc:Ignorable="d"
+        Title="Edit list of channels" Height="369.485" Width="378.677" MinWidth="190" MinHeight="260">
+    <Grid>
+        <ListBox x:Name="ListB_Channels" Margin="0,0,0,35" ItemsSource="{Binding ChannelsToJoin, Mode=TwoWay}">
+            <ListBox.ContextMenu>
+                <ContextMenu>
+                    <MenuItem x:Name="B_Contex_Add" Header="Add" Click="B_Contex_Add_Click"/>
+                    <MenuItem x:Name="B_Contex_Edit" Header="Edit" Click="B_Contex_Edit_Click"/>
+                    <MenuItem x:Name="B_Contex_Remove" Header="Remove"/>
+                    <MenuItem x:Name="B_Cancel1" Header="Cancel"/>
+                </ContextMenu>
+            </ListBox.ContextMenu>
+        </ListBox>
+        <Button x:Name="B_OK" Content="OK" HorizontalAlignment="Left" Margin="10,0,0,8" VerticalAlignment="Bottom" Width="75" Click="B_OK_Click"/>
+        <Button x:Name="B_Cancel" Content="Cancel" HorizontalAlignment="Left" Margin="90,0,0,8" VerticalAlignment="Bottom" Width="75" Click="B_Cancel_Click"/>
+
+    </Grid>
+</Window>

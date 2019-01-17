@@ -54,18 +54,74 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Page Include="MainWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
+    <Compile Include="Converters\InvertBooleanConveterter.cs" />
+    <Compile Include="Windows\EditChannel\EditChatFilters.xaml.cs">
+      <DependentUpon>EditChatFilters.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\EditChannel\EditChatFiltersUsers.xaml.cs">
+      <DependentUpon>EditChatFiltersUsers.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\EditChannel\EditCvars.xaml.cs">
+      <DependentUpon>EditCvars.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\EditChannel\EditIntervalMessages.xaml.cs">
+      <DependentUpon>EditIntervalMessages.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\EditChannel\EditQuotes.xaml.cs">
+      <DependentUpon>EditQuotes.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\MainWindow.xaml.cs">
+      <DependentUpon>MainWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\Settings\ConnectionSettingsWindow.xaml.cs">
+      <DependentUpon>ConnectionSettingsWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.xaml.cs">
-      <DependentUpon>MainWindow.xaml</DependentUpon>
-      <SubType>Code</SubType>
+    <Compile Include="Windows\Settings\Dialogs\EditListOfChannelsAddEdit.xaml.cs">
+      <DependentUpon>EditListOfChannelsAddEdit.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Windows\Settings\EditListOfChannels.xaml.cs">
+      <DependentUpon>EditListOfChannels.xaml</DependentUpon>
+    </Compile>
+    <Page Include="Windows\EditChannel\EditChatFilters.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\EditChannel\EditChatFiltersUsers.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\EditChannel\EditCvars.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\EditChannel\EditIntervalMessages.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\EditChannel\EditQuotes.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\MainWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\Settings\ConnectionSettingsWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\Settings\Dialogs\EditListOfChannelsAddEdit.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\Settings\EditListOfChannels.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">

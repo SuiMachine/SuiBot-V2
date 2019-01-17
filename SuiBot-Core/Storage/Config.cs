@@ -49,6 +49,11 @@ namespace SuiBot_Core.Storage
         [XmlIgnore]
         public bool IsValidConfig => Server != null && Port != 0 && Username != null && Password != null && Username != "" && Password != "";
 
+        public static bool ConfigExists()
+        {
+            return File.Exists("Bot/ConnectionConfig.suixml");
+        }
+
         /// <summary>
         /// Loads config from Bot/Config.suixml.
         /// </summary>
@@ -120,12 +125,18 @@ namespace SuiBot_Core.Storage
         /// <returns>SuiBot_Config object</returns>
         public static CoreConfig Load()
         {
-            CoreConfig obj;
-            XmlSerializer serializer = new XmlSerializer(typeof(CoreConfig));
-            FileStream fs = new FileStream("Bot/Config.xml", FileMode.Open);
-            obj = (CoreConfig)serializer.Deserialize(fs);
-            fs.Close();
-            return obj;
+            if (File.Exists("Bot/Config.xml"))
+            {
+                CoreConfig obj;
+                XmlSerializer serializer = new XmlSerializer(typeof(CoreConfig));
+                FileStream fs = new FileStream("Bot/Config.xml", FileMode.Open);
+                obj = (CoreConfig)serializer.Deserialize(fs);
+                fs.Close();
+                return obj;
+            }
+            else
+                return new CoreConfig();
+
         }
 
         /// <summary>

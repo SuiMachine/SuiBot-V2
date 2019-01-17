@@ -56,7 +56,6 @@ namespace SuiBot_Core
         public System.Timers.Timer IntervalTimer;
         public System.Timers.Timer StatusUpdateTimer;
         private Task BotTask;
-        private Thread BotThread;
         public bool IsRunning = false;
 
         /// <summary>
@@ -122,13 +121,11 @@ namespace SuiBot_Core
             MeebyIrcClient.Connect(BotConnectionConfig.Server, BotConnectionConfig.Port);
             BotTask = Task.Factory.StartNew(() =>
             {
-                BotThread = Thread.CurrentThread;
                 MeebyIrcClient.Listen();
             });
             
             if (!MeebyIrcClient.IsConnected)
                 throw new Exception("Failed to connect");
-            MeebyIrcClient.Login(BotConnectionConfig.Username, BotConnectionConfig.Username, 4, BotConnectionConfig.Username, "oauth:" + BotConnectionConfig.Password);
 
             //Timer tick
             IntervalTimer.Elapsed += IntervalTimer_Elapsed;
@@ -228,7 +225,7 @@ namespace SuiBot_Core
         #region MeebyIrcEventHandling
         private void IrcClient_OnJoin(object sender, JoinEventArgs e)
         {
-            ErrorLogging.WriteLine(e.Channel + "! JOINED: " + e.Data.Nick);
+            //ErrorLogging.WriteLine(e.Channel + "! JOINED: " + e.Data.Nick);
             Console.WriteLine("! JOINED: " + e.Data.Nick);
         }
 
@@ -244,20 +241,13 @@ namespace SuiBot_Core
 
         private void IrcClient_OnRegistered(object sender, EventArgs e)
         {
+            Console.WriteLine("! LOGIN VERIFIED");
             ErrorLogging.WriteLine("! LOGIN VERIFIED");
-            //Request capabilities - https://dev.twitch.tv/docs/irc/guide/#twitch-irc-capabilities
-            Thread.Sleep(2000);
-            MeebyIrcClient.WriteLine("CAP REQ :twitch.tv/tags twitch.tv/commands twitch.tv/membership");
-
-            foreach (var channel in BotCoreConfig.ChannelsToJoin)
-            {
-                ConnectToChannel(channel, Storage.ChannelConfig.Load(channel));
-                Thread.Sleep(2000);    //Since Twitch doesn't like mass joining
-            }
         }
 
         private void IrcClient_OnDisconnected(object sender, EventArgs e)
         {
+            Console.WriteLine("! Disconnected");
             ErrorLogging.WriteLine("! Disconnected");
         }
 
@@ -269,7 +259,21 @@ namespace SuiBot_Core
 
         private void IrcClient_OnConnected(object sender, EventArgs e)
         {
+            Console.WriteLine("Connected!");
             ErrorLogging.WriteLine("Connected!");
+            MeebyIrcClient.Login(BotConnectionConfig.Username, BotConnectionConfig.Username, 4, BotConnectionConfig.Username, "oauth:" + BotConnectionConfig.Password);
+
+            Thread.Sleep(2000);
+
+            //Request capabilities - https://dev.twitch.tv/docs/irc/guide/#twitch-irc-capabilities
+            MeebyIrcClient.WriteLine("CAP REQ :twitch.tv/tags twitch.tv/commands twitch.tv/membership");
+            Thread.Sleep(2000);
+
+            foreach (var channel in BotCoreConfig.ChannelsToJoin)
+            {
+                ConnectToChannel(channel, Storage.ChannelConfig.Load(channel));
+                Thread.Sleep(2000);    //Since Twitch doesn't like mass joining
+            }
         }
 
         private void IrcClient_OnConnecting(object sender, EventArgs e)
