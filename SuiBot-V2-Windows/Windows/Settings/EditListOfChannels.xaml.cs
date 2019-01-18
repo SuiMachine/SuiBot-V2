@@ -63,6 +63,16 @@ namespace SuiBot_V2_Windows.Windows.Settings
             }
         }
 
+        private void B_Contex_Remove_Click(object sender, RoutedEventArgs e)
+        {
+            var item = ListB_Channels.SelectedItem;
+            if (item != null)
+            {
+                var id = ListB_Channels.SelectedIndex;
+                CoreConfig.ChannelsToJoin.RemoveAt(id);
+            }
+        }
+
         private void Refresh()
         {
             ListB_Channels.Items.Refresh();

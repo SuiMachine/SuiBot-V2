@@ -12,7 +12,7 @@
                 <ContextMenu>
                     <MenuItem x:Name="B_Contex_Add" Header="Add" Click="B_Contex_Add_Click"/>
                     <MenuItem x:Name="B_Contex_Edit" Header="Edit" Click="B_Contex_Edit_Click"/>
-                    <MenuItem x:Name="B_Contex_Remove" Header="Remove"/>
+                    <MenuItem x:Name="B_Contex_Remove" Header="Remove" Checked="B_Contex_Remove_Click"/>
                     <MenuItem x:Name="B_Cancel1" Header="Cancel"/>
                 </ContextMenu>
             </ListBox.ContextMenu>

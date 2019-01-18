@@ -87,6 +87,46 @@ namespace SuiBot_Core
             this.LastMessage = new ChatMessage() { UserRole = Role.User, Message = "", Username = "" };
         }
 
+        public int PerformTest()
+        {
+            //This should be async, but whatever
+
+            if (!BotConnectionConfig.IsValidConfig)
+                throw new Exception("Invalid config!");
+
+            MeebyIrcClient = new IrcClient()
+            {
+                Encoding = Encoding.UTF8,
+                SendDelay = 200,
+                AutoRetry = true,
+                AutoReconnect = true,
+                EnableUTF8Recode = true
+            };
+
+            try
+            {
+                MeebyIrcClient.Connect(BotConnectionConfig.Server, BotConnectionConfig.Port);
+            }
+            catch
+            {
+                return 1;
+            }
+            if (!MeebyIrcClient.IsConnected)
+                return 1;
+
+            MeebyIrcClient.Login(BotConnectionConfig.Username, BotConnectionConfig.Username, 4, BotConnectionConfig.Username, "oauth:" + BotConnectionConfig.Password);
+
+            DateTime Deadline = DateTime.UtcNow + TimeSpan.FromSeconds(10);
+
+            while(DateTime.UtcNow <= Deadline)
+            {
+                if (MeebyIrcClient.IsRegistered)
+                    return 0;
+                MeebyIrcClient.ListenOnce();
+            }
+            return 2;
+        }
+
         public void Connect()
         {
             if (!BotConnectionConfig.IsValidConfig)
