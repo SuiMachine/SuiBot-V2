@@ -62,6 +62,7 @@ namespace SuiBot_Core
 
         public void SendChatMessage(string message)
         {
+            SuiBotInstance.SendChatMessageFeedback("#" + Channel, message);
             SuiBotInstance.MeebyIrcClient.SendMessage(Meebey.SmartIrc4net.SendType.Message, "#" + Channel, message);
         }
 
@@ -69,9 +70,17 @@ namespace SuiBot_Core
         {
             SetUserCooldown(messageToRespondTo, DefaultCooldown);
             if(!noPersonMention)
-                SuiBotInstance.MeebyIrcClient.SendMessage(Meebey.SmartIrc4net.SendType.Message, "#" + Channel, string.Format("@{0}: {1}", messageToRespondTo.Username, message));
+            {
+                var msgResponse = string.Format("@{0}: {1}", messageToRespondTo.Username, message);
+                SuiBotInstance.SendChatMessageFeedback("#" + Channel, msgResponse);
+                SuiBotInstance.MeebyIrcClient.SendMessage(Meebey.SmartIrc4net.SendType.Message, "#" + Channel, msgResponse);
+
+            }
             else
+            {
+                SuiBotInstance.SendChatMessageFeedback("#" + Channel, message);
                 SuiBotInstance.MeebyIrcClient.SendMessage(Meebey.SmartIrc4net.SendType.Message, "#" + Channel, message);
+            }
         }
 
         public void SaveConfig()

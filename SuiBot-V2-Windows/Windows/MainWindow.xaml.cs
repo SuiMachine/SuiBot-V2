@@ -88,14 +88,15 @@ namespace SuiBot_V2_Windows.Windows
                     return;
                 }
 
+                RemoveNonLogTabs();
                 SuiBotInstance = new SuiBot_Core.SuiBot(connectionConfig, coreConfig);
                 SuiBotInstance.OnChannelJoining += SuiBotInstance_OnChannelJoining;
                 SuiBotInstance.OnChannelLeaving += SuiBotInstance_OnChannelLeaving;
-                //SuiBotInstance.OnChannelStatusUpdate += SuiBotInstance_OnChannelStatusUpdate;
+                SuiBotInstance.OnChannelStatusUpdate += SuiBotInstance_OnChannelStatusUpdate;
                 SuiBotInstance.OnChatMessageReceived += SuiBotInstance_OnChatMessageReceived;
-                //SuiBotInstance.OnChatSendMessage += SuiBotInstance_OnChatSendMessage;
+                SuiBotInstance.OnChatSendMessage += SuiBotInstance_OnChatSendMessage;
                 SuiBotInstance.OnIrcFeedback += SuiBotInstance_OnIrcFeedback;
-                //SuiBotInstance.OnModerationActionPerformed += SuiBotInstance_OnModerationActionPerformed;
+                SuiBotInstance.OnModerationActionPerformed += SuiBotInstance_OnModerationActionPerformed;
                 SuiBotInstance.OnShutdown += SuiBotInstance_OnShutdown;
                 IsBotRunning = true;
                 MenuItem_BotIsRunning.IsChecked = IsBotRunning;
@@ -107,6 +108,19 @@ namespace SuiBot_V2_Windows.Windows
                 SuiBotInstance.Shutdown();
             }
         }
+
+        private void RemoveNonLogTabs()
+        {
+            for(int i=0; i<TabControl_Channels.Items.Count; i++)
+            {
+                var tab = (TabItem)TabControl_Channels.Items[i];
+                if((string)tab.Header != "Log")
+                {
+                    TabControl_Channels.Items.RemoveAt(i);
+                    i--;
+                }
+            }
+        }
         #endregion
 
         #region BotEventHandling
@@ -114,11 +128,11 @@ namespace SuiBot_V2_Windows.Windows
         {
             SuiBotInstance.OnChannelJoining -= SuiBotInstance_OnChannelJoining;
             SuiBotInstance.OnChannelLeaving -= SuiBotInstance_OnChannelLeaving;
-            //SuiBotInstance.OnChannelStatusUpdate -= SuiBotInstance_OnChannelStatusUpdate;
+            SuiBotInstance.OnChannelStatusUpdate -= SuiBotInstance_OnChannelStatusUpdate;
             SuiBotInstance.OnChatMessageReceived -= SuiBotInstance_OnChatMessageReceived;
-            //SuiBotInstance.OnChatSendMessage -= SuiBotInstance_OnChatSendMessage;
+            SuiBotInstance.OnChatSendMessage -= SuiBotInstance_OnChatSendMessage;
             SuiBotInstance.OnIrcFeedback -= SuiBotInstance_OnIrcFeedback;
-            //SuiBotInstance.OnModerationActionPerformed -= SuiBotInstance_OnModerationActionPerformed;
+            SuiBotInstance.OnModerationActionPerformed -= SuiBotInstance_OnModerationActionPerformed;
             SuiBotInstance.OnShutdown -= SuiBotInstance_OnShutdown;
             IsBotRunning = false;
             MenuItem_BotIsRunning.IsChecked = IsBotRunning;

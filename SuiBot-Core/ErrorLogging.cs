@@ -10,10 +10,13 @@ namespace SuiBot_Core
 {
     static class ErrorLogging
     {
-        static StreamWriter sr = new StreamWriter("SuiBot-Core.log", true);
+        static StreamWriter sr = null;
 
         public static void WriteLine(string Error)
         {
+            if(sr == null)
+                sr = new StreamWriter("SuiBot-Core.log", true);
+
             string errorToSave = string.Format("{0}: {1}", DateTime.Now.ToString(), Error);
 #if DEBUG
             Debug.WriteLine(errorToSave);
@@ -24,6 +27,7 @@ namespace SuiBot_Core
         internal static void Close()
         {
             sr.Close();
+            sr = null;
         }
     }
 }

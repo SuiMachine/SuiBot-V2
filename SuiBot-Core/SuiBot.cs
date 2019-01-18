@@ -26,9 +26,9 @@ namespace SuiBot_Core
         public event Events.OnChatMessageReceivedHandler OnChatMessageReceived;
         public event Events.OnChannelJoiningHandler OnChannelJoining;
         public event Events.OnChannelLeavingHandler OnChannelLeaving;
-        //public event Events.OnChannelStatusUpdateHandler OnChannelStatusUpdate;
-        //public event Events.OnChatSendMessageHandler OnChatSendMessage;
-        //public event Events.OnModerationActionHandler OnModerationActionPerformed;
+        public event Events.OnChannelStatusUpdateHandler OnChannelStatusUpdate;
+        public event Events.OnChatSendMessageHandler OnChatSendMessage;
+        public event Events.OnModerationActionHandler OnModerationActionPerformed;
         public event Events.OnShutdownHandler OnShutdown;
         #endregion
 
@@ -63,93 +63,7 @@ namespace SuiBot_Core
             this.LastMessage = new ChatMessage() { UserRole = Role.User, Message = "", Username = "" };
         }
 
-        public int PerformTest()
-        {
-            //This should be async, but whatever
-
-            if (!BotConnectionConfig.IsValidConfig)
-                throw new Exception("Invalid config!");
-
-            MeebyIrcClient = new IrcClient()
-            {
-                Encoding = Encoding.UTF8,
-                SendDelay = 200,
-                AutoRetry = true,
-                AutoReconnect = true,
-                EnableUTF8Recode = true
-            };
-
-            try
-            {
-                MeebyIrcClient.Connect(BotConnectionConfig.Server, BotConnectionConfig.Port);
-            }
-            catch
-            {
-                return 1;
-            }
-            if (!MeebyIrcClient.IsConnected)
-                return 1;
-
-            MeebyIrcClient.Login(BotConnectionConfig.Username, BotConnectionConfig.Username, 4, BotConnectionConfig.Username, "oauth:" + BotConnectionConfig.Password);
-
-            DateTime Deadline = DateTime.UtcNow + TimeSpan.FromSeconds(10);
-
-            while(DateTime.UtcNow <= Deadline)
-            {
-                if (MeebyIrcClient.IsRegistered)
-                    return 0;
-                MeebyIrcClient.ListenOnce();
-            }
-            return 2;
-        }
-
-        public void Connect()
-        {
-            if (!BotConnectionConfig.IsValidConfig)
-                throw new Exception("Invalid config!");
-
-            MeebyIrcClient = new IrcClient()
-            {
-                Encoding = Encoding.UTF8,
-                SendDelay = 200,
-                AutoRetry = true,
-                AutoReconnect = true,
-                EnableUTF8Recode = true
-            };
-
-            //MeebyIrc events
-            MeebyIrcClient.OnError += IrcClient_OnError;
-            MeebyIrcClient.OnErrorMessage += IrcClient_OnErrorMessage;
-            MeebyIrcClient.OnConnecting += IrcClient_OnConnecting;
-            MeebyIrcClient.OnConnected += IrcClient_OnConnected;
-            MeebyIrcClient.OnAutoConnectError += IrcClient_OnAutoConnectError;
-            MeebyIrcClient.OnDisconnected += IrcClient_OnDisconnected;
-            MeebyIrcClient.OnRegistered += IrcClient_OnRegistered;
-            MeebyIrcClient.OnPart += IrcClient_OnPart;
-            MeebyIrcClient.OnJoin += IrcClient_OnJoin;
-            MeebyIrcClient.OnConnectionError += MeebyIrcClient_OnConnectionError;
-            MeebyIrcClient.OnRawMessage += MeebyIrcClient_OnRawMessage;
-
-            if (BotCoreConfig.ChannelsToJoin.Count == 0)
-                throw new Exception("At least 1 channel is required to join.");
-
-            IsRunning = true;
-            MeebyIrcClient.Connect(BotConnectionConfig.Server, BotConnectionConfig.Port);
-            BotTask = Task.Factory.StartNew(() =>
-            {
-                MeebyIrcClient.Listen();
-            });
-            
-            if (!MeebyIrcClient.IsConnected)
-                throw new Exception("Failed to connect");
-
-            //Timer tick
-            IntervalTimer.Elapsed += IntervalTimer_Elapsed;
-            IntervalTimer.Start();
-            StatusUpdateTimer.Elapsed += StatusUpdateTimer_Elapsed;
-            StatusUpdateTimer.Start();
-        }
-
+        #region MeebyIrcEvents
         private void MeebyIrcClient_OnRawMessage(object sender, IrcEventArgs e)
         {
             try
@@ -157,7 +71,7 @@ namespace SuiBot_Core
                 if (e.Data.Channel != null && e.Data.Nick != null && e.Data.Message != null && ActiveChannels.ContainsKey(e.Data.Channel))
                 {
                     LastMessage.Update(GetRoleFromTags(e), e.Data.Nick, e.Data.Message);
-                    this.OnChatMessageReceived(e.Data.Channel, LastMessage);
+                    this.OnChatMessageReceived?.Invoke(e.Data.Channel, LastMessage);
                     ActiveChannels[e.Data.Channel].DoWork(LastMessage);
                 }
             }
@@ -203,19 +117,6 @@ namespace SuiBot_Core
             ErrorLogging.WriteLine("!!! CONNECTION ERROR!!! " + e.ToString());
         }
 
-        public void Close()
-        {
-            foreach (var channel in ActiveChannels)
-            {
-                channel.Value.ShutdownTask();
-            }
-
-            MeebyIrcClient.Disconnect();
-            System.Threading.Thread.Sleep(2000);
-            IsRunning = false;
-            this.OnShutdown();
-        }
-
         private void StatusUpdateTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
             foreach(var channel in ActiveChannels)
@@ -237,11 +138,11 @@ namespace SuiBot_Core
         public void ConnectToChannel(string channelToJoin, Storage.ChannelConfig channelcfg)
         {
             MeebyIrcClient.RfcJoin("#" + channelToJoin);
-            this.OnChannelJoining(channelToJoin);
+            this.OnChannelJoining?.Invoke(channelToJoin);
             ActiveChannels.Add("#" +channelToJoin, new SuiBot_ChannelInstance(channelToJoin, this, channelcfg));
         }
 
-        #region MeebyIrcEventHandling
+
         private void IrcClient_OnJoin(object sender, JoinEventArgs e)
         {
             //ErrorLogging.WriteLine(e.Channel + "! JOINED: " + e.Data.Nick);
@@ -250,7 +151,7 @@ namespace SuiBot_Core
 
         internal void LeaveChannel(string channelToLeave)
         {
-            this.OnChannelLeaving(channelToLeave);
+            this.OnChannelLeaving?.Invoke(channelToLeave);
             MeebyIrcClient.RfcPart("#" + channelToLeave);
         }
 
@@ -261,7 +162,7 @@ namespace SuiBot_Core
 
         private void IrcClient_OnRegistered(object sender, EventArgs e)
         {
-            this.OnIrcFeedback(Events.IrcFeedback.Verified, "");
+            this.OnIrcFeedback?.Invoke(Events.IrcFeedback.Verified, "");
             Console.WriteLine("! LOGIN VERIFIED");
             ErrorLogging.WriteLine("! LOGIN VERIFIED");
         }
@@ -313,6 +214,95 @@ namespace SuiBot_Core
         {
             ErrorLogging.WriteLine("Error: !" + e.ErrorMessage);
         }
+        #endregion
+
+        #region PublicFunctions
+        public int PerformTest()
+        {
+            //This should be async, but whatever
+
+            if (!BotConnectionConfig.IsValidConfig)
+                throw new Exception("Invalid config!");
+
+            MeebyIrcClient = new IrcClient()
+            {
+                Encoding = Encoding.UTF8,
+                SendDelay = 200,
+                AutoRetry = true,
+                AutoReconnect = true,
+                EnableUTF8Recode = true
+            };
+
+            try
+            {
+                MeebyIrcClient.Connect(BotConnectionConfig.Server, BotConnectionConfig.Port);
+            }
+            catch
+            {
+                return 1;
+            }
+            if (!MeebyIrcClient.IsConnected)
+                return 1;
+
+            MeebyIrcClient.Login(BotConnectionConfig.Username, BotConnectionConfig.Username, 4, BotConnectionConfig.Username, "oauth:" + BotConnectionConfig.Password);
+
+            DateTime Deadline = DateTime.UtcNow + TimeSpan.FromSeconds(10);
+
+            while (DateTime.UtcNow <= Deadline)
+            {
+                if (MeebyIrcClient.IsRegistered)
+                    return 0;
+                MeebyIrcClient.ListenOnce();
+            }
+            return 2;
+        }
+
+        public void Connect()
+        {
+            if (!BotConnectionConfig.IsValidConfig)
+                throw new Exception("Invalid config!");
+
+            MeebyIrcClient = new IrcClient()
+            {
+                Encoding = Encoding.UTF8,
+                SendDelay = 200,
+                AutoRetry = true,
+                AutoReconnect = true,
+                EnableUTF8Recode = true
+            };
+
+            //MeebyIrc events
+            MeebyIrcClient.OnError += IrcClient_OnError;
+            MeebyIrcClient.OnErrorMessage += IrcClient_OnErrorMessage;
+            MeebyIrcClient.OnConnecting += IrcClient_OnConnecting;
+            MeebyIrcClient.OnConnected += IrcClient_OnConnected;
+            MeebyIrcClient.OnAutoConnectError += IrcClient_OnAutoConnectError;
+            MeebyIrcClient.OnDisconnected += IrcClient_OnDisconnected;
+            MeebyIrcClient.OnRegistered += IrcClient_OnRegistered;
+            MeebyIrcClient.OnPart += IrcClient_OnPart;
+            MeebyIrcClient.OnJoin += IrcClient_OnJoin;
+            MeebyIrcClient.OnConnectionError += MeebyIrcClient_OnConnectionError;
+            MeebyIrcClient.OnRawMessage += MeebyIrcClient_OnRawMessage;
+
+            if (BotCoreConfig.ChannelsToJoin.Count == 0)
+                throw new Exception("At least 1 channel is required to join.");
+
+            IsRunning = true;
+            MeebyIrcClient.Connect(BotConnectionConfig.Server, BotConnectionConfig.Port);
+            BotTask = Task.Factory.StartNew(() =>
+            {
+                MeebyIrcClient.Listen();
+            });
+
+            if (!MeebyIrcClient.IsConnected)
+                throw new Exception("Failed to connect");
+
+            //Timer tick
+            IntervalTimer.Elapsed += IntervalTimer_Elapsed;
+            IntervalTimer.Start();
+            StatusUpdateTimer.Elapsed += StatusUpdateTimer_Elapsed;
+            StatusUpdateTimer.Start();
+        }
 
         public void Shutdown()
         {
@@ -320,7 +310,24 @@ namespace SuiBot_Core
             Close();
             ErrorLogging.Close();
         }
-        #endregion
 
+        public void Close()
+        {
+            foreach (var channel in ActiveChannels)
+            {
+                channel.Value.ShutdownTask();
+            }
+
+            MeebyIrcClient.Disconnect();
+            System.Threading.Thread.Sleep(2000);
+            IsRunning = false;
+            this.OnShutdown();
+        }
+
+        public void SendChatMessageFeedback(string channel, string message)
+        {
+            this.OnChatSendMessage?.Invoke(channel, message);
+        }
+        #endregion
     }
 }
