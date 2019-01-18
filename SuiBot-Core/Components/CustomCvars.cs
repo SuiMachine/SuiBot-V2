@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SuiBot_Core.Components
 {
-    class CustomCvars : IDisposable
+    internal class CustomCvars : IDisposable
     {
         SuiBot_ChannelInstance ChannelInstance;
         Storage.CustomCvars Cvars;

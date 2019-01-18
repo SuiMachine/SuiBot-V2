@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:SuiBot_V2_Windows.Windows"
         xmlns:localConverters="clr-namespace:SuiBot_V2_Windows.Converters"
         mc:Ignorable="d"
-        Title="SuiBot-V2" Height="521" Width="653">
+        Title="SuiBot-V2" Height="480" Width="500" MinWidth="500" MinHeight="480">
     <Window.Resources>
         <localConverters:InvertBooleanConveterter x:Key="InvertBooleanConv" />
     </Window.Resources>
@@ -17,7 +17,7 @@
         </Grid.RowDefinitions>
         <Menu x:Name="SuibotMenu" VerticalAlignment="Top" Margin="0,0,-2,0" Height="21">
             <MenuItem Header="File">
-                <MenuItem Header="Run Bot" Click="MenuItem_RunBotClicked"/>
+                <MenuItem x:Name="MenuItem_BotIsRunning" Header="Run Bot" Click="MenuItem_RunBotClicked"/>
                 <MenuItem Header="Connection Settings" Click="MenuItem_ConnectionSettingsClick"/>
                 <MenuItem Header="Exit" Click="MenuItem_ExitClick"/>
             </MenuItem>
@@ -27,11 +27,15 @@
             </MenuItem>
         </Menu>
         <Label Content="Write:" HorizontalAlignment="Left" Margin="0" VerticalAlignment="Bottom" Width="54" Height="24" Grid.Row="1"/>
-        <TextBox x:Name="TB_Message" Height="24" Margin="54,0,80,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Bottom" Grid.Row="1"/>
-        <Button Content="Send" HorizontalAlignment="Right" Margin="0" VerticalAlignment="Bottom" Width="75" Height="24" Grid.Row="1"/>
-        <TabControl Margin="1,26,1,0">
-            <TabItem Header="TabItem">
-                <Grid Background="#FFE5E5E5" Margin="0,0,0,0"/>
+        <TextBox x:Name="TB_Message" Height="24" Margin="54,0,80,0" TextWrapping="Wrap" VerticalAlignment="Bottom" Grid.Row="1" KeyDown="OnTBKeyDown"/>
+        <Button Content="Send" HorizontalAlignment="Right" Margin="0" VerticalAlignment="Bottom" Width="75" Height="24" Grid.Row="1" Click="OnSendClicked"/>
+        <TabControl x:Name="TabControl_Channels" Margin="1,26,1,0">
+            <TabItem Header="Log">
+                <Grid Background="#FFE5E5E5" Margin="0,0,0,0">
+                    <RichTextBox x:Name="RichBox_Log">
+                        <FlowDocument/>
+                    </RichTextBox>
+                </Grid>
             </TabItem>
         </TabControl>
     </Grid>

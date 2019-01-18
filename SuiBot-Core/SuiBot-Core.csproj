@@ -57,9 +57,10 @@
     <Compile Include="Components\Quotes.cs" />
     <Compile Include="Components\SRL.cs" />
     <Compile Include="ErrorLogging.cs" />
+    <Compile Include="Events\BotEvents.cs" />
     <Compile Include="Extensions\SuiStringExtansions.cs" />
     <Compile Include="JsonGrabber.cs" />
-    <Compile Include="ReceivedMessage.cs" />
+    <Compile Include="ChatMessage.cs" />
     <Compile Include="Storage\ChatFilters.cs" />
     <Compile Include="Storage\ChatFilterUsersDB.cs" />
     <Compile Include="Storage\CustomCvars.cs" />
@@ -72,9 +73,7 @@
     <Compile Include="Storage\IntervalMessages.cs" />
     <Compile Include="TwitchStatusUpdate.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Events\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>

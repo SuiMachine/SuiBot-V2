@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace SuiBot_Core
 {
-    public static class JsonGrabber
+    internal static class JsonGrabber
     {
         public static bool GrabJson(Uri address, out string result)
         {

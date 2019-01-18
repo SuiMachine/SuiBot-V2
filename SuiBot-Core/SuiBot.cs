@@ -8,43 +8,6 @@ using Meebey.SmartIrc4net;
 
 namespace SuiBot_Core
 {
-    #region Universal structs and Enums
-    /// <summary>
-    /// Struct for handling Username, Message and Channel. Can be updated with Update(v,v,v) function.
-    /// </summary>
-    public struct ChatMessage
-    {
-        public Role UserRole;
-        public string Username;
-        public string Message;
-
-        /// <summary>
-        /// Updates the ChatMessage object with new set of data. Can be done manually instead.
-        /// </summary>
-        /// <param name="UserRole">Role of a user.</param>
-        /// <param name="Username">Name of a user.</param>
-        /// <param name="Message">Message posted by a user.</param>
-        public void Update(Role UserRole, string Username, string Message)
-        {
-            this.UserRole = UserRole;
-            this.Username = Username;
-            this.Message = Message;
-        }
-    }
-
-    /// <summary>
-    /// Roles available on Twitch, where 0 is SuperMod and 5 is User
-    /// </summary>
-    public enum Role
-    {
-        SuperMod,
-        Mod,
-        VIP,    //previously trusted
-        Subscriber,
-        User
-    }
-    #endregion
-
     public class SuiBot
     {
         private Storage.ConnectionConfig BotConnectionConfig { get; set; }
@@ -57,6 +20,19 @@ namespace SuiBot_Core
         public System.Timers.Timer StatusUpdateTimer;
         private Task BotTask;
         public bool IsRunning = false;
+
+        #region BotEventsDeclraration
+        public event Events.OnIrcFeedbackHandler OnIrcFeedback;
+        public event Events.OnChatMessageReceivedHandler OnChatMessageReceived;
+        public event Events.OnChannelJoiningHandler OnChannelJoining;
+        public event Events.OnChannelLeavingHandler OnChannelLeaving;
+        //public event Events.OnChannelStatusUpdateHandler OnChannelStatusUpdate;
+        //public event Events.OnChatSendMessageHandler OnChatSendMessage;
+        //public event Events.OnModerationActionHandler OnModerationActionPerformed;
+        public event Events.OnShutdownHandler OnShutdown;
+        #endregion
+
+
 
         /// <summary>
         /// Creates a new instance of Suibot, loading required data from files (if they exist)
@@ -181,6 +157,7 @@ namespace SuiBot_Core
                 if (e.Data.Channel != null && e.Data.Nick != null && e.Data.Message != null && ActiveChannels.ContainsKey(e.Data.Channel))
                 {
                     LastMessage.Update(GetRoleFromTags(e), e.Data.Nick, e.Data.Message);
+                    this.OnChatMessageReceived(e.Data.Channel, LastMessage);
                     ActiveChannels[e.Data.Channel].DoWork(LastMessage);
                 }
             }
@@ -236,6 +213,7 @@ namespace SuiBot_Core
             MeebyIrcClient.Disconnect();
             System.Threading.Thread.Sleep(2000);
             IsRunning = false;
+            this.OnShutdown();
         }
 
         private void StatusUpdateTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
@@ -259,6 +237,7 @@ namespace SuiBot_Core
         public void ConnectToChannel(string channelToJoin, Storage.ChannelConfig channelcfg)
         {
             MeebyIrcClient.RfcJoin("#" + channelToJoin);
+            this.OnChannelJoining(channelToJoin);
             ActiveChannels.Add("#" +channelToJoin, new SuiBot_ChannelInstance(channelToJoin, this, channelcfg));
         }
 
@@ -271,6 +250,7 @@ namespace SuiBot_Core
 
         internal void LeaveChannel(string channelToLeave)
         {
+            this.OnChannelLeaving(channelToLeave);
             MeebyIrcClient.RfcPart("#" + channelToLeave);
         }
 
@@ -281,6 +261,7 @@ namespace SuiBot_Core
 
         private void IrcClient_OnRegistered(object sender, EventArgs e)
         {
+            this.OnIrcFeedback(Events.IrcFeedback.Verified, "");
             Console.WriteLine("! LOGIN VERIFIED");
             ErrorLogging.WriteLine("! LOGIN VERIFIED");
         }

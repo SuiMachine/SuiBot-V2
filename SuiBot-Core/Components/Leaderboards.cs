@@ -9,7 +9,7 @@ using SpeedrunComSharp;
 
 namespace SuiBot_Core.Components
 {
-    class Leaderboards
+    internal class Leaderboards
     {
         public SuiBot_ChannelInstance channelInstance;
         const string RegexSyntaxGame = "game:\".+?\"";

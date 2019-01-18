@@ -4,7 +4,7 @@ using Newtonsoft.Json.Linq;
 
 namespace SuiBot_Core.Components
 {
-    public static class SRL
+    internal static class SRL
     {
         static readonly Uri BaseApiURL = new Uri("http://api.speedrunslive.com:81/");
 

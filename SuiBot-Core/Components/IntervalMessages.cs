@@ -7,7 +7,7 @@ using SuiBot_Core.Extensions.SuiStringExtension;
 
 namespace SuiBot_Core.Components
 {
-    class IntervalMessages : IDisposable
+    internal class IntervalMessages : IDisposable
     {
         private SuiBot_ChannelInstance ChannelInstance;
         private Storage.IntervalMessages IntervalMessagesStorage;

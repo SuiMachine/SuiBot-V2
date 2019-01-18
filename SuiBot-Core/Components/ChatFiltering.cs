@@ -8,7 +8,7 @@ using SuiBot_Core.Extensions.SuiStringExtension;
 
 namespace SuiBot_Core.Components
 {
-    class ChatFiltering : IDisposable
+    internal class ChatFiltering : IDisposable
     {
         const string RegexFindTimeoutLenght = "duration:\".+?\"";
         const string RegexFindResponse = "response:\".+?\"";

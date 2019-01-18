@@ -11,7 +11,7 @@ using System.Text.RegularExpressions;
 
 namespace SuiBot_Core.Components
 {
-    public class Quotes : IDisposable
+    internal class Quotes : IDisposable
     {
         //Magick
         const string RegexFindID = "(id:\\\")(\\d+)\\\"|id:\\d+";
