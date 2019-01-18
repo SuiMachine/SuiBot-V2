@@ -82,5 +82,12 @@ namespace SuiBot_Core.Storage
             this.IntervalTick = Interval;
             this.Message = Message;
         }
+
+        public IntervalMessage(IntervalMessage intervalMessageToCopy)
+        {
+            this.Interval = intervalMessageToCopy.Interval;
+            this.IntervalTick = intervalMessageToCopy.IntervalTick;
+            this.Message = intervalMessageToCopy.Message;
+        }
     }
 }

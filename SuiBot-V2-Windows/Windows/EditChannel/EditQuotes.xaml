@@ -5,8 +5,25 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SuiBot_V2_Windows.Windows.EditChannel"
         mc:Ignorable="d"
-        Title="EditQuotes" Height="450" Width="800">
+        Title="Edit Quotes" Height="410" Width="690" MinWidth="690" MinHeight="410">
+    <Window.ContextMenu>
+        <ContextMenu>
+            <MenuItem Header="Add" Click="ContextMenuAddClicked"/>
+            <MenuItem Header="Edit" Click="ContextMenuEditClicked"/>
+            <MenuItem Header="Remove" Click="ContextMenuRemoveClicked"/>
+            <MenuItem Header="Cancel"/>
+        </ContextMenu>
+    </Window.ContextMenu>
     <Grid>
-        
+        <ListView x:Name="ListView_Quotes" Margin="0,0,0,31" ItemsSource="{Binding QuotesList}">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Width="Auto" Header="Author" DisplayMemberBinding="{Binding Author}"  />
+                    <GridViewColumn Width="Auto" Header="Quote" DisplayMemberBinding="{Binding Text}" />
+                </GridView>
+            </ListView.View>
+        </ListView>
+        <Button Content="Cancel" HorizontalAlignment="Right" Margin="0,0,6,4" VerticalAlignment="Bottom" Width="75" Click="Button_CancelClicked"/>
+        <Button Content="OK" HorizontalAlignment="Right" Margin="0,0,86,4" VerticalAlignment="Bottom" Width="75" Click="Button_OKClicked"/>
     </Grid>
 </Window>

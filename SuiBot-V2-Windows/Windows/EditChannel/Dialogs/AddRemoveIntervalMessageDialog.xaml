@@ -1,0 +1,17 @@
+﻿<Window x:Class="SuiBot_V2_Windows.Windows.EditChannel.Dialogs.AddRemoveIntervalMessageDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SuiBot_V2_Windows.Windows.EditChannel.Dialogs"
+        mc:Ignorable="d"
+        Title="AddRemoveIntervalMessageDialog" Height="275" Width="325" MinWidth="325" MinHeight="275">
+    <Grid>
+        <Label Content="Message:" HorizontalAlignment="Left" Margin="10,36,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="TB_Message" Margin="9,62,11,37" TextWrapping="Wrap" AcceptsReturn="False" Text="{Binding Message}"/>
+        <Label Content="Interval (minutes):" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="TB_Interval" Height="23" Margin="120,12,10,0" TextWrapping="Wrap" VerticalAlignment="Top" Text="{Binding Interval}"/>
+        <Button Content="OK" HorizontalAlignment="Right" Margin="0,0,90,9" VerticalAlignment="Bottom" Width="75" Click="Button_OKClicked"/>
+        <Button Content="Cancel" HorizontalAlignment="Right" Margin="0,0,10,9" VerticalAlignment="Bottom" Width="75" Click="Button_CancelClicked"/>
+    </Grid>
+</Window>

@@ -5,8 +5,25 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SuiBot_V2_Windows.Windows.EditChannel"
         mc:Ignorable="d"
-        Title="EditIntervalMessages" Height="450" Width="800">
+        Title="Edit Interval Messages" Height="450" Width="800" MinWidth="800" MinHeight="450">
     <Grid>
-        
+        <ListView x:Name="ListView_IntervalMessages" Margin="0,0,0,37" ItemsSource="{Binding Messages}">
+            <ListView.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Add" Click="ContexMenuAddClicked"/>
+                    <MenuItem Header="Edit" Click="ContexMenuEditClicked"/>
+                    <MenuItem Header="Remove" Click="ContextMenuRemoveClicked"/>
+                    <MenuItem Header="Cancel"/>
+                </ContextMenu>
+            </ListView.ContextMenu>
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Width="Auto" Header="Interval" DisplayMemberBinding="{Binding Interval}"  />
+                    <GridViewColumn Width="Auto" Header="Message" DisplayMemberBinding="{Binding Message}" />
+                </GridView>
+            </ListView.View>
+        </ListView>
+        <Button Content="OK" HorizontalAlignment="Right" Margin="0,0,90,8" VerticalAlignment="Bottom" Width="75" Click="Button_OKClicked"/>
+        <Button Content="Cancel" HorizontalAlignment="Right" Margin="0,0,10,8" VerticalAlignment="Bottom" Width="75" Click="Button_CancelClicked"/>
     </Grid>
 </Window>

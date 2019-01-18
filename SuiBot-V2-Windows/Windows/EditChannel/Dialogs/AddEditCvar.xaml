@@ -1,0 +1,20 @@
+﻿<Window x:Class="SuiBot_V2_Windows.Windows.EditChannel.Dialogs.AddEditCvar"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SuiBot_V2_Windows.Windows.EditChannel.Dialogs"
+        xmlns:roleEnum="clr-namespace:SuiBot_Core;assembly=SuiBot-Core"
+        mc:Ignorable="d"
+        Title="AddEditCvar" Height="262" Width="293" MinHeight="262" MinWidth="293">
+    <Grid>
+        <Label Content="Command:" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="TB_Command" Height="23" Margin="88,13,5,0" TextWrapping="Wrap" Text="{Binding Command}" VerticalAlignment="Top"/>
+        <Label Content="Required Role:" HorizontalAlignment="Left" Margin="10,41,0,0" VerticalAlignment="Top"/>
+        <ComboBox x:Name="CBox_Role" Margin="104,42,3,0" VerticalAlignment="Top" SelectedItem="{Binding RequiredRole}"/>
+        <Label Content="Response to a command:" HorizontalAlignment="Left" Margin="10,67,0,0" VerticalAlignment="Top"/>
+        <Button Content="OK" HorizontalAlignment="Right" Margin="0,0,84,7" VerticalAlignment="Bottom" Width="76" Click="Button_OKClicked"/>
+        <Button Content="Cancel" HorizontalAlignment="Right" Margin="0,0,3,7" VerticalAlignment="Bottom" Width="76" Click="Button_CancelClicked"/>
+        <TextBox Margin="5,93,5,34" TextWrapping="Wrap" Width="275" Text="{Binding CvarResponse}" AcceptsReturn="False"/>
+    </Grid>
+</Window>

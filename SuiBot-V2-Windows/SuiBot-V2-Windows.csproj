@@ -55,6 +55,15 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Converters\InvertBooleanConveterter.cs" />
+    <Compile Include="Windows\EditChannel\Dialogs\AddEditCvar.xaml.cs">
+      <DependentUpon>AddEditCvar.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\EditChannel\Dialogs\AddEditQuoteDialog.xaml.cs">
+      <DependentUpon>AddEditQuoteDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\EditChannel\Dialogs\AddRemoveIntervalMessageDialog.xaml.cs">
+      <DependentUpon>AddRemoveIntervalMessageDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Windows\EditChannel\EditChatFilters.xaml.cs">
       <DependentUpon>EditChatFilters.xaml</DependentUpon>
     </Compile>
@@ -86,6 +95,18 @@
     <Compile Include="Windows\Settings\EditListOfChannels.xaml.cs">
       <DependentUpon>EditListOfChannels.xaml</DependentUpon>
     </Compile>
+    <Page Include="Windows\EditChannel\Dialogs\AddEditCvar.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\EditChannel\Dialogs\AddEditQuoteDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\EditChannel\Dialogs\AddRemoveIntervalMessageDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Windows\EditChannel\EditChatFilters.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -156,5 +177,6 @@
       <Name>SuiBot-Core</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -5,8 +5,26 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SuiBot_V2_Windows.Windows.EditChannel"
         mc:Ignorable="d"
-        Title="EditCvars" Height="450" Width="800">
+        Title="Edit Custom Commands" Height="450" Width="800">
     <Grid>
-        
+        <Button Content="OK" HorizontalAlignment="Right" Margin="0,0,90,8" VerticalAlignment="Bottom" Width="75" Click="Button_OKClick"/>
+        <Button Content="Cancel" HorizontalAlignment="Right" Margin="0,0,10,8" VerticalAlignment="Bottom" Width="75" Click="Button_CancelClick"/>
+        <ListView x:Name="ListView_Cvars" Margin="0,0,0,35" ItemsSource="{Binding Cvars}">
+            <ListView.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Add" Click="ContexMenu_AddItemClicked"/>
+                    <MenuItem Header="Edit" Click="ContexMenu_EditItemClicked"/>
+                    <MenuItem Header="Remove" Click="ContexMenu_RemoveItemClicked"/>
+                    <MenuItem Header="Cancel"/>
+                </ContextMenu>
+            </ListView.ContextMenu>
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Width="Auto" Header="Command" DisplayMemberBinding="{Binding Command}"  />
+                    <GridViewColumn Width="Auto" Header="Min. Role"  DisplayMemberBinding="{Binding RequiredRole}" />
+                    <GridViewColumn Width="Auto" Header="Response" DisplayMemberBinding="{Binding CvarResponse}" />
+                </GridView>
+            </ListView.View>
+        </ListView>
     </Grid>
 </Window>

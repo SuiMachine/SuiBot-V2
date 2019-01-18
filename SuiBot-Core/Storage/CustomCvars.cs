@@ -121,5 +121,12 @@ namespace SuiBot_Core.Storage
             this.Command = Command;
             this.CvarResponse = CvarResponse;
         }
+
+        public CustomCvar(CustomCvar cvarToCopy)
+        {
+            this.RequiredRole = cvarToCopy.RequiredRole;
+            this.Command = cvarToCopy.Command;
+            this.CvarResponse = cvarToCopy.CvarResponse;
+        }
     }
 }

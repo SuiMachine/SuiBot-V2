@@ -67,6 +67,12 @@ namespace SuiBot_Core.Storage
             this.Text = Text;
         }
 
+        public Quote(Quote QuoteToCopy)
+        {
+            this.Text = QuoteToCopy.Text;
+            this.Author = QuoteToCopy.Author;
+        }
+
         public override string ToString()
         {
             if(Author == "")

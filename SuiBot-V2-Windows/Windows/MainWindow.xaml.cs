@@ -155,7 +155,7 @@ namespace SuiBot_V2_Windows.Windows
             var result = dlg.ShowDialog();
             if (result != null && result == true)
             {
-                dlg.CustomCvars.Save();
+                dlg.CustomCvarsInstance.Save();
             }
         }
 
