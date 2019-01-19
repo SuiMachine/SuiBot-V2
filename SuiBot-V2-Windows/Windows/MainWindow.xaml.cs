@@ -454,5 +454,11 @@ namespace SuiBot_V2_Windows.Windows
                 }
             }
         }
+
+        private void AboutMe_Clicked(object sender, RoutedEventArgs e)
+        {
+            AboutMeWindow window = new AboutMeWindow();
+            window.ShowDialog();
+        }
     }
 }

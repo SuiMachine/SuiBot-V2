@@ -25,6 +25,9 @@
                 <MenuItem Header="Edit list" Click="EditActiveChannelsClicked"/>
                 <MenuItem x:Name="ActiveChannels" Header="Edit channel settings"/>
             </MenuItem>
+            <MenuItem Header="About">
+                <MenuItem Header="About" Click="AboutMe_Clicked"/>
+            </MenuItem>
         </Menu>
         <Label Content="Write:" HorizontalAlignment="Left" Margin="0" VerticalAlignment="Bottom" Width="54" Height="24" Grid.Row="1"/>
         <TextBox x:Name="TB_Message" Height="24" Margin="54,0,80,0" TextWrapping="Wrap" VerticalAlignment="Bottom" Grid.Row="1" KeyDown="OnTBKeyDown"/>

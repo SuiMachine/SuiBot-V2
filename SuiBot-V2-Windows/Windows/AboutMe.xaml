@@ -1,0 +1,21 @@
+﻿<Window x:Class="SuiBot_V2_Windows.Windows.AboutMeWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SuiBot_V2_Windows.Windows"
+        mc:Ignorable="d"
+        Title="About me" Height="230.836" Width="513.398" ResizeMode="NoResize">
+    <Grid>
+        <TextBlock Margin="5" TextWrapping="Wrap">
+            <Bold>SuiBot-V2</Bold> is a successor to <Hyperlink NavigateUri="https://github.com/SuiMachine/SuiBot_Console" Click="Hyperlink_Click">SuiBot_Console</Hyperlink> written pretty much entirely from scratch in <Bold>C#</Bold>, using many elements that I have learnt over the years. It can run on both <Bold>Windows</Bold> and <Bold>Linux</Bold> (including Raspberry Pi using mono (only console version tested)). For more informations check out <Hyperlink NavigateUri="https://github.com/SuiMachine/SuiBot-V2/wiki" Click="Hyperlink_Click">Wiki</Hyperlink>.<LineBreak/>
+            <LineBreak/>
+            This program and each of its components (aside from the ones mentioned in third party libraries) is released under <Bold>GNU Lesser General Public License v3.0</Bold>.<LineBreak/>
+            <LineBreak/>
+            <Bold>Third party libraries used:</Bold><LineBreak/>
+            - <Hyperlink NavigateUri="https://github.com/LiveSplit/SpeedrunComSharp" Click="Hyperlink_Click">SpeedrunComSharp</Hyperlink> by <Bold>CryZe</Bold> available on <Bold>MIT License</Bold>.<LineBreak/>
+            - <Hyperlink NavigateUri="https://github.com/meebey/SmartIrc4net" Click="Hyperlink_Click">SmartIrc4net</Hyperlink> available on <Bold>GNU Lesser General Public License v2.1</Bold>.<LineBreak/>
+
+        </TextBlock>
+    </Grid>
+</Window>
