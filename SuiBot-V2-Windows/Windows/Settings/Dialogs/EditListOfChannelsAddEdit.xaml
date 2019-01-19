@@ -8,7 +8,7 @@
         Title="Add Channel" Height="111.397" Width="310.294" ResizeMode="NoResize">
     <Grid>
         <Label Content="Channel" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
-        <TextBox HorizontalAlignment="Left" Height="23" Margin="68,12,0,0" Text="{Binding NewChannel}" TextWrapping="Wrap" VerticalAlignment="Top" Width="226" />
+        <TextBox HorizontalAlignment="Left" Height="23" Margin="68,12,0,0" Text="{Binding NewChannel}" TextWrapping="Wrap" VerticalAlignment="Top" Width="226" KeyDown="TB_Channel_OnKeyDown" />
         <Button x:Name="B_OK" Content="OK" HorizontalAlignment="Left" Margin="68,49,0,0" VerticalAlignment="Top" Width="75" Click="B_OKClicked"/>
         <Button x:Name="B_Cancel" Content="Cancel" HorizontalAlignment="Left" Margin="148,49,0,0" VerticalAlignment="Top" Width="75" Click="B_CancelClicked"/>
 

@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:SuiBot_V2_Windows.Windows"
         xmlns:localConverters="clr-namespace:SuiBot_V2_Windows.Converters"
         mc:Ignorable="d"
-        Title="SuiBot-V2" Height="480" Width="500" MinWidth="500" MinHeight="480">
+        Title="SuiBot-V2" Height="265" Width="566" MinHeight="200" MinWidth="300">
     <Window.Resources>
         <localConverters:InvertBooleanConveterter x:Key="InvertBooleanConv" />
     </Window.Resources>

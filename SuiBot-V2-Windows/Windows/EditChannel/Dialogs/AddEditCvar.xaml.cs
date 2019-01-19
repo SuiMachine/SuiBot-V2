@@ -45,12 +45,27 @@ namespace SuiBot_V2_Windows.Windows.EditChannel.Dialogs
 
         private void Button_OKClicked(object sender, RoutedEventArgs e)
         {
+            ReturnedCvar.Command = ReturnedCvar.Command.Trim(new char[] { ' ', '!' });
+            if(ReturnedCvar.Command == "")
+            {
+                MessageBox.Show("Command can not be empty!", "Error", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            if (ReturnedCvar.CvarResponse == "")
+            {
+                MessageBox.Show("Response can not be empty!", "Error", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
             this.DialogResult = true;
+            this.Close();
         }
 
         private void Button_CancelClicked(object sender, RoutedEventArgs e)
         {
             this.DialogResult = false;
+            this.Close();
         }
     }
 }

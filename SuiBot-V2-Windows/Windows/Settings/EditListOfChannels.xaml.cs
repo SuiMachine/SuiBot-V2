@@ -70,6 +70,7 @@ namespace SuiBot_V2_Windows.Windows.Settings
             {
                 var id = ListB_Channels.SelectedIndex;
                 CoreConfig.ChannelsToJoin.RemoveAt(id);
+                this.ListB_Channels.Items.Refresh();
             }
         }
 
@@ -81,11 +82,22 @@ namespace SuiBot_V2_Windows.Windows.Settings
         private void B_OK_Click(object sender, RoutedEventArgs e)
         {
             this.DialogResult = true;
+            this.Close();
         }
 
         private void B_Cancel_Click(object sender, RoutedEventArgs e)
         {
             this.DialogResult = false;
+            this.Close();
+
+        }
+
+        private void ListB_Channels_PressedKeyDown(object sender, KeyEventArgs e)
+        {
+            if(e.Key == Key.Delete)
+            {
+                B_Contex_Remove_Click(null, null);
+            }
         }
     }
 }

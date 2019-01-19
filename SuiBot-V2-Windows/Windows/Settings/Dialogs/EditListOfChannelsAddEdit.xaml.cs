@@ -35,13 +35,26 @@ namespace SuiBot_V2_Windows.Windows.Settings.Dialogs
 
         private void B_OKClicked(object sender, RoutedEventArgs e)
         {
-            NewChannel = NewChannel.Trim(new char[] { '#', ' ' }).ToLower();
+            NewChannel = NewChannel.Trim(new char[] { '#', ' ', '!' }).ToLower();
+            if(NewChannel == "")
+            {
+                MessageBox.Show("Channel name can not be empty!", "Error", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
             this.DialogResult = true;
+            this.Close();
         }
 
         private void B_CancelClicked(object sender, RoutedEventArgs e)
         {
             this.DialogResult = false;
+            this.Close();
+        }
+
+        private void TB_Channel_OnKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+                B_OKClicked(null, null);
         }
     }
 }

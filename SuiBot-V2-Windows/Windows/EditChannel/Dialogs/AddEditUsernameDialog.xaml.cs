@@ -15,37 +15,39 @@ using System.Windows.Shapes;
 namespace SuiBot_V2_Windows.Windows.EditChannel.Dialogs
 {
     /// <summary>
-    /// Interaction logic for AddEditQuoteDialog.xaml
+    /// Interaction logic for AddEditUsernameDialog.xaml
     /// </summary>
-    public partial class AddEditQuoteDialog : Window
+    public partial class AddEditUsernameDialog : Window
     {
-        public SuiBot_Core.Storage.Quote ReturnedQuote { get; private set; }
+        public string ReturnedUsername { get; private set; }
 
-        public AddEditQuoteDialog(SuiBot_Core.Storage.Quote QuoteToEdit = null)
+        public AddEditUsernameDialog(string Username = null)
         {
             InitializeComponent();
-
-            if(QuoteToEdit == null)
+            if(Username != null)
             {
-                this.Title = "Add new quote";
-                this.ReturnedQuote = new SuiBot_Core.Storage.Quote();
+                this.Title = "Edit username";
+                this.ReturnedUsername = Username;
             }
             else
             {
-                this.Title = "Edit quote";
-                this.ReturnedQuote = new SuiBot_Core.Storage.Quote(QuoteToEdit);
+                this.Title = "Add username";
+                this.ReturnedUsername = "";
             }
 
-            this.DataContext = ReturnedQuote;
+            this.DataContext = this;
         }
 
         private void Button_OKClicked(object sender, RoutedEventArgs e)
         {
-            if(ReturnedQuote.Text == "")
+            this.ReturnedUsername = this.ReturnedUsername.Trim(new char[] { ' ', '#' });
+
+            if(ReturnedUsername == "")
             {
-                MessageBox.Show("Quote can not be empty string!", "Error", MessageBoxButton.OK, MessageBoxImage.Asterisk);
+                MessageBox.Show("Username can not be empty!", "Error", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
+
             this.DialogResult = true;
             this.Close();
         }

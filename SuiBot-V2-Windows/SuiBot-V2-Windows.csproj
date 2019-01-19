@@ -61,6 +61,9 @@
     <Compile Include="Windows\EditChannel\Dialogs\AddEditQuoteDialog.xaml.cs">
       <DependentUpon>AddEditQuoteDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Windows\EditChannel\Dialogs\AddEditUsernameDialog.xaml.cs">
+      <DependentUpon>AddEditUsernameDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Windows\EditChannel\Dialogs\AddRemoveIntervalMessageDialog.xaml.cs">
       <DependentUpon>AddRemoveIntervalMessageDialog.xaml</DependentUpon>
     </Compile>
@@ -72,6 +75,9 @@
     </Compile>
     <Compile Include="Windows\EditChannel\EditCvars.xaml.cs">
       <DependentUpon>EditCvars.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\EditChannel\EditFeatures.xaml.cs">
+      <DependentUpon>EditFeatures.xaml</DependentUpon>
     </Compile>
     <Compile Include="Windows\EditChannel\EditIntervalMessages.xaml.cs">
       <DependentUpon>EditIntervalMessages.xaml</DependentUpon>
@@ -103,6 +109,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Windows\EditChannel\Dialogs\AddEditUsernameDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Windows\EditChannel\Dialogs\AddRemoveIntervalMessageDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -116,6 +126,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Windows\EditChannel\EditCvars.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\EditChannel\EditFeatures.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

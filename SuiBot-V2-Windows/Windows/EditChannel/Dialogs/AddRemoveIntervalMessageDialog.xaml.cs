@@ -53,11 +53,13 @@ namespace SuiBot_V2_Windows.Windows.EditChannel.Dialogs
             }
 
             this.DialogResult = true;
+            this.Close();
         }
 
         private void Button_CancelClicked(object sender, RoutedEventArgs e)
         {
             this.DialogResult = false;
+            this.Close();
         }
     }
 }

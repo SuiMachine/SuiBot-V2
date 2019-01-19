@@ -31,11 +31,13 @@ namespace SuiBot_V2_Windows.Windows.EditChannel
         private void Button_OKClicked(object sender, RoutedEventArgs e)
         {
             this.DialogResult = true;
+            this.Close();
         }
 
         private void Button_CancelClicked(object sender, RoutedEventArgs e)
         {
             this.DialogResult = false;
+            this.Close();
         }
 
         private void ContexMenuAddClicked(object sender, RoutedEventArgs e)

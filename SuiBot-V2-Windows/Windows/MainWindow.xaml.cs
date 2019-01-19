@@ -101,7 +101,8 @@ namespace SuiBot_V2_Windows.Windows
                 IsBotRunning = true;
                 MenuItem_BotIsRunning.IsChecked = IsBotRunning;
                 UpdateChannelsBranchEnable();
-                SuiBotInstance.Connect();
+                SuiBotThread = new Thread(SuiBotInstance.Connect);
+                SuiBotThread.Start();
             }
             else
             {
@@ -126,6 +127,14 @@ namespace SuiBot_V2_Windows.Windows
         #region BotEventHandling
         private void SuiBotInstance_OnShutdown()
         {
+            if (this.Dispatcher.Thread != System.Threading.Thread.CurrentThread)
+            {
+                this.Dispatcher.Invoke(() =>
+                SuiBotInstance_OnShutdown());
+                return;
+            }
+
+            RichBox_Log.Document.Blocks.Add(new Paragraph(new Run("Suibot is now offline.")));
             SuiBotInstance.OnChannelJoining -= SuiBotInstance_OnChannelJoining;
             SuiBotInstance.OnChannelLeaving -= SuiBotInstance_OnChannelLeaving;
             SuiBotInstance.OnChannelStatusUpdate -= SuiBotInstance_OnChannelStatusUpdate;
@@ -137,6 +146,11 @@ namespace SuiBot_V2_Windows.Windows
             IsBotRunning = false;
             MenuItem_BotIsRunning.IsChecked = IsBotRunning;
             UpdateChannelsBranchEnable();
+            if(SuiBotThread.IsAlive)
+            {
+                SuiBotThread.Abort();
+            }
+            SuiBotThread = null;
         }
 
         private void SuiBotInstance_OnModerationActionPerformed(string channel, string user, string response, string duration)
@@ -303,6 +317,14 @@ namespace SuiBot_V2_Windows.Windows
             {
                 var newMenuElement = new MenuItem() { Header = channel };
 
+                //General features
+                var ChatGeneralFeaturesItem = new MenuItem() { Header = "General features" };
+                ChatGeneralFeaturesItem.Click += (sender, e) =>
+                {
+                    EditChannelFeatures(channel);
+                };
+                newMenuElement.Items.Add(ChatGeneralFeaturesItem);
+
                 //Chat Filters
                 var ChatFiltersMenuItem = new MenuItem() { Header = "Chat filters" };
                 ChatFiltersMenuItem.Click += (sender, e) =>
@@ -344,6 +366,16 @@ namespace SuiBot_V2_Windows.Windows
                 newMenuElement.Items.Add(QuotesMenuItem);
 
                 ActiveChannels.Items.Add(newMenuElement);
+            }
+        }
+
+        private void EditChannelFeatures(string channel)
+        {
+            EditChannel.EditFeatures dlg = new EditChannel.EditFeatures(SuiBot_Core.Storage.ChannelConfig.Load(channel));
+            var result = dlg.ShowDialog();
+            if (result != null && result == true)
+            {
+                dlg.ReturnedChannelConfig.Save();
             }
         }
 
