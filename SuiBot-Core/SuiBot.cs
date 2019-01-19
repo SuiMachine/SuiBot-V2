@@ -32,6 +32,23 @@ namespace SuiBot_Core
         public event Events.OnShutdownHandler OnShutdown;
         #endregion
 
+        /// <summary>
+        /// Returns an authentication url that is used to obtain an oauth from Twitch.
+        /// </summary>
+        /// <returns>Authy url.</returns>
+        public static string GetAuthenticationURL()
+        {
+            return new Uri(string.Format("https://id.twitch.tv/oauth2/authorize?client_id=rmi9m0sheo4pp5882o8s24zu7h09md&redirect_uri=https://suimachine.github.io/twitchauthy/&response_type=token&scope={0}",
+                string.Join(" ", new string[] {
+                    "channel_check_subscription",
+                    "channel_editor",
+                    "channel_subscriptions",
+                    "channel:moderate",
+                    "chat:edit",
+                    "chat:read",
+                    "channel:moderate"
+                }))).ToString();
+        }
 
 
         /// <summary>

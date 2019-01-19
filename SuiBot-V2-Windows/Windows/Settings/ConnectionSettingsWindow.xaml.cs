@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -37,7 +38,7 @@ namespace SuiBot_V2_Windows.Windows.Settings
 
         private void OKClicked(object sender, RoutedEventArgs e)
         {
-            this.ConnectionConfig.Password = this.PassBox_Password.Password;
+            this.ConnectionConfig.Password = this.PassBox_Password.Password.Trim();
             this.DialogResult = true;
             this.Close();
         }
@@ -50,7 +51,7 @@ namespace SuiBot_V2_Windows.Windows.Settings
 
         private void TestConnectionClicked(object sender, RoutedEventArgs e)
         {
-            this.ConnectionConfig.Password = this.PassBox_Password.Password;
+            this.ConnectionConfig.Password = this.PassBox_Password.Password.Trim();
 
             SuiBot_Core.SuiBot sb = new SuiBot_Core.SuiBot(this.ConnectionConfig, SuiBot_Core.Storage.CoreConfig.Load());
 
@@ -69,6 +70,13 @@ namespace SuiBot_V2_Windows.Windows.Settings
                     break;
             }
 
+        }
+
+        private void ObtainAuthy(object sender, RoutedEventArgs e)
+        {
+            Clipboard.SetText(SuiBot_Core.SuiBot.GetAuthenticationURL());
+            MessageBox.Show("Authentication url was copied to your clipboard. Please paste it in browser address field, where you are logged in to an account you want to use as a bot and authenticate it. Then copy the oauth key returned to you to password password field. Whitespaces at the beginning and end of a string will be removed, so don't worry about them.\n\n" +
+                "Make sure not to display neither the web browser or authy key on stream during this process.", "Notification", MessageBoxButton.OK, MessageBoxImage.Information);
         }
     }
 }
