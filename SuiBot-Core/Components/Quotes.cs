@@ -196,7 +196,7 @@ namespace SuiBot_Core.Components
 
         public void RemoveQuote(ChatMessage lastMessage)
         {
-            if (lastMessage.UserRole <= Role.VIP)
+            if (lastMessage.UserRole <= Role.Mod)
             {
                 FilterOutSegments(lastMessage.Message, out int quoteID, out string authorFilter, out string quoteTextFilter);
                 if (quoteID >= 0 && (authorFilter != "" || quoteTextFilter != ""))

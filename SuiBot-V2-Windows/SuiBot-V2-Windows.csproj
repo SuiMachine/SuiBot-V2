@@ -61,6 +61,9 @@
     <Compile Include="Windows\EditChannel\Dialogs\AddEditCvar.xaml.cs">
       <DependentUpon>AddEditCvar.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Windows\EditChannel\Dialogs\AddEditFilterDialog.xaml.cs">
+      <DependentUpon>AddEditFilterDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Windows\EditChannel\Dialogs\AddEditQuoteDialog.xaml.cs">
       <DependentUpon>AddEditQuoteDialog.xaml</DependentUpon>
     </Compile>
@@ -109,6 +112,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Windows\EditChannel\Dialogs\AddEditCvar.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\EditChannel\Dialogs\AddEditFilterDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

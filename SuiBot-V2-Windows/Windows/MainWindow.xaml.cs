@@ -174,6 +174,13 @@ namespace SuiBot_V2_Windows.Windows
 
         private void SuiBotInstance_OnChatSendMessage(string channel, string message)
         {
+            if (this.Dispatcher.Thread != System.Threading.Thread.CurrentThread)
+            {
+                this.Dispatcher.Invoke(() =>
+                SuiBotInstance_OnChatSendMessage(channel, message));
+                return;
+            }
+
             channel = channel.Trim(new char[] { '#' });
 
             if (ChannelTabs.ContainsKey(channel))

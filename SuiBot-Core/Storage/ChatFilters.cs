@@ -28,6 +28,13 @@ namespace SuiBot_Core.Storage
             PurgeFilters = new List<ChatFilter>();
         }
 
+        public enum FilterType
+        {
+            Purge,
+            Timeout,
+            Ban
+        }
+
         public static ChatFilters Load(string Channel)
         {
             string FilePath = string.Format("Bot/Channels/{0}/ChatFilters.xml", Channel);
@@ -73,6 +80,13 @@ namespace SuiBot_Core.Storage
             Syntax = "";
             Response = "";
             Duration = 1;
+        }
+
+        public ChatFilter(ChatFilter chatFilterToCopy)
+        {
+            this.Syntax = chatFilterToCopy.Syntax;
+            this.Response = chatFilterToCopy.Response;
+            this.Duration = chatFilterToCopy.Duration;
         }
 
         public ChatFilter(string Syntax, string Response, uint Duration)

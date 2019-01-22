@@ -184,6 +184,7 @@ namespace SuiBot_Core
                 else if(lastMessage.UserRole <= Role.Mod && messageLazy.StartsWithWordLazy(new string[] { "leaderboard", "leaderboards" }))
                 {
                     Leaderboards.DoModWork(lastMessage);
+                    return;
                 }
             }
             
@@ -208,17 +209,22 @@ namespace SuiBot_Core
             {
                 Components.SRL.GetRaces(this);
                 SetUserCooldown(lastMessage, DefaultCooldown);
+                return;
             }
 
             //Twitch update
             if(messageLazy.StartsWith("updatestatus") && lastMessage.UserRole <= Role.VIP)
             {
                 UpdateTwitchStatus(true);
+                return;
             }
 
             //Killswitch
             if (messageLazy.StartsWith("killbot") && lastMessage.UserRole == Role.SuperMod)
+            {
                 ShutdownTask();
+                return;
+            }
 
             //Custom Cvars
             if (ConfigInstance.CustomCvarsEnabled)

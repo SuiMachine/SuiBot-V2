@@ -292,7 +292,7 @@ namespace SuiBot_Core.Components
             catch(Exception e)
             {
                 ErrorLogging.WriteLine(e.ToString());
-                return "Error looking for a game on speedrun.com";
+                return "Error looking for a game on speedrun.com.";
             }
         }
 
