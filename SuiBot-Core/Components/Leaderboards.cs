@@ -210,12 +210,12 @@ namespace SuiBot_Core.Components
                         if (category == "")
                             srCategory = srGame.LevelCategories.ElementAt(0);
                         else
-                            srCategory = srGame.LevelCategories.FirstOrDefault(cat => cat.Name.ToLower() == category.ToLower());
+                            srCategory = srGame.LevelCategories.FirstOrDefault(cat => cat.Name.ToLower().StartsWith(category.ToLower()));
 
                         if (srCategory == null)
                             return "No category was found";
 
-                        var srLevel = srGame.Levels.FirstOrDefault(lvl => lvl.Name.ToLower() == level.ToLower());
+                        var srLevel = srGame.Levels.FirstOrDefault(lvl => lvl.Name.ToLower().StartsWith(level.ToLower()));
                         if (srLevel == null)
                             return "No level was found";
 
@@ -254,7 +254,7 @@ namespace SuiBot_Core.Components
                         if (category == "")
                             srCategory = srGame.FullGameCategories.ElementAt(0);
                         else
-                            srCategory = srGame.FullGameCategories.FirstOrDefault(cat => cat.Name.ToLower() == category.ToLower());
+                            srCategory = srGame.FullGameCategories.FirstOrDefault(cat => cat.Name.ToLower().StartsWith(category.ToLower()));
 
                         if (srCategory == null)
                             return "No category was found";
@@ -349,12 +349,12 @@ namespace SuiBot_Core.Components
                         if (category == "")
                             srCategory = srGame.LevelCategories.ElementAt(0);
                         else
-                            srCategory = srGame.LevelCategories.FirstOrDefault(cat => cat.Name.ToLower() == category.ToLower());
+                            srCategory = srGame.LevelCategories.FirstOrDefault(cat => cat.Name.ToLower().StartsWith(category.ToLower()));
 
                         if (srCategory == null)
                             return "No category was found";
 
-                        var srLevel = srGame.Levels.FirstOrDefault(lvl => lvl.Name.ToLower() == level.ToLower());
+                        var srLevel = srGame.Levels.FirstOrDefault(lvl => lvl.Name.ToLower().StartsWith(level.ToLower()));
                         if (srLevel == null)
                             return "No level was found";
 
@@ -379,7 +379,7 @@ namespace SuiBot_Core.Components
                         if (category == "")
                             srCategory = srGame.FullGameCategories.ElementAt(0);
                         else
-                            srCategory = srGame.FullGameCategories.FirstOrDefault(cat => cat.Name.ToLower() == category.ToLower());
+                            srCategory = srGame.FullGameCategories.FirstOrDefault(cat => cat.Name.ToLower().StartsWith(category.ToLower()));
 
                         if (srCategory == null)
                             return "No category was found";
