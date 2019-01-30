@@ -124,13 +124,9 @@ namespace SuiBot_Core
             }
         }
 
-        private void MeebyIrcClient_OnMotd(object sender, MotdEventArgs e)
-        {
-            //ErrorLogging.WriteLine("MOTD: " + e.MotdMessage);
-        }
-
         private void MeebyIrcClient_OnConnectionError(object sender, EventArgs e)
         {
+            Console.WriteLine("!!! CONNECTION ERROR!!! " + e.ToString());
             ErrorLogging.WriteLine("!!! CONNECTION ERROR!!! " + e.ToString());
         }
 
@@ -192,6 +188,7 @@ namespace SuiBot_Core
 
         private void IrcClient_OnAutoConnectError(object sender, AutoConnectErrorEventArgs e)
         {
+            Console.WriteLine("Auto connect error: " + e.Exception);
             ErrorLogging.WriteLine("Auto connect error: " + e.Exception);
 
         }
@@ -201,7 +198,6 @@ namespace SuiBot_Core
             Console.WriteLine("Connected!");
             ErrorLogging.WriteLine("Connected!");
             MeebyIrcClient.Login(BotConnectionConfig.Username, BotConnectionConfig.Username, 4, BotConnectionConfig.Username, "oauth:" + BotConnectionConfig.Password);
-
             Thread.Sleep(2000);
 
             //Request capabilities - https://dev.twitch.tv/docs/irc/guide/#twitch-irc-capabilities
@@ -223,12 +219,12 @@ namespace SuiBot_Core
         private void IrcClient_OnErrorMessage(object sender, IrcEventArgs e)
         {
             ErrorLogging.WriteLine("Error: !" + e.Data.Message);
-
-            //Console.WriteLine("Error: " + e.Data.Message);
+            Console.WriteLine("Error: " + e.Data.Message);
         }
 
         private void IrcClient_OnError(object sender, ErrorEventArgs e)
         {
+            Console.WriteLine("Error: !" + e.ErrorMessage);
             ErrorLogging.WriteLine("Error: !" + e.ErrorMessage);
         }
         #endregion

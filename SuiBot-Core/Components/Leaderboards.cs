@@ -227,7 +227,7 @@ namespace SuiBot_Core.Components
                             string runners = "";
                             if (record.Players.Count > 1)
                             {
-                                for(int i=0; i<record.Players.Count-1; i++)
+                                for (int i = 0; i < record.Players.Count - 1; i++)
                                 {
                                     runners += record.Players[i].Name + ", ";
                                 }
@@ -245,7 +245,7 @@ namespace SuiBot_Core.Components
                                 );
                         }
                         else
-                            return "No records found";
+                            return string.Format("No records were found! - {0}", leaderboard.WebLink);
                     }
                     //Full-game run
                     else
@@ -285,7 +285,7 @@ namespace SuiBot_Core.Components
                                 );
                         }
                         else
-                            return "Leaderboard doesn't have any records";
+                            return "Leaderboard doesn't have any records! " + leaderboard.WebLink; ;
                     }
                 }
             }
