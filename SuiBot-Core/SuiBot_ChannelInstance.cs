@@ -105,7 +105,7 @@ namespace SuiBot_Core
                     break;
             }
 
-            if (UserCooldowns[messageToRespondTo.Username] == null)
+            if (!UserCooldowns.ContainsKey(messageToRespondTo.Username))
                 UserCooldowns.Add(messageToRespondTo.Username, DateTime.UtcNow + TimeSpan.FromSeconds(coodown));
             else
             {
