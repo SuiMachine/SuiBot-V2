@@ -35,9 +35,7 @@
         <TabControl x:Name="TabControl_Channels" Margin="1,26,1,0">
             <TabItem Header="Log">
                 <Grid Background="#FFE5E5E5" Margin="0,0,0,0">
-                    <RichTextBox x:Name="RichBox_Log">
-                        <FlowDocument/>
-                    </RichTextBox>
+                    <RichTextBox x:Name="RichBox_Log" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" />
                 </Grid>
             </TabItem>
         </TabControl>

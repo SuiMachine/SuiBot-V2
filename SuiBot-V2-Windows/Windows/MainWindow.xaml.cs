@@ -42,10 +42,8 @@ namespace SuiBot_V2_Windows.Windows
             SuiBotInstance = new SuiBot_Core.SuiBot();
 
             ReloadActiveChannels();
-            RichBox_Log.IsEnabled = false;
-            var p = new Paragraph();
-            p.Inlines.Add(new Run(string.Format("{0} - Welcome to SuiBot V2.", DateTime.Now)) { Foreground = new SolidColorBrush(Colors.Black)});
-            RichBox_Log.Document.Blocks.Add(p);
+            RichBox_Log.IsReadOnly = true;
+            LogRB_AppendLine(new Run(string.Format("{0} - Welcome to SuiBot V2.", DateTime.Now)) { Foreground = new SolidColorBrush(Colors.Black) });
         }
 
         #region ButtonEvents
@@ -134,7 +132,7 @@ namespace SuiBot_V2_Windows.Windows
                 return;
             }
 
-            RichBox_Log.Document.Blocks.Add(new Paragraph(new Run("Suibot is now offline.")));
+            LogRB_AppendLine("Suibot is now offline.");
             SuiBotInstance.OnChannelJoining -= SuiBotInstance_OnChannelJoining;
             SuiBotInstance.OnChannelLeaving -= SuiBotInstance_OnChannelLeaving;
             SuiBotInstance.OnChannelStatusUpdate -= SuiBotInstance_OnChannelStatusUpdate;
@@ -167,9 +165,20 @@ namespace SuiBot_V2_Windows.Windows
                 return;
             }
 
+            LogRB_AppendLine(feedback.ToString() + " " + message);
+        }
+
+        private void LogRB_AppendLine(string text)
+        {
+            LogRB_AppendLine(new Run(text));
+        }
+
+        private void LogRB_AppendLine(Run text)
+        {
             var p = new Paragraph();
-            p.Inlines.Add(DateTime.Now + ": " + feedback.ToString() + " " + message);
+            p.Inlines.Add(DateTime.Now + ": " + text);
             RichBox_Log.Document.Blocks.Add(p);
+            RichBox_Log.ScrollToEnd();
         }
 
         private void SuiBotInstance_OnChatSendMessage(string channel, string message)
@@ -212,6 +221,7 @@ namespace SuiBot_V2_Windows.Windows
                 p.Inlines.Add(new Run(message.Username + ":") { Foreground = GetBrush(message.UserRole), FontWeight = FontWeights.Bold});
                 p.Inlines.Add(new Run(" " + message.Message) { Foreground = new SolidColorBrush(Colors.Black)});
                 rb.Document.Blocks.Add(p);
+                rb.ScrollToEnd();
             }
         }
 
@@ -272,7 +282,7 @@ namespace SuiBot_V2_Windows.Windows
             if (!ChannelTabs.ContainsKey(channel))
             {
                 Grid container = new Grid() { Margin = new Thickness(0, 0, 0, 0) };
-                RichTextBox rb = new RichTextBox() { IsEnabled = false };
+                RichTextBox rb = new RichTextBox() { IsEnabled = false, HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled, VerticalScrollBarVisibility = ScrollBarVisibility.Auto };
                 Style noSpaceStyle = new Style(typeof(Paragraph));
                 noSpaceStyle.Setters.Add(new Setter(Paragraph.MarginProperty, new Thickness(0)));
                 rb.Resources.Add(typeof(Paragraph), noSpaceStyle);
@@ -294,7 +304,7 @@ namespace SuiBot_V2_Windows.Windows
                 return;
             }
 
-            if (!ChannelTabs.ContainsKey(channel))
+            if (ChannelTabs.ContainsKey(channel))
             {
                 for (int i = 0; i < TabControl_Channels.Items.Count; i++)
                 {

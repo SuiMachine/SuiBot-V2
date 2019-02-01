@@ -96,7 +96,6 @@ namespace SuiBot_Core
             {
                 ErrorLogging.WriteLine("Exception on raw message " + ex.Message);
             }
-
         }
 
         private Role GetRoleFromTags(IrcEventArgs e)
