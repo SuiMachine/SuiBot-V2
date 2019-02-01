@@ -43,7 +43,7 @@ namespace SuiBot_V2_Windows.Windows
 
             ReloadActiveChannels();
             RichBox_Log.IsReadOnly = true;
-            LogRB_AppendLine(new Run(string.Format("{0} - Welcome to SuiBot V2.", DateTime.Now)) { Foreground = new SolidColorBrush(Colors.Black) });
+            LogRB_AppendLine(new Run("Welcome to SuiBot V2.") { Foreground = new SolidColorBrush(Colors.Black) });
         }
 
         #region ButtonEvents
@@ -176,7 +176,8 @@ namespace SuiBot_V2_Windows.Windows
         private void LogRB_AppendLine(Run text)
         {
             var p = new Paragraph();
-            p.Inlines.Add(DateTime.Now + ": " + text);
+            p.Inlines.Add(new Run(DateTime.Now + ": "));
+            p.Inlines.Add(text);
             RichBox_Log.Document.Blocks.Add(p);
             RichBox_Log.ScrollToEnd();
         }
@@ -282,7 +283,7 @@ namespace SuiBot_V2_Windows.Windows
             if (!ChannelTabs.ContainsKey(channel))
             {
                 Grid container = new Grid() { Margin = new Thickness(0, 0, 0, 0) };
-                RichTextBox rb = new RichTextBox() { IsEnabled = false, HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled, VerticalScrollBarVisibility = ScrollBarVisibility.Auto };
+                RichTextBox rb = new RichTextBox() { IsReadOnly = false, HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled, VerticalScrollBarVisibility = ScrollBarVisibility.Auto };
                 Style noSpaceStyle = new Style(typeof(Paragraph));
                 noSpaceStyle.Setters.Add(new Setter(Paragraph.MarginProperty, new Thickness(0)));
                 rb.Resources.Add(typeof(Paragraph), noSpaceStyle);
