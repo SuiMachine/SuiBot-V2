@@ -84,7 +84,7 @@ namespace SuiBot_Core.Components
         {
             lastMessage.Message = lastMessage.Message.StripSingleWord();
 
-            if(lastMessage.Message.StartsWithWordLazy("username"))
+            if(lastMessage.Message.StartsWithLazy("username"))
             {
                 lastMessage.Message = lastMessage.Message.StripSingleWord();
                 if(lastMessage.Message != "")
@@ -100,7 +100,7 @@ namespace SuiBot_Core.Components
                     channelInstance.SendChatMessageResponse(lastMessage, "Nulled out speedrun username");
                 }
             }
-            else if(lastMessage.Message.StartsWithWordLazy("game"))
+            else if(lastMessage.Message.StartsWithLazy("game"))
             {
                 lastMessage.Message = lastMessage.Message.StripSingleWord();
                 if (lastMessage.Message != "")
@@ -115,7 +115,7 @@ namespace SuiBot_Core.Components
                     channelInstance.SendChatMessageResponse(lastMessage, "Disabled game override (game will be updated on next twitch status update).");
                 }
             }
-            else if(lastMessage.Message.StartsWithWordLazy("level"))
+            else if(lastMessage.Message.StartsWithLazy("level"))
             {
                 lastMessage.Message = lastMessage.Message.StripSingleWord();
                 if (lastMessage.Message != "")
@@ -129,7 +129,7 @@ namespace SuiBot_Core.Components
                     channelInstance.SendChatMessageResponse(lastMessage, "Disabled level override.");
                 }
             }
-            else if (lastMessage.Message.StartsWithWordLazy("category"))
+            else if (lastMessage.Message.StartsWithLazy("category"))
             {
                 lastMessage.Message = lastMessage.Message.StripSingleWord();
                 if (lastMessage.Message != "")
