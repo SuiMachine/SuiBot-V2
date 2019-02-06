@@ -14,7 +14,7 @@ namespace SuiBot_Core.Components
     internal class Quotes : IDisposable
     {
         //Magick
-        const string RegexFindID = "(id:\\\")(\\d+)\\\"|id:\\d+";
+        const string RegexFindID = "(id:\\\")(\\w+)\\\"|id:\\w+";
         const string RegexFindAuthor = "author:\".+?\"|author:\\w+";
         const string RegexFindQuote = "quote:\".+?\"|quote:\\w+";
 
@@ -44,7 +44,7 @@ namespace SuiBot_Core.Components
             {
                 SearchQuote(lastMessage);
             }
-            else if(lastMessage.Message.StartsWithWordLazy("last"))
+            else if(lastMessage.Message.StartsWithLazy("last"))
             {
                 GetQuote(lastMessage, ChannelQuotes.QuotesList.Count-1);
             }
@@ -57,8 +57,10 @@ namespace SuiBot_Core.Components
         private void SearchQuote(ChatMessage lastMessage)
         {
             FilterOutSegments(lastMessage.Message, out int quoteID, out string authorFilter, out string quoteTextFilter);
+            if (quoteID == -2)
+                quoteID = ChannelQuotes.QuotesList.Count-1;
 
-            if(quoteID < 0 && authorFilter == "" && quoteTextFilter == "")
+            if (quoteID < 0 && authorFilter == "" && quoteTextFilter == "")
                 ChannelInstance.SendChatMessageResponse(lastMessage, "No search data provided?");
             else if (quoteID >= 0 && (authorFilter != "" || quoteTextFilter != ""))
             {
@@ -134,9 +136,12 @@ namespace SuiBot_Core.Components
             var idMatches = Regex.Matches(message, RegexFindID, RegexOptions.IgnoreCase);
             if (idMatches.Count > 0)
             {
-                var number = Regex.Matches(idMatches[0].Value, "\\d+")[0].Value.Trim();
+                var potentialIdFilter = idMatches[0].Value.Remove(0, "id:".Length);
+                potentialIdFilter = potentialIdFilter.Trim(new char[] { ' ', '\"' });
 
-                if (!int.TryParse(number, out quoteID))
+                if (potentialIdFilter.ToLower() == "last")
+                    quoteID = -2;       //Isn't it obvious it's added after the fact?
+                else if (!int.TryParse(potentialIdFilter, out quoteID))
                     quoteID = -1;
             }
             else
@@ -163,7 +168,9 @@ namespace SuiBot_Core.Components
 
         private void GetQuote(ChatMessage lastMessage, int id = -1)
         {
-            if (id == -1)
+            if(ChannelQuotes.QuotesList.Count == 0)
+                ChannelInstance.SendChatMessageResponse(lastMessage, "Channel doesn't have any quotes");
+            else if (id == -1)
                 ChannelInstance.SendChatMessageResponse(lastMessage, GetRandomQuote(), true);
             else
                 ChannelInstance.SendChatMessageResponse(lastMessage, ChannelQuotes.QuotesList[id].ToString(), true);
@@ -198,7 +205,16 @@ namespace SuiBot_Core.Components
         {
             if (lastMessage.UserRole <= Role.Mod)
             {
+                if(ChannelQuotes.QuotesList.Count == 0)
+                {
+                    ChannelInstance.SendChatMessageResponse(lastMessage, "Channel doesn't have any quotes.");
+                    return;
+                }
+
                 FilterOutSegments(lastMessage.Message, out int quoteID, out string authorFilter, out string quoteTextFilter);
+                if (quoteID == -2)
+                    quoteID = ChannelQuotes.QuotesList.Count - 1;
+
                 if (quoteID >= 0 && (authorFilter != "" || quoteTextFilter != ""))
                 {
                     ChannelInstance.SendChatMessageResponse(lastMessage, "ID search is not meant to be used in conjunction with Author Filter or Quote Text Filter!");
