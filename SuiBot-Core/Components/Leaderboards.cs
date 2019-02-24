@@ -151,16 +151,19 @@ namespace SuiBot_Core.Components
 
             if (lastMessage.Message == "")
             {
-                channelInstance.SendChatMessageResponse(lastMessage, GetWR(CurrentGame, "", "", new string[0]));
-
+                channelInstance.SendChatMessageResponse(lastMessage, GetWR(CurrentGame, true, "", "", new string[0]));
             }
             else
             {
+                bool isCurrentGame = false;
                 SeperateElements(lastMessage.Message, out string lookUpGame, out string lookUpCategory, out string lookUpLevel, out string[] lookUpVariables);
 
                 //Sort out game name
                 if (lookUpGame.ToLower() == "this")
+                {
                     lookUpGame = CurrentGame;
+                    isCurrentGame = true;
+                }
 
                 if (lookUpGame == "")
                 {
@@ -169,7 +172,10 @@ namespace SuiBot_Core.Components
                         lookUpGame = lastMessage.Message;
                     }
                     else
+                    {
                         lookUpGame = CurrentGame;
+                        isCurrentGame = true;
+                    }
                 }
                 lookUpGame = GetProxyName(lookUpGame);
 
@@ -179,19 +185,19 @@ namespace SuiBot_Core.Components
                 }
                 else
                 {
-                    channelInstance.SendChatMessageResponse(lastMessage, GetWR(lookUpGame, lookUpCategory, lookUpLevel, lookUpVariables));
+                    channelInstance.SendChatMessageResponse(lastMessage, GetWR(lookUpGame, isCurrentGame, lookUpCategory, lookUpLevel, lookUpVariables));
                 }
             }
         }
 
-        private string GetWR(string game, string category, string level, string[] variables)
+        private string GetWR(string game, bool isCurrent, string category, string level, string[] variables)
         {
             try
             {
-                if (level == "" && LevelOverride != "")
+                if (level == "" && isCurrent && LevelOverride != "")
                     level = LevelOverride;
 
-                if (category == "" && CategoryOverride != "")
+                if (category == "" && isCurrent && CategoryOverride != "")
                     category = CategoryOverride;
 
                 if (game == "")
@@ -302,15 +308,19 @@ namespace SuiBot_Core.Components
 
             if (lastMessage.Message == "")
             {
-                GetPB(CurrentGame, "", "", new string[0]);
+                GetPB(CurrentGame, true, "", "", new string[0]);
             }
             else
             {
+                bool isCurrentGame = false;
                 SeperateElements(lastMessage.Message, out string lookUpGame, out string lookUpCategory, out string lookUpLevel, out string[] lookUpVariables);
 
                 //Sort out game name
                 if (lookUpGame.ToLower() == "this")
+                {
                     lookUpGame = CurrentGame;
+                    isCurrentGame = true;
+                }
 
                 if (lookUpGame == "")
                 {
@@ -327,17 +337,24 @@ namespace SuiBot_Core.Components
                 }
                 else
                 {
-                    channelInstance.SendChatMessageResponse(lastMessage, GetPB(lookUpGame, lookUpCategory, lookUpLevel, lookUpVariables));
+                    channelInstance.SendChatMessageResponse(lastMessage, GetPB(lookUpGame, isCurrentGame, lookUpCategory, lookUpLevel, lookUpVariables));
                 }
             }
         }
 
-        private string GetPB(string game, string category, string level, string[] variables)
+        private string GetPB(string game, bool isCurrentGame, string category, string level, string[] variables)
         {
             try
             {
                 var srSearch = new SpeedrunComClient();
                 var srGame = srSearch.Games.SearchGame(game);
+
+                if (level == "" && isCurrentGame && LevelOverride != "")
+                    level = LevelOverride;
+
+                if (category == "" && isCurrentGame && CategoryOverride != "")
+                    category = CategoryOverride;
+
                 if (srGame == null)
                     return "No game was found";
                 else
