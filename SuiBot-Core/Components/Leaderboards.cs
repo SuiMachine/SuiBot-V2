@@ -304,11 +304,12 @@ namespace SuiBot_Core.Components
 
         internal void DoWorkPB(ChatMessage lastMessage)
         {
+            CurrentGame = "Painkiller";
             lastMessage.Message = lastMessage.Message.StripSingleWord();
 
             if (lastMessage.Message == "")
             {
-                GetPB(CurrentGame, true, "", "", new string[0]);
+                channelInstance.SendChatMessageResponse(lastMessage, GetPB(CurrentGame, true, "", "", new string[0]));
             }
             else
             {
@@ -389,8 +390,7 @@ namespace SuiBot_Core.Components
                         else
                             return "No PBs found for this level";
                     }
-                    //Full-game run
-                    else
+                    else                     //Full-game run
                     {
                         Category srCategory;
                         if (category == "")
