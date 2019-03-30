@@ -5,17 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SuiBot_V2_Windows.Windows"
         mc:Ignorable="d"
-        Title="About me" Height="230.836" Width="513.398" ResizeMode="NoResize">
+        Title="About me" Height="230.836" Width="592.398" ResizeMode="NoResize">
     <Grid>
-        <TextBlock Margin="5" TextWrapping="Wrap">
-            <Bold>SuiBot-V2</Bold> is a successor to <Hyperlink NavigateUri="https://github.com/SuiMachine/SuiBot_Console" Click="Hyperlink_Click">SuiBot_Console</Hyperlink> written pretty much entirely from scratch in <Bold>C#</Bold>, using many elements that I have learnt over the years. It can run on both <Bold>Windows</Bold> and <Bold>Linux</Bold> (including Raspberry Pi using mono (only console version tested)). For more informations check out <Hyperlink NavigateUri="https://github.com/SuiMachine/SuiBot-V2/wiki" Click="Hyperlink_Click">Wiki</Hyperlink>.<LineBreak/>
-            <LineBreak/>
-            This program and each of its components (aside from the ones mentioned in third party libraries) is released under <Bold>GNU Lesser General Public License v3.0</Bold>.<LineBreak/>
-            <LineBreak/>
-            <Bold>Third party libraries used:</Bold><LineBreak/>
-            - <Hyperlink NavigateUri="https://github.com/LiveSplit/SpeedrunComSharp" Click="Hyperlink_Click">SpeedrunComSharp</Hyperlink> by <Bold>CryZe</Bold> available on <Bold>MIT License</Bold>.<LineBreak/>
-            - <Hyperlink NavigateUri="https://github.com/meebey/SmartIrc4net" Click="Hyperlink_Click">SmartIrc4net</Hyperlink> available on <Bold>GNU Lesser General Public License v2.1</Bold>.<LineBreak/>
-
-        </TextBlock>
+        <TextBlock Margin="5,5,53,5" TextWrapping="Wrap"><Bold><Run Text="Su"/><Run Text="iB"/><Run Text="o"/><Run Text="t"/><Run Text="-V2"/></Bold><Run Text=" is a successor to "/><Hyperlink NavigateUri="https://github.com/SuiMachine/SuiBot_Console" Click="Hyperlink_Click"><Run Text="SuiBot_Console"/></Hyperlink><Run Text=" written pretty much entirely from scrat"/><Run Text="ch"/><Run Text=" in"/><Run Text=" "/><Bold><Run Text="C#"/></Bold><Run Text=", using many elements that I have learnt over the years. It can run on both "/><Bold><Run Text="Windows"/></Bold><Run Text=" and "/><Bold><Run Text="Linux"/></Bold><Run Text=" (including Raspberry Pi using mono (only console v"/><Run Text="ersion tested)). For more information"/><Run Text="s"/><Run Text=" check out "/><Hyperlink NavigateUri="https://github.com/SuiMachine/SuiBot-V2/wiki" Click="Hyperlink_Click"><Run Text="Wiki"/></Hyperlink><Run Text="."/><LineBreak/><LineBreak/><Run Text="This program and each of its components (aside from the ones mentioned in third party libraries) is released und"/><Run Text="er "/><Bold><Run Text="GNU Lesser General Public License v3.0"/></Bold><Run Text="."/><LineBreak/><LineBreak/><Bold><Run Text="Third party libraries used:"/></Bold><LineBreak/><Run Text="- "/><Hyperlink NavigateUri="https://github.com/LiveSplit/SpeedrunComSharp" Click="Hyperlink_Click"><Run Text="SpeedrunComSharp"/></Hyperlink><Run Text=" by "/><Bold><Run Text="CryZe"/></Bold><Run Text=" available on "/><Bold><Run Text="MIT License"/></Bold><Run Text="."/><LineBreak/><Run Text="- "/><Hyperlink NavigateUri="https://github.com/meebey/SmartIrc4net" Click="Hyperlink_Click"><Run Text="SmartIrc4net"/></Hyperlink><Run Text=" available on "/><Bold><Run Text="GNU Lesser General Public License v2.1"/></Bold><Run Text="."/><LineBreak/></TextBlock>
+        <Image HorizontalAlignment="Right" Height="48" Margin="0,5,5,0" VerticalAlignment="Top" Width="48" Source="/SuiBot-V2-Windows;component/suibot_win.ico"/>
     </Grid>
 </Window>

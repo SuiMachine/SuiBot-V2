@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -25,12 +26,14 @@ namespace SuiBot_V2_Windows.Windows
         private SuiBot_Core.SuiBot SuiBotInstance { get; set; }
         private Thread SuiBotThread { get; set; }
         private bool IsBotRunning { get; set; }
+        public bool MinimizeToTray { get; set; }
         private Dictionary<string, RichTextBox> ChannelTabs { get; set; }
 
         public MainWindow()
         {
             DataContext = this;
             ChannelTabs = new Dictionary<string, RichTextBox>();
+
 
             InitializeComponent();
             if (!SuiBot_Core.Storage.ConnectionConfig.ConfigExists())
@@ -39,6 +42,7 @@ namespace SuiBot_V2_Windows.Windows
                 tmpConfig.Save();
             }
             IsBotRunning = false;
+            MinimizeToTray = false;
             SuiBotInstance = new SuiBot_Core.SuiBot();
 
             ReloadActiveChannels();
@@ -477,6 +481,31 @@ namespace SuiBot_V2_Windows.Windows
         {
             AboutMeWindow window = new AboutMeWindow();
             window.ShowDialog();
+        }
+
+        private void Window_StateChanged(object sender, EventArgs e)
+        {
+            if ( this.WindowState == WindowState.Minimized )
+            {
+                if(MinimizeToTray)
+                {
+                    this.trayIcon.Visibility = Visibility.Visible;
+                    this.Hide();
+                }
+
+            }
+            else
+            {
+                this.trayIcon.Visibility = Visibility.Hidden;
+            }
+        }
+
+
+        private void TrayIcon_RestoreClicked(object sender, RoutedEventArgs e)
+        {
+            this.Visibility = Visibility.Visible;
+            this.Show();
+            this.WindowState = WindowState.Normal;
         }
     }
 }
