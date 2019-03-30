@@ -1,6 +1,6 @@
 # SuiBot-V2
 
-![img](suibot_win.png "SuiBot V2")
+<img align="left" src="suibot_win.png">
 SuiBot-V2 is a successor to [SuiBot_Console](https://github.com/SuiMachine/SuiBot_Console) written pretty much entirely from scratch, using many elements that I have learnt over the years. It can run on both Windows and Linux (including Raspberry Pi using mono (only console version tested)). For more informations check out [wiki](https://github.com/SuiMachine/SuiBot-V2/wiki).
 
 Compilation
