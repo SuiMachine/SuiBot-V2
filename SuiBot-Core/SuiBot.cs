@@ -181,6 +181,7 @@ namespace SuiBot_Core
 
         private void IrcClient_OnDisconnected(object sender, EventArgs e)
         {
+            ActiveChannels.Clear();
             Console.WriteLine("! Disconnected");
             ErrorLogging.WriteLine("! Disconnected");
         }

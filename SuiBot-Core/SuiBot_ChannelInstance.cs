@@ -154,6 +154,19 @@ namespace SuiBot_Core
             var messageLazy = lastMessage.Message.ToLower();
             messageLazy = messageLazy.Remove(0, 1);
 
+            //Properties
+            if (messageLazy.StartsWithLazy("getproperty"))
+            {
+                ConfigInstance.GetProperty(this, lastMessage);
+                return;
+            }
+
+            if (messageLazy.StartsWithLazy("setproperty"))
+            {
+                ConfigInstance.SetPropety(this, lastMessage);
+                return;
+            }
+
             //Quotes
             if(ConfigInstance.QuotesEnabled && (messageLazy.StartsWith("quote") || messageLazy.StartsWith("quotes")))
             {

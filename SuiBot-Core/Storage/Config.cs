@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
 using System.IO;
+using SuiBot_Core.Extensions.SuiStringExtension;
+using System.Reflection;
 
 namespace SuiBot_Core.Storage
 {
@@ -212,6 +214,168 @@ namespace SuiBot_Core.Storage
             LeaderboardsEnabled = false;
             CustomCvarsEnabled = false;
             LeaderboardsUsername = "";
+        }
+
+        internal void GetProperty(SuiBot_ChannelInstance channelInstance, ChatMessage lastMessage)
+        {
+            if (lastMessage.UserRole <= Role.Mod)
+            {
+                var msg = lastMessage.Message.StripSingleWord().ToLower();
+                if(msg != "")
+                {
+                    try
+                    {
+                        Type _type = this.GetType();
+                        var properties = _type.GetProperties();
+                        var foundProperty = properties.FirstOrDefault(x => x.Name.ToLower() == msg);
+                        if(foundProperty != null)
+                        {
+                            string result = foundProperty.GetValue(this, null).ToString();
+                            channelInstance.SendChatMessageResponse(lastMessage, string.Format("{0} == {1}", foundProperty.Name, result));
+                        }
+                        else
+                        {
+                            channelInstance.SendChatMessageResponse(lastMessage, "No proparty was found");
+                        }
+                    }
+                    catch
+                    {
+                        channelInstance.SendChatMessageResponse(lastMessage, "Error looking for property");
+                    }
+                }
+            }
+        }
+
+        internal void SetPropety(SuiBot_ChannelInstance channelInstance, ChatMessage lastMessage)
+        {
+            var msg = lastMessage.Message.StripSingleWord();
+            if (msg != "")
+            {
+                try
+                {
+                    Type _type = this.GetType();
+                    var properties = _type.GetProperties();
+                    var foundProperty = properties.FirstOrDefault(x => msg.ToLower().StartsWithLazy(x.Name));
+                    if (foundProperty != null)
+                    {
+                        msg = msg.StripSingleWord();
+                        if (foundProperty.PropertyType == typeof(bool))
+                        {
+                            if (bool.TryParse(msg, out bool res))
+                            {
+                                var old = foundProperty.GetValue(this, null);
+                                foundProperty.SetValue(this, res, null);
+                                channelInstance.SendChatMessageResponse(lastMessage, string.Format("Set {0} to {1} (was {2}).", foundProperty.Name, res.ToString(), old.ToString()));
+                                Save();
+                            }
+                            else
+                            {
+                                channelInstance.SendChatMessageResponse(lastMessage, "Failed to parse bool value.");
+                            }
+                        }
+                        else if (foundProperty.PropertyType == typeof(byte))
+                        {
+                            if (byte.TryParse(msg, out byte res))
+                            {
+                                var old = foundProperty.GetValue(this, null);
+                                foundProperty.SetValue(this, res, null);
+                                channelInstance.SendChatMessageResponse(lastMessage, string.Format("Set {0} to {1} (was {2}).", foundProperty.Name, res.ToString(), old.ToString()));
+                                Save();
+                            }
+                            else
+                            {
+                                channelInstance.SendChatMessageResponse(lastMessage, "Failed to parse byte value.");
+                            }
+                        }
+                        else if (foundProperty.PropertyType == typeof(short))
+                        {
+                            if (short.TryParse(msg, out short res))
+                            {
+                                var old = foundProperty.GetValue(this, null);
+                                foundProperty.SetValue(this, res, null);
+                                channelInstance.SendChatMessageResponse(lastMessage, string.Format("Set {0} to {1} (was {2}).", foundProperty.Name, res.ToString(), old.ToString()));
+                                Save();
+                            }
+                            else
+                            {
+                                channelInstance.SendChatMessageResponse(lastMessage, "Failed to short bool value.");
+                            }
+                        }
+                        else if (foundProperty.PropertyType == typeof(int))
+                        {
+                            if (int.TryParse(msg, out int res))
+                            {
+                                var old = foundProperty.GetValue(this, null);
+                                foundProperty.SetValue(this, res, null);
+                                channelInstance.SendChatMessageResponse(lastMessage, string.Format("Set {0} to {1} (was {2}).", foundProperty.Name, res.ToString(), old.ToString()));
+                                Save();
+                            }
+                            else
+                            {
+                                channelInstance.SendChatMessageResponse(lastMessage, "Failed to parse int value.");
+                            }
+                        }
+                        else if (foundProperty.PropertyType == typeof(float))
+                        {
+                            if (float.TryParse(msg, out float res))
+                            {
+                                var old = foundProperty.GetValue(this, null);
+                                foundProperty.SetValue(this, res, null);
+                                channelInstance.SendChatMessageResponse(lastMessage, string.Format("Set {0} to {1} (was {2}).", foundProperty.Name, res.ToString(), old.ToString()));
+                                Save();
+                            }
+                            else
+                            {
+                                channelInstance.SendChatMessageResponse(lastMessage, "Failed to parse float value.");
+                            }
+                        }
+                        else if (foundProperty.PropertyType == typeof(long))
+                        {
+                            if (long.TryParse(msg, out long res))
+                            {
+                                var old = foundProperty.GetValue(this, null);
+                                foundProperty.SetValue(this, res, null);
+                                channelInstance.SendChatMessageResponse(lastMessage, string.Format("Set {0} to {1} (was {2}).", foundProperty.Name, res.ToString(), old.ToString()));
+                                Save();
+                            }
+                            else
+                            {
+                                channelInstance.SendChatMessageResponse(lastMessage, "Failed to parse long value.");
+                            }
+                        }
+                        else if (foundProperty.PropertyType == typeof(double))
+                        {
+                            if (double.TryParse(msg, out double res))
+                            {
+                                var old = foundProperty.GetValue(this, null);
+                                foundProperty.SetValue(this, res, null);
+                                channelInstance.SendChatMessageResponse(lastMessage, string.Format("Set {0} to {1} (was {2}).", foundProperty.Name, res.ToString(), old.ToString()));
+                                Save();
+                            }
+                            else
+                            {
+                                channelInstance.SendChatMessageResponse(lastMessage, "Failed to parse double value.");
+                            }
+                        }
+                        else if (foundProperty.PropertyType == typeof(string))
+                        {
+                            var old = foundProperty.GetValue(this, null);
+                            foundProperty.SetValue(this, msg, null);
+                            channelInstance.SendChatMessageResponse(lastMessage, string.Format("Set \"{0}\" to \"{1}\" (was \"{2}\").", foundProperty.Name, msg, old.ToString()));
+                            Save();
+                        }
+                    }
+                    else
+                    {
+                        channelInstance.SendChatMessageResponse(lastMessage, "No proparty was found");
+                    }
+                }
+                catch(Exception ex)
+                {
+                    channelInstance.SendChatMessageResponse(lastMessage, "Error setting property");
+                    ErrorLogging.WriteLine(ex.ToString());
+                }
+            }
         }
 
         public static ChannelConfig Load(string channel)

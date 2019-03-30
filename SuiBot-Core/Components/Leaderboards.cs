@@ -304,7 +304,6 @@ namespace SuiBot_Core.Components
 
         internal void DoWorkPB(ChatMessage lastMessage)
         {
-            CurrentGame = "Painkiller";
             lastMessage.Message = lastMessage.Message.StripSingleWord();
 
             if (lastMessage.Message == "")
