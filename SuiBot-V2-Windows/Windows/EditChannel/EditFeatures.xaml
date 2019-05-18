@@ -27,7 +27,7 @@
         <Label Content="Leadboards username:" HorizontalAlignment="Left" Margin="5,254,0,0" VerticalAlignment="Top"/>
         <TextBox HorizontalAlignment="Left" Height="23" Text="{Binding LeaderboardsUsername}" Margin="134,256,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="158"/>
         <CheckBox Content="Quotes Enabled" IsChecked="{Binding QuotesEnabled}" HorizontalAlignment="Left" Margin="5,280,0,0" VerticalAlignment="Top"/>
-        <CheckBox Content="Viewer PB enabled" IsChecked="{Binding ViewerPBEnabled}" HorizontalAlignment="Left" Margin="5,301,0,0" VerticalAlignment="Top" IsEnabled="False"/>
+        <CheckBox Content="Viewer PB enabled" IsChecked="{Binding ViewerPBEnabled}" HorizontalAlignment="Left" Margin="5,301,0,0" VerticalAlignment="Top" />
         <Button Content="OK" HorizontalAlignment="Center" Margin="0,0,80,10" VerticalAlignment="Bottom" Width="75" Click="Button_OKClicked"/>
         <Button Content="Cancel" HorizontalAlignment="Center" Margin="80,0,0,10" VerticalAlignment="Bottom" Width="75" Click="Button_CancelClicked"/>
     </Grid>

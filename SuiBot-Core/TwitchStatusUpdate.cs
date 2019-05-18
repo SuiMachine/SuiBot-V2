@@ -11,6 +11,7 @@ namespace SuiBot_Core
         public bool isOnline = true;
         public string game = "";
         private string oldId = "x";
+        public uint LastViewers = 0;
         Uri sUrl = null;
         Dictionary<string, string> RequestHeaders;
 
@@ -57,6 +58,17 @@ namespace SuiBot_Core
                     else
                     {
                         Console.WriteLine("Checked stream status. Is online.");
+                    }
+
+                    indexStart = temp.IndexOf("viewers");
+                    if (indexStart > 0)
+                    {
+                        indexStart += "viewers".Length + 3;
+                        int indexEnd = temp.IndexOf(",", indexStart);
+                        if (uint.TryParse(temp.Substring(indexStart, indexEnd - indexStart), out uint Value))
+                        {
+                            this.LastViewers = Value;
+                        }
                     }
                 }
                 else

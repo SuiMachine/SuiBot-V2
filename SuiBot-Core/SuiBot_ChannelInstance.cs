@@ -21,6 +21,7 @@ namespace SuiBot_Core
         Components.ChatFiltering ChatFiltering { get; set; }
         Components.Leaderboards Leaderboards { get; set; }
         Components.CustomCvars Cvars { get; set; }
+        Components.ViewerPB ViewerPb { get; set; }
         #endregion
         TwitchStatusUpdate TwitchStatus { get; set; }
         Dictionary<string, DateTime> UserCooldowns { get; set; }
@@ -39,6 +40,7 @@ namespace SuiBot_Core
             this.TwitchStatus = new TwitchStatusUpdate(this);
             this.Cvars = new Components.CustomCvars(this);
             this.UserCooldowns = new Dictionary<string, DateTime>();
+            this.ViewerPb = new Components.ViewerPB(this);
         }
 
         internal void TimerTick()
@@ -50,6 +52,10 @@ namespace SuiBot_Core
         internal void UpdateTwitchStatus(bool vocal = false)
         {
             TwitchStatus.GetStatus();
+
+            if (ConfigInstance.ViewerPBEnabled)
+                ViewerPb.UpdateViewerPB(TwitchStatus.LastViewers);
+
             if (vocal)
                 SendChatMessage(string.Format("New obtained stream status is {0}{1}.",
                     TwitchStatus.isOnline == false ? "offline" : "online",
