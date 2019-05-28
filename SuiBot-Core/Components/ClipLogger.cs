@@ -16,7 +16,7 @@ namespace SuiBot_Core.Components
         public ClipLogger(SuiBot_ChannelInstance ChannelInstance)
         {
             this.ChannelInstance = ChannelInstance;
-            clipUrl = string.Format("https://www.twitch.tv/{0}/clip/", ChannelInstance.Channel).ToLower();
+            clipUrl = string.Format("twitch.tv/{0}/clip/", ChannelInstance.Channel).ToLower();
 
             //Create a file just in case
             if (!File.Exists(string.Format("Bot/Channels/{0}/Clips.txt", ChannelInstance.Channel)))
@@ -27,7 +27,9 @@ namespace SuiBot_Core.Components
         {
             var words = lastMessage.Message.Split(' ');
 
-            var twitchClip = words.FirstOrDefault(x => x.StartsWith("https://clips.twitch.tv/", StringComparison.CurrentCultureIgnoreCase) || x.StartsWith(clipUrl, StringComparison.CurrentCultureIgnoreCase));
+            var twitchClip = words.FirstOrDefault(x =>
+                x.ToLower().Contains("clips.twitch.tv/") || x.ToLower().Contains(clipUrl)
+                );
 
             if(twitchClip != null)
             {
