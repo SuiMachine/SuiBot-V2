@@ -182,6 +182,8 @@ namespace SuiBot_Core.Storage
         public bool CustomCvarsEnabled { get; set; }
         [XmlElement]
         public bool AskEnabled { get; set; }
+        [XmlElement]
+        public bool ClipLogging { get; set; }
         //bool AskCleverbot { get; set; }
         [XmlElement]
         public bool FilteringEnabled { get; set; }
@@ -206,6 +208,7 @@ namespace SuiBot_Core.Storage
 
             QuotesEnabled = false;
             AskEnabled = false;
+            ClipLogging = false;
             FilteringEnabled = false;
             FilteringHarsh = false;
             Filters = new ChatFilters();

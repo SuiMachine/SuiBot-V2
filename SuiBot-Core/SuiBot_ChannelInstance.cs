@@ -22,6 +22,7 @@ namespace SuiBot_Core
         Components.Leaderboards Leaderboards { get; set; }
         Components.CustomCvars Cvars { get; set; }
         Components.ViewerPB ViewerPb { get; set; }
+        Components.ClipLogger ClipLogger { get; set; }
         #endregion
         TwitchStatusUpdate TwitchStatus { get; set; }
         Dictionary<string, DateTime> UserCooldowns { get; set; }
@@ -41,6 +42,7 @@ namespace SuiBot_Core
             this.Cvars = new Components.CustomCvars(this);
             this.UserCooldowns = new Dictionary<string, DateTime>();
             this.ViewerPb = new Components.ViewerPB(this);
+            this.ClipLogger = new Components.ClipLogger(this);
         }
 
         internal void TimerTick()
@@ -147,6 +149,9 @@ namespace SuiBot_Core
             //If Filtering is enabled and timeouted or banned, we don't need to do anything else
             if (ConfigInstance.FilteringEnabled && PerformActionFiltering(lastMessage))
                 return;
+
+            if (ConfigInstance.ClipLogging)
+                ClipLogger.DoWork(lastMessage);
 
             //This is a useful optimisation trick, since commands all start with a one and the same prefix, we don't actually have to spend time comparing strings, if we know that prefix was wrong
             if (!lastMessage.Message.StartsWith(CommandPrefix) || CoreConfigInstance.IgnoredUsers.Contains(lastMessage.Username))
