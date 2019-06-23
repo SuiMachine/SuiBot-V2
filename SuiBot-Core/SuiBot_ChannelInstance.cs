@@ -22,7 +22,9 @@ namespace SuiBot_Core
         Components.Leaderboards Leaderboards { get; set; }
         Components.CustomCvars Cvars { get; set; }
         Components.ViewerPB ViewerPb { get; set; }
-        Components.ClipLogger ClipLogger { get; set; }
+        #region Other
+        Components.Other.KickPeople KickPeople { get; set; }
+        #endregion
         #endregion
         TwitchStatusUpdate TwitchStatus { get; set; }
         Dictionary<string, DateTime> UserCooldowns { get; set; }
@@ -42,7 +44,9 @@ namespace SuiBot_Core
             this.Cvars = new Components.CustomCvars(this);
             this.UserCooldowns = new Dictionary<string, DateTime>();
             this.ViewerPb = new Components.ViewerPB(this);
-            this.ClipLogger = new Components.ClipLogger(this);
+
+            //Other
+            KickPeople = new Components.Other.KickPeople(this);
         }
 
         internal void TimerTick()
@@ -150,9 +154,6 @@ namespace SuiBot_Core
             if (ConfigInstance.FilteringEnabled && PerformActionFiltering(lastMessage))
                 return;
 
-            if (ConfigInstance.ClipLogging)
-                ClipLogger.DoWork(lastMessage);
-
             //This is a useful optimisation trick, since commands all start with a one and the same prefix, we don't actually have to spend time comparing strings, if we know that prefix was wrong
             if (!lastMessage.Message.StartsWith(CommandPrefix) || CoreConfigInstance.IgnoredUsers.Contains(lastMessage.Username))
                 return;
@@ -250,8 +251,18 @@ namespace SuiBot_Core
                 return;
             }
 
-            //Custom Cvars
-            if (ConfigInstance.CustomCvarsEnabled)
+            if (ConfigInstance.MemeComponents.ENABLE)
+            {
+                if (ConfigInstance.MemeComponents.KickEnabled && messageLazy.StartsWith("kick"))
+                {
+                    KickPeople.DoWork(lastMessage);
+                    return;
+                }
+            }
+
+
+                //Custom Cvars
+                if (ConfigInstance.CustomCvarsEnabled)
             {
                 if (messageLazy.StartsWithLazy(new string[] { "cvar", "cvars" }))
                 {

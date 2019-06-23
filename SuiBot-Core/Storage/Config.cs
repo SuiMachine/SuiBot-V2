@@ -183,7 +183,7 @@ namespace SuiBot_Core.Storage
         [XmlElement]
         public bool AskEnabled { get; set; }
         [XmlElement]
-        public bool ClipLogging { get; set; }
+        public MemeConfig MemeComponents { get; set; }
         //bool AskCleverbot { get; set; }
         [XmlElement]
         public bool FilteringEnabled { get; set; }
@@ -208,7 +208,7 @@ namespace SuiBot_Core.Storage
 
             QuotesEnabled = false;
             AskEnabled = false;
-            ClipLogging = false;
+            MemeComponents = new MemeConfig();
             FilteringEnabled = false;
             FilteringHarsh = false;
             Filters = new ChatFilters();
@@ -256,9 +256,26 @@ namespace SuiBot_Core.Storage
             {
                 try
                 {
-                    Type _type = this.GetType();
-                    var properties = _type.GetProperties();
-                    var foundProperty = properties.FirstOrDefault(x => msg.ToLower().StartsWithLazy(x.Name));
+                    Object target;
+                    Type _type;
+                    PropertyInfo[] properties;
+                    PropertyInfo foundProperty = null;
+
+                    if (msg.StartsWithLazy("memecomponents."))
+                    {
+                        msg = msg.Split(new char[] { '.' }, 2)[1];
+                        target = MemeComponents;
+                    }
+                    else
+                    {
+                        target = this;
+                    }
+
+                    _type = target.GetType();
+                    properties = _type.GetProperties();
+
+                    foundProperty = properties.FirstOrDefault(x => msg.ToLower().StartsWithLazy(x.Name));
+
                     if (foundProperty != null)
                     {
                         msg = msg.StripSingleWord();
@@ -266,8 +283,8 @@ namespace SuiBot_Core.Storage
                         {
                             if (bool.TryParse(msg, out bool res))
                             {
-                                var old = foundProperty.GetValue(this, null);
-                                foundProperty.SetValue(this, res, null);
+                                var old = foundProperty.GetValue(target, null);
+                                foundProperty.SetValue(target, res, null);
                                 channelInstance.SendChatMessageResponse(lastMessage, string.Format("Set {0} to {1} (was {2}).", foundProperty.Name, res.ToString(), old.ToString()));
                                 Save();
                             }
@@ -280,8 +297,8 @@ namespace SuiBot_Core.Storage
                         {
                             if (byte.TryParse(msg, out byte res))
                             {
-                                var old = foundProperty.GetValue(this, null);
-                                foundProperty.SetValue(this, res, null);
+                                var old = foundProperty.GetValue(target, null);
+                                foundProperty.SetValue(target, res, null);
                                 channelInstance.SendChatMessageResponse(lastMessage, string.Format("Set {0} to {1} (was {2}).", foundProperty.Name, res.ToString(), old.ToString()));
                                 Save();
                             }
@@ -294,8 +311,8 @@ namespace SuiBot_Core.Storage
                         {
                             if (short.TryParse(msg, out short res))
                             {
-                                var old = foundProperty.GetValue(this, null);
-                                foundProperty.SetValue(this, res, null);
+                                var old = foundProperty.GetValue(target, null);
+                                foundProperty.SetValue(target, res, null);
                                 channelInstance.SendChatMessageResponse(lastMessage, string.Format("Set {0} to {1} (was {2}).", foundProperty.Name, res.ToString(), old.ToString()));
                                 Save();
                             }
@@ -308,8 +325,8 @@ namespace SuiBot_Core.Storage
                         {
                             if (int.TryParse(msg, out int res))
                             {
-                                var old = foundProperty.GetValue(this, null);
-                                foundProperty.SetValue(this, res, null);
+                                var old = foundProperty.GetValue(target, null);
+                                foundProperty.SetValue(target, res, null);
                                 channelInstance.SendChatMessageResponse(lastMessage, string.Format("Set {0} to {1} (was {2}).", foundProperty.Name, res.ToString(), old.ToString()));
                                 Save();
                             }
@@ -322,8 +339,8 @@ namespace SuiBot_Core.Storage
                         {
                             if (float.TryParse(msg, out float res))
                             {
-                                var old = foundProperty.GetValue(this, null);
-                                foundProperty.SetValue(this, res, null);
+                                var old = foundProperty.GetValue(target, null);
+                                foundProperty.SetValue(target, res, null);
                                 channelInstance.SendChatMessageResponse(lastMessage, string.Format("Set {0} to {1} (was {2}).", foundProperty.Name, res.ToString(), old.ToString()));
                                 Save();
                             }
@@ -336,8 +353,8 @@ namespace SuiBot_Core.Storage
                         {
                             if (long.TryParse(msg, out long res))
                             {
-                                var old = foundProperty.GetValue(this, null);
-                                foundProperty.SetValue(this, res, null);
+                                var old = foundProperty.GetValue(target, null);
+                                foundProperty.SetValue(target, res, null);
                                 channelInstance.SendChatMessageResponse(lastMessage, string.Format("Set {0} to {1} (was {2}).", foundProperty.Name, res.ToString(), old.ToString()));
                                 Save();
                             }
@@ -350,8 +367,8 @@ namespace SuiBot_Core.Storage
                         {
                             if (double.TryParse(msg, out double res))
                             {
-                                var old = foundProperty.GetValue(this, null);
-                                foundProperty.SetValue(this, res, null);
+                                var old = foundProperty.GetValue(target, null);
+                                foundProperty.SetValue(target, res, null);
                                 channelInstance.SendChatMessageResponse(lastMessage, string.Format("Set {0} to {1} (was {2}).", foundProperty.Name, res.ToString(), old.ToString()));
                                 Save();
                             }
@@ -362,8 +379,8 @@ namespace SuiBot_Core.Storage
                         }
                         else if (foundProperty.PropertyType == typeof(string))
                         {
-                            var old = foundProperty.GetValue(this, null);
-                            foundProperty.SetValue(this, msg, null);
+                            var old = foundProperty.GetValue(target, null);
+                            foundProperty.SetValue(target, msg, null);
                             channelInstance.SendChatMessageResponse(lastMessage, string.Format("Set \"{0}\" to \"{1}\" (was \"{2}\").", foundProperty.Name, msg, old.ToString()));
                             Save();
                         }
@@ -411,6 +428,24 @@ namespace SuiBot_Core.Storage
             StreamWriter fw = new StreamWriter(string.Format("Bot/Channels/{0}.xml", ChannelName));
             serializer.Serialize(fw, this);
             fw.Close();
+        }
+    }
+
+    /// <summary>
+    /// Used only for Meme Components
+    /// </summary>
+    [Serializable]
+    public class MemeConfig
+    {
+        [XmlElement]
+        public bool ENABLE { get; set; }
+        [XmlElement]
+        public bool KickEnabled { get; set; }
+
+        public MemeConfig()
+        {
+            ENABLE = false;
+            KickEnabled = false;
         }
     }
 }

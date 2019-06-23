@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -8,47 +10,55 @@ namespace SuiBot_Core
 {
     public class TwitchStatusUpdate
     {
+        string channelName;
         public bool isOnline = true;
         public string game = "";
         private string oldId = "x";
         public uint LastViewers = 0;
-        Uri sUrl = null;
+        Uri sUrlTwitchStatus = null;
         Dictionary<string, string> RequestHeaders;
+
+        public TwitchStatusUpdate(string channelName)
+        {
+            RequestHeaders = new Dictionary<string, string>();
+            sUrlTwitchStatus = new Uri("https://api.twitch.tv/helix/streams?user_login=" + channelName);
+            this.channelName = channelName;
+            RequestHeaders.Add("Client-ID", "rmi9m0sheo4pp5882o8s24zu7h09md");
+        }
 
         public TwitchStatusUpdate(SuiBot_ChannelInstance suiBot_ChannelInstance)
         {
             RequestHeaders = new Dictionary<string, string>();
-            sUrl = new Uri("https://api.twitch.tv/helix/streams?user_login=" + suiBot_ChannelInstance.Channel);
+            this.channelName = suiBot_ChannelInstance.Channel;
+            sUrlTwitchStatus = new Uri("https://api.twitch.tv/helix/streams?user_login=" + suiBot_ChannelInstance.Channel);
             RequestHeaders.Add("Client-ID", "rmi9m0sheo4pp5882o8s24zu7h09md");
         }
 
         public void GetStatus()
         {
-            string res = "";
-            if (JsonGrabber.GrabJson(sUrl, RequestHeaders, "application/json", "application/vnd.twitchtv.v3+json", "GET", out res))
+            if (JsonGrabber.GrabJson(sUrlTwitchStatus, RequestHeaders, "application/json", "application/vnd.twitchtv.v3+json", "GET", out string res))
             {
                 if (res.Contains("title"))
                 {
                     isOnline = true;
-                    string temp = Convert.ToString(res);
-                    int indexStart = temp.IndexOf("type");
+                    int indexStart = res.IndexOf("type");
                     if (indexStart > 0)
                     {
                         indexStart += "type".Length + 3;
-                        int indexEnd = temp.IndexOf(",", indexStart);
-                        string thatThing = temp.Substring(indexStart, indexEnd - indexStart - 1).ToLower();
+                        int indexEnd = res.IndexOf(",", indexStart);
+                        string thatThing = res.Substring(indexStart, indexEnd - indexStart - 1).ToLower();
                         if (thatThing == "live")
                             isOnline = true;
                         else
                             isOnline = false;
                     }
 
-                    indexStart = temp.IndexOf("game_id");
+                    indexStart = res.IndexOf("game_id");
                     if (indexStart > 0)
                     {
                         indexStart += "game_id".Length + 3;
-                        int indexEnd = temp.IndexOf(",", indexStart) - 1;
-                        game = ResolveNameFromId(temp.Substring(indexStart, indexEnd - indexStart));
+                        int indexEnd = res.IndexOf(",", indexStart) - 1;
+                        game = ResolveNameFromId(res.Substring(indexStart, indexEnd - indexStart));
                         if (game == "ul")
                         {
                             game = String.Empty;
@@ -60,12 +70,12 @@ namespace SuiBot_Core
                         Console.WriteLine("Checked stream status. Is online.");
                     }
 
-                    indexStart = temp.IndexOf("viewers");
+                    indexStart = res.IndexOf("viewers");
                     if (indexStart > 0)
                     {
                         indexStart += "viewers".Length + 3;
-                        int indexEnd = temp.IndexOf(",", indexStart);
-                        if (uint.TryParse(temp.Substring(indexStart, indexEnd - indexStart), out uint Value))
+                        int indexEnd = res.IndexOf(",", indexStart);
+                        if (uint.TryParse(res.Substring(indexStart, indexEnd - indexStart), out uint Value))
                         {
                             this.LastViewers = Value;
                         }
@@ -110,7 +120,7 @@ namespace SuiBot_Core
         public string GetStreamTime()
         {
             string res = "";
-            if (JsonGrabber.GrabJson(sUrl, RequestHeaders, "application/json", "application/vnd.twitchtv.v3+json", "GET", out res))
+            if (JsonGrabber.GrabJson(sUrlTwitchStatus, RequestHeaders, "application/json", "application/vnd.twitchtv.v3+json", "GET", out res))
             {
                 if (res.Contains("display_name"))
                 {

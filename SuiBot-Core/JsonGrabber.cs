@@ -75,7 +75,6 @@ namespace SuiBot_Core
                 result = "";
                 return false;
             }
-
         }
     }
 }

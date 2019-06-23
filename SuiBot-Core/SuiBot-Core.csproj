@@ -51,10 +51,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Components\ChatFiltering.cs" />
-    <Compile Include="Components\ClipLogger.cs" />
     <Compile Include="Components\CustomCvars.cs" />
     <Compile Include="Components\IntervalMessages.cs" />
     <Compile Include="Components\Leaderboards.cs" />
+    <Compile Include="Components\Other\KickPeople.cs" />
     <Compile Include="Components\Quotes.cs" />
     <Compile Include="Components\SRL.cs" />
     <Compile Include="Components\ViewerPB.cs" />
@@ -63,6 +63,7 @@
     <Compile Include="Extensions\SuiStringExtansions.cs" />
     <Compile Include="JsonGrabber.cs" />
     <Compile Include="ChatMessage.cs" />
+    <Compile Include="Components\RNG.cs" />
     <Compile Include="Storage\ChatFilters.cs" />
     <Compile Include="Storage\ChatFilterUsersDB.cs" />
     <Compile Include="Storage\CustomCvars.cs" />

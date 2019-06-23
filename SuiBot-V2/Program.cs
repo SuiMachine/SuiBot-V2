@@ -17,8 +17,7 @@ namespace SuiBot_V2
         static void Main(string[] args)
         {
             Console.CancelKeyPress += Console_CancelKeyPress;
-            //var APITest = new SuiBot_Core.TwitchStatusUpdate("havrd");
-            //APITest.GetStatus();
+
 
             if(File.Exists("Bot/ConnectionConfig.suixml"))
             {
