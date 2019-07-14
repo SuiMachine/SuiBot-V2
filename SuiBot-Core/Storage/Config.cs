@@ -440,12 +440,12 @@ namespace SuiBot_Core.Storage
         [XmlElement]
         public bool ENABLE { get; set; }
         [XmlElement]
-        public bool KickEnabled { get; set; }
+        public bool RatsBirthday { get; set; }
 
         public MemeConfig()
         {
             ENABLE = false;
-            KickEnabled = false;
+            RatsBirthday = false;
         }
     }
 }

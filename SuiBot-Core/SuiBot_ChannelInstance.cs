@@ -23,7 +23,7 @@ namespace SuiBot_Core
         Components.CustomCvars Cvars { get; set; }
         Components.ViewerPB ViewerPb { get; set; }
         #region Other
-        Components.Other.KickPeople KickPeople { get; set; }
+        Components.Other._MemeComponents MemeComponents { get; set; }
         #endregion
         #endregion
         TwitchStatusUpdate TwitchStatus { get; set; }
@@ -46,7 +46,7 @@ namespace SuiBot_Core
             this.ViewerPb = new Components.ViewerPB(this);
 
             //Other
-            KickPeople = new Components.Other.KickPeople(this);
+            MemeComponents = new Components.Other._MemeComponents(this, ConfigInstance.MemeComponents);
         }
 
         internal void TimerTick()
@@ -253,20 +253,16 @@ namespace SuiBot_Core
 
             if (ConfigInstance.MemeComponents.ENABLE)
             {
-                if (ConfigInstance.MemeComponents.KickEnabled && messageLazy.StartsWith("kick"))
-                {
-                    KickPeople.DoWork(lastMessage);
-                    return;
-                }
+                MemeComponents.DoWork(lastMessage);
             }
 
 
-                //Custom Cvars
-                if (ConfigInstance.CustomCvarsEnabled)
+            //Custom Cvars
+            if (ConfigInstance.CustomCvarsEnabled)
             {
                 if (messageLazy.StartsWithLazy(new string[] { "cvar", "cvars" }))
                 {
-                    if(lastMessage.UserRole <= Role.Mod)
+                    if (lastMessage.UserRole <= Role.Mod)
                     {
                         Cvars.DoWork(lastMessage);
                         return;
