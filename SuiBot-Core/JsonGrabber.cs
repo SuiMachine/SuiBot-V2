@@ -15,6 +15,8 @@ namespace SuiBot_Core
             try
             {
                 HttpWebRequest wRequest = (HttpWebRequest)HttpWebRequest.Create(address);
+                wRequest.Credentials = CredentialCache.DefaultCredentials;
+
                 dynamic wResponse = wRequest.GetResponse().GetResponseStream();
                 StreamReader reader = new StreamReader(wResponse);
                 result = reader.ReadToEnd();
@@ -22,7 +24,7 @@ namespace SuiBot_Core
                 wResponse.Close();
                 return true;
             }
-            catch
+            catch(Exception e)
             {
                 result = "";
                 return false;
@@ -62,6 +64,7 @@ namespace SuiBot_Core
                 {
                     wRequest.Method = Method;
                 }
+                
 
                 dynamic wResponse = wRequest.GetResponse().GetResponseStream();
                 StreamReader reader = new StreamReader(wResponse);
@@ -70,7 +73,7 @@ namespace SuiBot_Core
                 wResponse.Close();
                 return true;
             }
-            catch
+            catch(Exception e)
             {
                 result = "";
                 return false;

@@ -13,7 +13,20 @@ namespace SuiBot_Core
         private Storage.ConnectionConfig BotConnectionConfig { get; set; }
         public Storage.CoreConfig BotCoreConfig { get; set; }
         internal IrcClient MeebyIrcClient { get; set; }
+        internal ImgUploader ImageUplaoder { get; set; }
         public Dictionary<string, SuiBot_ChannelInstance> ActiveChannels { get; set; }
+
+        #region ImgBBGetter
+        /// <summary>
+        /// Gets a ImgBB Api Key (since BotConnectioNConfig is private normally to make sure passwords don't leak.
+        /// </summary>
+        /// <returns>Current ImgBB Api Key</returns>
+        internal string GetImgBBKey()
+        {
+            return this.BotConnectionConfig.ImgBBApiKey;
+        }
+        #endregion
+
         private ChatMessage LastMessage;
         public string BotName { get; set; }
         public System.Timers.Timer IntervalTimer;
@@ -62,6 +75,7 @@ namespace SuiBot_Core
             this.IntervalTimer = new System.Timers.Timer(1000 * 60) { AutoReset = true };
             this.StatusUpdateTimer = new System.Timers.Timer(5 * 1000 * 60) { AutoReset = true };
             this.ActiveChannels = new Dictionary<string, SuiBot_ChannelInstance>();
+            this.ImageUplaoder = new ImgUploader(this);
         }
 
 
@@ -78,6 +92,7 @@ namespace SuiBot_Core
             this.StatusUpdateTimer = new System.Timers.Timer(5* 1000 * 60) { AutoReset = true };
             this.ActiveChannels = new Dictionary<string, SuiBot_ChannelInstance>();
             this.LastMessage = new ChatMessage() { UserRole = Role.User, Message = "", Username = "" };
+            this.ImageUplaoder = new ImgUploader(this);
         }
 
         #region MeebyIrcEvents
@@ -87,7 +102,10 @@ namespace SuiBot_Core
             {
                 if (e.Data.Channel != null && e.Data.Nick != null && e.Data.Message != null && ActiveChannels.ContainsKey(e.Data.Channel))
                 {
-                    LastMessage.Update(GetRoleFromTags(e), e.Data.Nick, e.Data.Message);
+                    LastMessage.Update(GetRoleFromTags(e), e.Data.Nick, e.Data.Message,
+                        e.Data.Tags.ContainsKey("msg-id") ? e.Data.Tags["msg-id"] == "highlighted-message" : false, //if message is highlighted using Twitch points
+                        e.Data.Tags.ContainsKey("custom-reward-id") ? e.Data.Tags["custom-reward-id"] : null //custom reward using viewer points
+                        );
                     this.OnChatMessageReceived?.Invoke(e.Data.Channel, LastMessage);
                     ActiveChannels[e.Data.Channel].DoWork(LastMessage);
                 }

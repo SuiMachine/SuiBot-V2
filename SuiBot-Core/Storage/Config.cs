@@ -31,6 +31,8 @@ namespace SuiBot_Core.Storage
         public string Username { get; set; }
         [XmlElement]
         public string Password { get; set; }
+        [XmlElement]
+        public string ImgBBApiKey { get; set; }
 
         public ConnectionConfig()
         {
@@ -38,14 +40,16 @@ namespace SuiBot_Core.Storage
             this.Port = 6667;
             this.Username = "";
             this.Password = "";
+            this.ImgBBApiKey = "";
         }
 
-        public ConnectionConfig(string Server, int Port, string Username, string Password)
+        public ConnectionConfig(string Server, int Port, string Username, string Password, string ImgBBApiKey)
         {
             this.Server = Server;
             this.Port = Port;
             this.Username = Username;
             this.Password = Password;
+            this.ImgBBApiKey = ImgBBApiKey;
         }
 
         [XmlIgnore]
@@ -84,6 +88,8 @@ namespace SuiBot_Core.Storage
                 Username = "";
             if(Password == null)
                 Password = "";
+            if (ImgBBApiKey == null)
+                ImgBBApiKey = "";
         }
 
 
@@ -441,11 +447,15 @@ namespace SuiBot_Core.Storage
         public bool ENABLE { get; set; }
         [XmlElement]
         public bool RatsBirthday { get; set; }
+        [XmlElement]
+        public bool Tombstone { get; set; }
+
 
         public MemeConfig()
         {
             ENABLE = false;
             RatsBirthday = false;
+            Tombstone = false;
         }
     }
 }

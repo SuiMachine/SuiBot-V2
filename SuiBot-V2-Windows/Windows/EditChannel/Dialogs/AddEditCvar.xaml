@@ -11,7 +11,7 @@
         <Label Content="Command:" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
         <TextBox x:Name="TB_Command" Height="23" Margin="88,13,5,0" TextWrapping="Wrap" Text="{Binding Command}" VerticalAlignment="Top"/>
         <Label Content="Required Role:" HorizontalAlignment="Left" Margin="10,41,0,0" VerticalAlignment="Top"/>
-        <ComboBox x:Name="CBox_Role" Margin="104,42,3,0" VerticalAlignment="Top" SelectedItem="{Binding RequiredRole}"/>
+        <ComboBox x:Name="CBox_Role" Margin="104,42,5,0" VerticalAlignment="Top" SelectedItem="{Binding RequiredRole}"/>
         <Label Content="Response to a command:" HorizontalAlignment="Left" Margin="10,67,0,0" VerticalAlignment="Top"/>
         <Button Content="OK" HorizontalAlignment="Right" Margin="0,0,84,7" VerticalAlignment="Bottom" Width="76" Click="Button_OKClicked"/>
         <Button Content="Cancel" HorizontalAlignment="Right" Margin="0,0,3,7" VerticalAlignment="Bottom" Width="76" Click="Button_CancelClicked"/>

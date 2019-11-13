@@ -30,6 +30,7 @@ namespace SuiBot_V2_Windows.Windows.Settings
 
             //For whatever reason (security?) you need to jump through hoops and loops to do binding on password, so here is plain old manual way
             this.PassBox_Password.Password = ConnectionConfig.Password;
+            this.PassBox_ImgBBApiKey.Password = ConnectionConfig.ImgBBApiKey;
         }
 
         private void Window_Initialized(object sender, EventArgs e)
@@ -39,6 +40,7 @@ namespace SuiBot_V2_Windows.Windows.Settings
         private void OKClicked(object sender, RoutedEventArgs e)
         {
             this.ConnectionConfig.Password = this.PassBox_Password.Password.Trim();
+            this.ConnectionConfig.ImgBBApiKey = this.PassBox_ImgBBApiKey.Password.Trim();
             this.DialogResult = true;
             this.Close();
         }

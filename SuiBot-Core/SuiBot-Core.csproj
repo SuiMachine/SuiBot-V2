@@ -9,9 +9,10 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>SuiBot_Core</RootNamespace>
     <AssemblyName>SuiBot-Core</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -42,6 +43,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -55,6 +57,7 @@
     <Compile Include="Components\IntervalMessages.cs" />
     <Compile Include="Components\Leaderboards.cs" />
     <Compile Include="Components\Other\MemeCompnent.cs" />
+    <Compile Include="Components\Other\Tombstone.cs" />
     <Compile Include="Components\Other\RatsBirthday.cs" />
     <Compile Include="Components\Other\_MemeComponents.cs" />
     <Compile Include="Components\Quotes.cs" />
@@ -63,6 +66,7 @@
     <Compile Include="ErrorLogging.cs" />
     <Compile Include="Events\BotEvents.cs" />
     <Compile Include="Extensions\SuiStringExtansions.cs" />
+    <Compile Include="ImgUploader.cs" />
     <Compile Include="JsonGrabber.cs" />
     <Compile Include="ChatMessage.cs" />
     <Compile Include="Components\RNG.cs" />

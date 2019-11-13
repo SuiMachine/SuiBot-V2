@@ -19,7 +19,7 @@ namespace SuiBot_V2_Windows.Windows.Settings.Dialogs
     /// </summary>
     public partial class EditListOfChannelsAdd : Window
     {
-        public string NewChannel { get; private set; }
+        public string NewChannel { get; set; }
 
         public EditListOfChannelsAdd(string editElement = null)
         {

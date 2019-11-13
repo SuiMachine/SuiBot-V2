@@ -196,12 +196,12 @@ namespace SuiBot_Core
             //Leaderboards
             if(ConfigInstance.LeaderboardsEnabled)
             {
-                if(messageLazy.StartsWithLazy("wr"))
+                if(messageLazy == "wr" || messageLazy.StartsWithWordLazy("wr"))
                 {
                     Leaderboards.DoWorkWR(lastMessage);
                     return;
                 }
-                else if(messageLazy.StartsWithLazy("pb"))
+                else if(messageLazy == "pb" || messageLazy.StartsWithWordLazy("pb"))
                 {
                     Leaderboards.DoWorkPB(lastMessage);
                     return;

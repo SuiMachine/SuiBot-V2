@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SuiBot_V2_Windows.Windows.Settings"
         mc:Ignorable="d"
-        Title="Connection Settings" Height="194" Width="428.613" ResizeMode="NoResize" Initialized="Window_Initialized">
+        Title="Connection Settings" Height="246" Width="428.613" ResizeMode="NoResize" Initialized="Window_Initialized">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
@@ -19,9 +19,13 @@
         <Label Content="Bot password:" HorizontalAlignment="Left" Margin="0,88,0,0" VerticalAlignment="Top"/>
         <Button Content="OK" Margin="9,0,0,6" VerticalAlignment="Bottom" Click="OKClicked" HorizontalAlignment="Left" Width="75"/>
         <Button Content="Cancel" HorizontalAlignment="Left" Margin="89,0,0,6" VerticalAlignment="Bottom" Width="75" Click="CancelClicked"/>
-        <PasswordBox x:Name="PassBox_Password" Margin="96,91,5,0" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
+        <PasswordBox x:Name="PassBox_Password" Margin="96,91,5,0" VerticalAlignment="Top" Height="23"/>
         <Button Content="Test Connection" HorizontalAlignment="Right" Margin="0,0,5,6" VerticalAlignment="Bottom" Width="105" Click="TestConnectionClicked"/>
         <Button Content="Obtain Oauth" HorizontalAlignment="Right" Margin="0,0,115,6" VerticalAlignment="Bottom" Width="92" Click="ObtainAuthy"/>
+        <Separator HorizontalAlignment="Left" Height="23" Margin="-5,114,0,0" VerticalAlignment="Top" Width="423"/>
+        <Label Content="*ImgBB APIKey:" HorizontalAlignment="Left" Margin="2,132,0,0" VerticalAlignment="Top"/>
+        <PasswordBox x:Name="PassBox_ImgBBApiKey" Margin="96,135,5,0" VerticalAlignment="Top" Height="23"/>
+        <Label Content="* - used only for optional features" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="2,0,0,30" FontSize="10"/>
 
     </Grid>
 </Window>

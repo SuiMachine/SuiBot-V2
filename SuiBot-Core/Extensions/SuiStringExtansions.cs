@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace SuiBot_Core.Extensions.SuiStringExtension
@@ -72,6 +73,38 @@ namespace SuiBot_Core.Extensions.SuiStringExtension
             }
             else
                 return "";
+        }
+
+        /// <summary>
+        /// Splits string into chunks similiar as split, except gets chunks in between seperator
+        /// </summary>
+        /// <param name="v">String to perform it on.</param>
+        /// <param name="chr">Seperator</param>
+        /// <returns>Chars array.</returns>
+        public static string[] GetChunks(this string v, char chr)
+        {
+            if (v.Contains(chr))
+            {
+                var split = v.Split(chr);
+                if (split.Length < 2)
+                    return new string[0];
+                else
+                {
+                    List<string> tmpSplit = new List<string>();
+                    for(int i=1; i<split.Length;i+=2)
+                    {
+                        tmpSplit.Add(split[i].Trim());
+                    }
+                    return tmpSplit.ToArray();
+                }
+            }
+            else
+                return new string[0];
+        }
+
+        public static string GetUrlSafeString(this string v)
+        {
+            return Uri.EscapeDataString(v);
         }
     }
 }

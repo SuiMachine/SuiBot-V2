@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="Edit list of channels" Height="369.485" Width="378.677" MinWidth="190" MinHeight="260">
     <Grid>
-        <ListBox x:Name="ListB_Channels" Margin="0,0,0,35" ItemsSource="{Binding ChannelsToJoin, Mode=TwoWay}" KeyDown="ListB_Channels_PressedKeyDown">
+        <ListBox x:Name="ListB_Channels" Margin="0,0,0,35" ItemsSource="{Binding ChannelsToJoin}" KeyDown="ListB_Channels_PressedKeyDown">
             <ListBox.ContextMenu>
                 <ContextMenu>
                     <MenuItem x:Name="B_Contex_Add" Header="Add" Click="B_Contex_Add_Click"/>

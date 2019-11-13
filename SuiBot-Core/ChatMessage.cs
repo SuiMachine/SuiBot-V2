@@ -14,6 +14,8 @@ namespace SuiBot_Core
         public Role UserRole;
         public string Username;
         public string Message;
+        public bool HighlightedMessage;
+        public string RewardID;
 
         /// <summary>
         /// Updates the ChatMessage object with new set of data. Can be done manually instead.
@@ -21,11 +23,13 @@ namespace SuiBot_Core
         /// <param name="UserRole">Role of a user.</param>
         /// <param name="Username">Name of a user.</param>
         /// <param name="Message">Message posted by a user.</param>
-        public void Update(Role UserRole, string Username, string Message)
+        public void Update(Role UserRole, string Username, string Message, bool HighlightedMessage = false, string RewardID = null)
         {
             this.UserRole = UserRole;
             this.Username = Username;
             this.Message = Message;
+            this.HighlightedMessage = HighlightedMessage;
+            this.RewardID = RewardID;
         }
     }
 

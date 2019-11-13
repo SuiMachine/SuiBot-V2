@@ -31,6 +31,9 @@ namespace SuiBot_Core.Components.Other
                 if (memeConfig.RatsBirthday)
                     memeComponents.Add("ratsbirthday", new RatsBirthday());
 
+                if (memeConfig.Tombstone)
+                    memeComponents.Add("tombstone", new Tombstone());
+
                 if (notify)
                     channelInstance.SendChatMessage("Meme components reloaded!");
             }
