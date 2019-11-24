@@ -56,7 +56,9 @@ namespace SuiBot_Core.Components
             {"Star Wars: Knights of the Old Republic II - The Sith Lords", "Star Wars: Knights of the Old Republic 2 - The Sith Lords" },
             {"Quake II", "Quake II (PC)" },
             {"DMC", "DmC: Devil May Cry" },
-            {"Hexen 2", "Hexen II" }
+            {"Hexen 2", "Hexen II" },
+            {"Dark Souls 2", "Dark Souls II" },
+            {"Dark Souls 3", "Dark Souls III" }
         };
 
         private static string GetProxyName(string lookUpGame)
