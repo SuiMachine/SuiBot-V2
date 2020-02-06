@@ -79,5 +79,27 @@ namespace SuiBot_Core
                 return false;
             }
         }
+
+        internal static Uri BuildRequestUri(string BaseURI, string[] variables)
+        {
+            string uri = BaseURI;
+            for(int i=0; i<variables.Length; i++)
+            {
+                if(i==0)
+                {
+                    uri += "?" + variables[i];
+                }
+                else
+                {
+                    uri += "&" + variables[i];
+                }
+            }
+            return new Uri(uri);
+        }
+
+        internal static string FormatParameter(string header, string variable)
+        {
+            return header + "=" + Uri.EscapeDataString(variable);
+        }
     }
 }

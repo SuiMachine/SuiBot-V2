@@ -60,6 +60,7 @@
     <Compile Include="Components\Other\Tombstone.cs" />
     <Compile Include="Components\Other\RatsBirthday.cs" />
     <Compile Include="Components\Other\_MemeComponents.cs" />
+    <Compile Include="Components\PCGW.cs" />
     <Compile Include="Components\Quotes.cs" />
     <Compile Include="Components\SRL.cs" />
     <Compile Include="Components\ViewerPB.cs" />

@@ -22,6 +22,7 @@ namespace SuiBot_Core
         Components.Leaderboards Leaderboards { get; set; }
         Components.CustomCvars Cvars { get; set; }
         Components.ViewerPB ViewerPb { get; set; }
+        Components.PCGW PCGW { get; set; }
         #region Other
         Components.Other._MemeComponents MemeComponents { get; set; }
         #endregion
@@ -44,6 +45,7 @@ namespace SuiBot_Core
             this.Cvars = new Components.CustomCvars(this);
             this.UserCooldowns = new Dictionary<string, DateTime>();
             this.ViewerPb = new Components.ViewerPB(this);
+            this.PCGW = new Components.PCGW(this, TwitchStatus);
 
             //Other
             MemeComponents = new Components.Other._MemeComponents(this, ConfigInstance.MemeComponents);
@@ -234,6 +236,13 @@ namespace SuiBot_Core
             {
                 Components.SRL.GetRaces(this);
                 SetUserCooldown(lastMessage, DefaultCooldown);
+                return;
+            }
+
+            //PCGW
+            if(messageLazy.StartsWith("pcgw"))
+            {
+                PCGW.DoWork(lastMessage);
                 return;
             }
 

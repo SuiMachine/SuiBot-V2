@@ -18,7 +18,6 @@ namespace SuiBot_V2
         {
             Console.CancelKeyPress += Console_CancelKeyPress;
 
-
             if(File.Exists("Bot/ConnectionConfig.suixml"))
             {
                 bot = new SuiBot();
