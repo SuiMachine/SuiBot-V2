@@ -100,12 +100,12 @@ namespace SuiBot_V2_Windows.Windows.EditChannel
             SuiBot_Core.Storage.ChatFilter editedFilter = null;
             switch(filterType)
             {
-                case (SuiBot_Core.Storage.ChatFilters.FilterType.Timeout):
+                case (SuiBot_Core.Storage.ChatFilters.FilterType.Purge):
                     if (ListView_PurgeFilters.SelectedItem == null)
                         return;
                     editedFilter = (SuiBot_Core.Storage.ChatFilter)ListView_PurgeFilters.SelectedItem;
                     break;
-                case (SuiBot_Core.Storage.ChatFilters.FilterType.Purge):
+                case (SuiBot_Core.Storage.ChatFilters.FilterType.Timeout):
                     if (ListView_TimeoutFilters.SelectedItem == null)
                         return;
                     editedFilter = (SuiBot_Core.Storage.ChatFilter)ListView_TimeoutFilters.SelectedItem;
