@@ -593,7 +593,7 @@ namespace SuiBot_Core.Components
             {
                 try
                 {
-                    if (Regex.IsMatch(lastMassage.Message, filter.Syntax, RegexOptions.IgnoreCase))
+                    if (filter.CompiledSyntax.IsMatch(lastMassage.Message)) //should be faster than Regex.IsMatch(lastMassage.Message, filter.Syntax, RegexOptions.IgnoreCase))
                     {
                         ChannelInstance.UserPurge(lastMassage.Username, string.Format("{0} (filterID: {1})", filter.Response, id));
                         return true;
@@ -612,7 +612,7 @@ namespace SuiBot_Core.Components
             {
                 try
                 {
-                    if (Regex.IsMatch(lastMassage.Message, filter.Syntax, RegexOptions.IgnoreCase))
+                    if (filter.CompiledSyntax.IsMatch(lastMassage.Message)) //should be faster than Regex.IsMatch(lastMassage.Message, filter.Syntax, RegexOptions.IgnoreCase))
                     {
                         ChannelInstance.UserTimeout(lastMassage.Username, filter.Duration, string.Format("{0} (filterID: {1})", filter.Response, id));
                         return true;
@@ -629,7 +629,7 @@ namespace SuiBot_Core.Components
             {
                 try
                 {
-                    if (Regex.IsMatch(lastMassage.Message, filter.Syntax, RegexOptions.IgnoreCase))
+                    if (filter.CompiledSyntax.IsMatch(lastMassage.Message)) //should be faster than Regex.IsMatch(lastMassage.Message, filter.Syntax, RegexOptions.IgnoreCase))
                     {
                         ChannelInstance.UserBan(lastMassage.Username, string.Format("{0} (filterID: {1})", filter.Response, id));
                         return true;

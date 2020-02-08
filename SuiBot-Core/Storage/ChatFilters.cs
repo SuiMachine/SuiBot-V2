@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
@@ -46,6 +47,20 @@ namespace SuiBot_Core.Storage
                 obj = (ChatFilters)serializer.Deserialize(fs);
                 fs.Close();
                 obj.Channel = Channel;
+
+                for(int i=0; i<obj.PurgeFilters.Count; i++)
+                {
+                    obj.PurgeFilters[i].CompiledSyntax = new Regex(obj.PurgeFilters[i].Syntax, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+                }
+                for (int i = 0; i < obj.TimeOutFilter.Count; i++)
+                {
+                    obj.TimeOutFilter[i].CompiledSyntax = new Regex(obj.TimeOutFilter[i].Syntax, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+                }
+                for (int i = 0; i < obj.BanFilters.Count; i++)
+                {
+                    obj.BanFilters[i].CompiledSyntax = new Regex(obj.BanFilters[i].Syntax, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+                }
+
                 return obj;
             }
             else
@@ -74,6 +89,8 @@ namespace SuiBot_Core.Storage
         public string Response { get; set; }
         [XmlAttribute]
         public uint Duration { get; set; }
+        [XmlIgnore]
+        public Regex CompiledSyntax { get; set; }
 
         public ChatFilter()
         {
@@ -87,6 +104,7 @@ namespace SuiBot_Core.Storage
             this.Syntax = chatFilterToCopy.Syntax;
             this.Response = chatFilterToCopy.Response;
             this.Duration = chatFilterToCopy.Duration;
+            this.CompiledSyntax = new Regex(chatFilterToCopy.Syntax, RegexOptions.IgnoreCase | RegexOptions.Compiled);
         }
 
         public ChatFilter(string Syntax, string Response, uint Duration)
@@ -94,6 +112,7 @@ namespace SuiBot_Core.Storage
             this.Syntax = Syntax;
             this.Response = Response;
             this.Duration = Duration;
+            this.CompiledSyntax = new Regex(Syntax, RegexOptions.IgnoreCase | RegexOptions.Compiled);
         }
     }
 }
