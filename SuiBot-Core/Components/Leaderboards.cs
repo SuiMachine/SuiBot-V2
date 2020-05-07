@@ -384,7 +384,7 @@ namespace SuiBot_Core.Components
                         {
                             var bestPBInCategory = levelPBs.FirstOrDefault(x => x.Category.ID == srCategory.ID);
                             if (bestPBInCategory != null)
-                                return string.Format("Streamer\'s PB for {0} ({1}) in level \"{2}\" is {3}", srGame.Name, srCategory.Name, srLevel.Name, bestPBInCategory.Times.Primary.ToString());
+                                return string.Format("Streamer\'s PB for {0} ({1}) in level \"{2}\" is {3} - {4}", srGame.Name, srCategory.Name, srLevel.Name, bestPBInCategory.Times.Primary.ToString(), bestPBInCategory.WebLink);
                             else
                                 return string.Format("No PB in category {0} for level {1} was found.", srCategory.Name, srLevel.Name);
                         }
@@ -409,10 +409,11 @@ namespace SuiBot_Core.Components
                             var filteredOutPBs = pbs.Where(x => x.CategoryID == srCategory.ID);
                             if (filteredOutPBs.Count() > 0)
                             {
-                                return string.Format("Streamer\'s PB for {0} ({1}) is {2}",
+                                return string.Format("Streamer\'s PB for {0} ({1}) is {2} - {3}",
                                     srGame.Name,
                                     srCategory.Name,
-                                    filteredOutPBs.ElementAt(0).Times.Primary.ToString());
+                                    filteredOutPBs.ElementAt(0).Times.Primary.ToString(),
+                                    filteredOutPBs.ElementAt(0).WebLink);
                             }
                             else
                                 return "Stremer doesn\'t seem to have any PBs in category " + srCategory.Name;

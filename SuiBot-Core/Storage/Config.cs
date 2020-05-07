@@ -190,6 +190,8 @@ namespace SuiBot_Core.Storage
         public bool AskEnabled { get; set; }
         [XmlElement]
         public MemeConfig MemeComponents { get; set; }
+        [XmlElement]
+        public GenericUtilConfig GenericUtil { get; set; }
         //bool AskCleverbot { get; set; }
         [XmlElement]
         public bool FilteringEnabled { get; set; }
@@ -215,6 +217,7 @@ namespace SuiBot_Core.Storage
             QuotesEnabled = false;
             AskEnabled = false;
             MemeComponents = new MemeConfig();
+            GenericUtil = new GenericUtilConfig();
             FilteringEnabled = false;
             FilteringHarsh = false;
             Filters = new ChatFilters();
@@ -271,6 +274,11 @@ namespace SuiBot_Core.Storage
                     {
                         msg = msg.Split(new char[] { '.' }, 2)[1];
                         target = MemeComponents;
+                    }
+                    else if(msg.StartsWithLazy("genericutil."))
+                    {
+                        msg = msg.Split(new char[] { '.' }, 2)[1];
+                        target = GenericUtil;
                     }
                     else
                     {
@@ -457,5 +465,21 @@ namespace SuiBot_Core.Storage
             RatsBirthday = false;
             Tombstone = false;
         }
+    }
+
+    [Serializable]
+    public class GenericUtilConfig
+    {
+        [XmlElement]
+        public bool ENABLE { get; set; }
+        [XmlElement]
+        public bool UptimeEnabled { get; set; }
+
+        public GenericUtilConfig()
+        {
+            ENABLE = false;
+            UptimeEnabled = false;
+        }
+
     }
 }

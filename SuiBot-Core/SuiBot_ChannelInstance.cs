@@ -22,6 +22,7 @@ namespace SuiBot_Core
         Components.Leaderboards Leaderboards { get; set; }
         Components.CustomCvars Cvars { get; set; }
         Components.ViewerPB ViewerPb { get; set; }
+        Components.GenericUtil GenericUtil { get; set; }
         Components.PCGW PCGW { get; set; }
         #region Other
         Components.Other._MemeComponents MemeComponents { get; set; }
@@ -30,8 +31,8 @@ namespace SuiBot_Core
         TwitchStatusUpdate TwitchStatus { get; set; }
         Dictionary<string, DateTime> UserCooldowns { get; set; }
 
-
-        public SuiBot_ChannelInstance(string Channel, SuiBot SuiBotInstance, Storage.ChannelConfig ConfigInstance)
+        //Cause of course now you have to have Oauth
+        public SuiBot_ChannelInstance(string Channel, string Oauth, SuiBot SuiBotInstance, Storage.ChannelConfig ConfigInstance)
         {
             this.Channel = Channel;
             this.ConfigInstance = ConfigInstance;
@@ -41,11 +42,12 @@ namespace SuiBot_Core
             this.IntervalMessagesInstance = new Components.IntervalMessages(this);
             this.Leaderboards = new Components.Leaderboards(this);
             this.ChatFiltering = new Components.ChatFiltering(this);
-            this.TwitchStatus = new TwitchStatusUpdate(this);
+            this.TwitchStatus = new TwitchStatusUpdate(this, Oauth);
             this.Cvars = new Components.CustomCvars(this);
             this.UserCooldowns = new Dictionary<string, DateTime>();
             this.ViewerPb = new Components.ViewerPB(this);
             this.PCGW = new Components.PCGW(this, TwitchStatus);
+            this.GenericUtil = new Components.GenericUtil(this, TwitchStatus);
 
             //Other
             MemeComponents = new Components.Other._MemeComponents(this, ConfigInstance.MemeComponents);
@@ -228,7 +230,6 @@ namespace SuiBot_Core
                     else
                         return;
                 }
-
             }
 
             //Srl
@@ -260,6 +261,18 @@ namespace SuiBot_Core
                 return;
             }
 
+            //GenericUtilComponents
+            if(ConfigInstance.GenericUtil.ENABLE)
+            {
+                if(ConfigInstance.GenericUtil.UptimeEnabled && messageLazy.StartsWith("uptime"))
+                {
+                    GenericUtil.GetUpTime(lastMessage);
+                    return;
+                }
+            }
+
+            
+            //MemeCompoenents
             if (ConfigInstance.MemeComponents.ENABLE)
             {
                 MemeComponents.DoWork(lastMessage);

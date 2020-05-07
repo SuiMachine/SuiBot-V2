@@ -86,7 +86,7 @@ namespace SuiBot_V2_Windows.Windows.EditChannel.Dialogs
 
             try
             {
-                regexInstance = new Regex(this.ReturnedFilter.Syntax);
+                regexInstance = new Regex(this.ReturnedFilter.Syntax, RegexOptions.IgnoreCase);
             }
             catch(Exception ex)
             {
@@ -108,7 +108,7 @@ namespace SuiBot_V2_Windows.Windows.EditChannel.Dialogs
         {
             try
             {
-                this.regexInstance = new Regex(TB_Filter.Text);
+                this.regexInstance = new Regex(TB_Filter.Text, RegexOptions.IgnoreCase);
                 for (int i = 0; i < RB_ExampleLines.Document.Blocks.Count; i++)
                 {
                     var currentBlock = RB_ExampleLines.Document.Blocks.ElementAt(i);

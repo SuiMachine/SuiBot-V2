@@ -169,7 +169,7 @@ namespace SuiBot_Core
         {
             MeebyIrcClient.RfcJoin("#" + channelToJoin);
             this.OnChannelJoining?.Invoke(channelToJoin);
-            ActiveChannels.Add("#" +channelToJoin, new SuiBot_ChannelInstance(channelToJoin, this, channelcfg));
+            ActiveChannels.Add("#" +channelToJoin, new SuiBot_ChannelInstance(channelToJoin, BotConnectionConfig.Password, this, channelcfg));
         }
 
 

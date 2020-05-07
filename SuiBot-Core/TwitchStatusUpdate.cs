@@ -13,25 +13,29 @@ namespace SuiBot_Core
         string channelName;
         public bool isOnline = true;
         public string game = "";
+        public DateTime StartTime;
         private string oldId = "x";
         public uint LastViewers = 0;
         Uri sUrlTwitchStatus = null;
         Dictionary<string, string> RequestHeaders;
-
+        
+        //For testing
         public TwitchStatusUpdate(string channelName)
         {
             RequestHeaders = new Dictionary<string, string>();
             sUrlTwitchStatus = new Uri("https://api.twitch.tv/helix/streams?user_login=" + channelName);
             this.channelName = channelName;
             RequestHeaders.Add("Client-ID", "rmi9m0sheo4pp5882o8s24zu7h09md");
+
         }
 
-        public TwitchStatusUpdate(SuiBot_ChannelInstance suiBot_ChannelInstance)
+        public TwitchStatusUpdate(SuiBot_ChannelInstance suiBot_ChannelInstance, string oauth)
         {
             RequestHeaders = new Dictionary<string, string>();
             this.channelName = suiBot_ChannelInstance.Channel;
             sUrlTwitchStatus = new Uri("https://api.twitch.tv/helix/streams?user_login=" + suiBot_ChannelInstance.Channel);
             RequestHeaders.Add("Client-ID", "rmi9m0sheo4pp5882o8s24zu7h09md");
+            RequestHeaders.Add("Authorization", "OAuth " + oauth);
         }
 
         public void GetStatus()
@@ -52,6 +56,23 @@ namespace SuiBot_Core
                         else
                             isOnline = false;
                     }
+
+                    indexStart = res.IndexOf("started_at");
+                    if (indexStart > 0)
+                    {
+                        indexStart += "started_at".Length + 3;
+                        int indexEnd = res.IndexOf(",", indexStart);
+                        string thatThing = res.Substring(indexStart, indexEnd - indexStart - 1).ToLower();
+                        //"2020-02-25t13:42:32z"
+                        if (DateTime.TryParse(thatThing, out DateTime ParsedTime))
+                        {
+                            StartTime = ParsedTime.ToUniversalTime();
+                        }
+                        else
+                            StartTime = DateTime.MinValue;
+                    }
+                    else
+                        StartTime = DateTime.MinValue;
 
                     indexStart = res.IndexOf("game_id");
                     if (indexStart > 0)
@@ -115,41 +136,6 @@ namespace SuiBot_Core
                 return "";
             }
 
-        }
-
-        public string GetStreamTime()
-        {
-            string res = "";
-            if (JsonGrabber.GrabJson(sUrlTwitchStatus, RequestHeaders, "application/json", "application/vnd.twitchtv.v3+json", "GET", out res))
-            {
-                if (res.Contains("display_name"))
-                {
-                    isOnline = true;
-                    string temp = Convert.ToString(res);
-                    int indexStart = temp.IndexOf("created_at");
-
-                    if (indexStart > 0)
-                    {
-                        indexStart = indexStart + 13;
-                        int indexEnd = temp.IndexOf(",", indexStart) - 2;
-                        string output = temp.Substring(indexStart, indexEnd - indexStart);
-                        if (DateTime.TryParse(output, out DateTime dt))
-                        {
-                            TimeSpan difference = DateTime.UtcNow - dt;
-                            return "on " + dt.Date.ToShortDateString() + " at " + dt.TimeOfDay.ToString() + " -- " + difference.Hours.ToString("00") + ":" + difference.Minutes.ToString("00") + ":" + difference.Seconds.ToString("00");
-                        }
-                        else
-                            return "";
-
-                    }
-                }
-                else
-                {
-                    isOnline = false;
-                }
-                return "";
-            }
-            return "";
         }
 
         internal void RequestUpdate(SuiBot_ChannelInstance instance)

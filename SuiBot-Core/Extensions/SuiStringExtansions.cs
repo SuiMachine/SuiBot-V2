@@ -7,6 +7,12 @@ namespace SuiBot_Core.Extensions.SuiStringExtension
     static class SuiStringExtension
     {
         /// <summary>
+        /// This is a string provider for formatting DateTime obtained from Twitch
+        /// </summary>
+        public const string Rfc3339FormatString = "yyyy-MM-dd'T'HH:mm:ss'Z'";
+
+
+        /// <summary>
         /// Checks whatever the source string starts with provided text, while ognoring the character case.
         /// </summary>
         /// <param name="v">Source string</param>
