@@ -35,7 +35,7 @@ namespace SuiBot_Core
             this.channelName = suiBot_ChannelInstance.Channel;
             sUrlTwitchStatus = new Uri("https://api.twitch.tv/helix/streams?user_login=" + suiBot_ChannelInstance.Channel);
             RequestHeaders.Add("Client-ID", "rmi9m0sheo4pp5882o8s24zu7h09md");
-            RequestHeaders.Add("Authorization", "OAuth " + oauth);
+            RequestHeaders.Add("Authorization", "Bearer " + oauth);
         }
 
         public void GetStatus()
