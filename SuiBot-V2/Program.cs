@@ -24,7 +24,6 @@ namespace SuiBot_V2
                 bot.Connect();
 
 
-
                 while (bot.IsRunning)
                     System.Threading.Thread.Sleep(1);
             }

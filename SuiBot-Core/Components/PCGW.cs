@@ -46,7 +46,7 @@ namespace SuiBot_Core.Components
             }
         }
 
-        private string GetPCGWUrl(string GameName)
+        internal string GetPCGWUrl(string GameName)
         {
             try
             {
@@ -65,15 +65,15 @@ namespace SuiBot_Core.Components
                             if (queryData["results"] != null)
                             {
                                 var resultData = queryData["results"];
-                                if (resultData.Count() >= 0)
+                                if (resultData.Count() > 0)
                                 {
                                     return resultData.First.First["fullurl"].ToString();
                                 }
                                 else
-                                    return "No results found";
+                                    return "Ask query returned no results. You may want to try: " + string.Format("https://www.pcgamingwiki.com/w/index.php?search={0}", Uri.EscapeDataString(GameName));
                             }
                             else
-                                return "Query returned no result node!";
+                                return "Query returned no result node! Something is wrong...";
                         }
                         else
                             return "Query returned with no \"Query\" node in response!";
