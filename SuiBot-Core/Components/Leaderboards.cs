@@ -20,6 +20,7 @@ namespace SuiBot_Core.Components
         public string CurrentGame { get; set; }
         public string LevelOverride { get; set; }
         public string CategoryOverride { get; set; }
+        public string PreferedCategory { get; set; }
         private string Speedrunusername => channelInstance.ConfigInstance.LeaderboardsUsername;
 
         #region ProxyNamesDeclaration
@@ -80,6 +81,31 @@ namespace SuiBot_Core.Components
             CurrentGame = "";
             LevelOverride = "";
             CategoryOverride = "";
+            PreferedCategory = "";
+        }
+
+        public void SetPreferedCategory(string StreamTitle)
+        {
+            var currentTitleLC = StreamTitle.ToLower();
+
+            var srSearch = new SpeedrunComClient();
+            var srGame = srSearch.Games.SearchGame(CurrentGame);
+
+            //Go from longest category titles to shortest (so for example we respect any% NG+, despite it having higher ID
+            var fullGameCategories = srGame.FullGameCategories.OrderByDescending(x => x.Name.Length);
+            foreach(var category in srGame.FullGameCategories)
+            {
+                if (currentTitleLC.Contains(category.Name.ToLower()))
+                {
+                    if(PreferedCategory != category.Name)
+                    {
+                        PreferedCategory = category.Name;
+                        channelInstance.SendChatMessage(string.Format("Set leaderboards category to: \"{0}\" based on stream title", PreferedCategory));
+                    }
+                    return;
+                }
+            }
+            PreferedCategory = "";
         }
 
         public void DoModWork(ChatMessage lastMessage)
@@ -199,8 +225,13 @@ namespace SuiBot_Core.Components
                 if (level == "" && isCurrent && LevelOverride != "")
                     level = LevelOverride;
 
-                if (category == "" && isCurrent && CategoryOverride != "")
-                    category = CategoryOverride;
+                if (category == "" && isCurrent)
+                {
+                    if (PreferedCategory != "")
+                        category = PreferedCategory;
+                    if (CategoryOverride != "")
+                        category = CategoryOverride;
+                }
 
                 if (game == "")
                     return "No game provided";
@@ -355,7 +386,12 @@ namespace SuiBot_Core.Components
                     level = LevelOverride;
 
                 if (category == "" && isCurrentGame && CategoryOverride != "")
-                    category = CategoryOverride;
+                {
+                    if (PreferedCategory != "")
+                        category = PreferedCategory;
+                    if (CategoryOverride != "")
+                        category = CategoryOverride;
+                }
 
                 if (srGame == null)
                     return "No game was found";

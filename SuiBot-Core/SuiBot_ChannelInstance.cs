@@ -66,14 +66,21 @@ namespace SuiBot_Core
             if (ConfigInstance.ViewerPBEnabled)
                 ViewerPb.UpdateViewerPB(TwitchStatus.LastViewers);
 
+
+
+
+
+            if (ConfigInstance.LeaderboardsEnabled && !Leaderboards.GameOverride)
+                Leaderboards.CurrentGame = TwitchStatus.game;
+
+            if (ConfigInstance.LeaderboardsAutodetectCategory && TwitchStatus.TitleHasChanged)
+                Leaderboards.SetPreferedCategory(TwitchStatus.OldTitle);
+
             if (vocal)
                 SendChatMessage(string.Format("New obtained stream status is {0}{1}.",
                     TwitchStatus.isOnline == false ? "offline" : "online",
                     TwitchStatus.game == "" ? "" : " and game is " + TwitchStatus.game
                     ));
-
-            if (ConfigInstance.LeaderboardsEnabled && !Leaderboards.GameOverride)
-                Leaderboards.CurrentGame = TwitchStatus.game;                
         }
 
         public void SendChatMessage(string message)

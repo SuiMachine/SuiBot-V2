@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SuiBot_V2_Windows.Windows.EditChannel"
         mc:Ignorable="d"
-        Title="Edit channel features" Height="407" Width="300" ResizeMode="NoResize">
+        Title="Edit channel features" Height="431" Width="300" ResizeMode="NoResize">
     <Grid>
         <Label Content="Supermods:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5,0,0,0"/>
         <ListBox x:Name="ListBox_SuperMods" Height="100" Margin="0,26,0,0" VerticalAlignment="Top" ItemsSource="{Binding SuperMods}" KeyDown="SuperModsList_OnKeyDown">
@@ -27,8 +27,9 @@
         <CheckBox Content="Leaderboards enabled" IsChecked="{Binding LeaderboardsEnabled}" HorizontalAlignment="Left" Margin="5,255,0,0" VerticalAlignment="Top"/>
         <Label Content="Leadboards username:" HorizontalAlignment="Left" Margin="5,274,0,0" VerticalAlignment="Top"/>
         <TextBox HorizontalAlignment="Left" Height="23" Text="{Binding LeaderboardsUsername}" Margin="134,276,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="158"/>
-        <CheckBox Content="Quotes Enabled" IsChecked="{Binding QuotesEnabled}" HorizontalAlignment="Left" Margin="5,300,0,0" VerticalAlignment="Top"/>
-        <CheckBox Content="Viewer PB enabled" IsChecked="{Binding ViewerPBEnabled}" HorizontalAlignment="Left" Margin="5,321,0,0" VerticalAlignment="Top" />
+        <CheckBox Content="Set category based on stream title" IsChecked="{Binding LeaderboardsAutodetectCategory}" HorizontalAlignment="Left" Margin="5,305,0,0" VerticalAlignment="Top"/>
+        <CheckBox Content="Quotes Enabled" IsChecked="{Binding QuotesEnabled}" HorizontalAlignment="Left" Margin="5,325,0,0" VerticalAlignment="Top"/>
+        <CheckBox Content="Viewer PB enabled" IsChecked="{Binding ViewerPBEnabled}" HorizontalAlignment="Left" Margin="5,346,0,0" VerticalAlignment="Top" />
         <Button Content="OK" HorizontalAlignment="Center" Margin="0,0,80,10" VerticalAlignment="Bottom" Width="75" Click="Button_OKClicked"/>
         <Button Content="Cancel" HorizontalAlignment="Center" Margin="80,0,0,10" VerticalAlignment="Bottom" Width="75" Click="Button_CancelClicked"/>
     </Grid>

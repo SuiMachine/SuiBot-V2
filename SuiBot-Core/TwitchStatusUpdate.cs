@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -18,15 +19,19 @@ namespace SuiBot_Core
         public uint LastViewers = 0;
         Uri sUrlTwitchStatus = null;
         Dictionary<string, string> RequestHeaders;
+
+        //Used by Leaderboards
+        public bool TitleHasChanged = false;
+        public string OldTitle = "";
         
         //For testing
-        public TwitchStatusUpdate(string channelName)
+        public TwitchStatusUpdate(string channelName, string oauth)
         {
             RequestHeaders = new Dictionary<string, string>();
             sUrlTwitchStatus = new Uri("https://api.twitch.tv/helix/streams?user_login=" + channelName);
             this.channelName = channelName;
             RequestHeaders.Add("Client-ID", "rmi9m0sheo4pp5882o8s24zu7h09md");
-
+            RequestHeaders.Add("Authorization", "Bearer " + oauth);
         }
 
         public TwitchStatusUpdate(SuiBot_ChannelInstance suiBot_ChannelInstance, string oauth)
@@ -34,6 +39,12 @@ namespace SuiBot_Core
             RequestHeaders = new Dictionary<string, string>();
             this.channelName = suiBot_ChannelInstance.Channel;
             sUrlTwitchStatus = new Uri("https://api.twitch.tv/helix/streams?user_login=" + suiBot_ChannelInstance.Channel);
+
+#if DEBUG  //testing
+            this.channelName = "catalystz";
+            sUrlTwitchStatus = new Uri("https://api.twitch.tv/helix/streams?user_login=" + this.channelName);
+
+#endif
             RequestHeaders.Add("Client-ID", "rmi9m0sheo4pp5882o8s24zu7h09md");
             RequestHeaders.Add("Authorization", "Bearer " + oauth);
         }
@@ -42,70 +53,81 @@ namespace SuiBot_Core
         {
             if (JsonGrabber.GrabJson(sUrlTwitchStatus, RequestHeaders, "application/json", "application/vnd.twitchtv.v3+json", "GET", out string res))
             {
-                if (res.Contains("title"))
+                try
                 {
-                    isOnline = true;
-                    int indexStart = res.IndexOf("type");
-                    if (indexStart > 0)
+                    var response = JObject.Parse(res);
+                    if (response["data"] != null)
                     {
-                        indexStart += "type".Length + 3;
-                        int indexEnd = res.IndexOf(",", indexStart);
-                        string thatThing = res.Substring(indexStart, indexEnd - indexStart - 1).ToLower();
-                        if (thatThing == "live")
+                        var dataNode = response["data"].First;
+                        if (dataNode["title"] != null)
+                        {
                             isOnline = true;
+                            var title = dataNode["title"].ToString();
+                            TitleHasChanged = OldTitle != title;
+                            OldTitle = title;
+
+                            if(dataNode["type"] != null)
+                            {
+                                var streamType = dataNode["type"].ToString();
+                                if (streamType == "live")
+                                    isOnline = true;
+                                else
+                                    isOnline = false;
+                            }
+
+                            if(dataNode["started_at"] != null)
+                            {
+                                var dateTimeStartAsstring = dataNode["started_at"].ToString();
+                                //"2020-02-25t13:42:32z"
+                                if (DateTime.TryParse(dateTimeStartAsstring, out DateTime ParsedTime))
+                                {
+                                    StartTime = ParsedTime.ToUniversalTime();
+                                }
+                                else
+                                    StartTime = DateTime.MinValue;
+                            }
+
+                            if(dataNode["game_id"] != null)
+                            {
+                                var gameIdAsString = dataNode["game_id"].ToString();
+                                game = ResolveNameFromId(gameIdAsString);
+                                if (game == "ul")
+                                {
+                                    game = String.Empty;
+                                }
+                                Console.WriteLine("Stream is online, game: " + game);
+                            }
+                            else
+                            {
+                                Console.WriteLine("Checked stream status. Is online.");
+                            }
+
+                            if(dataNode["viewer_count"] != null)
+                            {
+                                var viewers = dataNode["viewer_count"].ToString();
+                                if (uint.TryParse(viewers, out uint Value))
+                                {
+                                    this.LastViewers = Value;
+                                }
+                            }
+
+                        }
                         else
+                        {
                             isOnline = false;
-                    }
-
-                    indexStart = res.IndexOf("started_at");
-                    if (indexStart > 0)
-                    {
-                        indexStart += "started_at".Length + 3;
-                        int indexEnd = res.IndexOf(",", indexStart);
-                        string thatThing = res.Substring(indexStart, indexEnd - indexStart - 1).ToLower();
-                        //"2020-02-25t13:42:32z"
-                        if (DateTime.TryParse(thatThing, out DateTime ParsedTime))
-                        {
-                            StartTime = ParsedTime.ToUniversalTime();
+                            Console.WriteLine("Checked stream status. Is offline.");
                         }
-                        else
-                            StartTime = DateTime.MinValue;
-                    }
-                    else
-                        StartTime = DateTime.MinValue;
-
-                    indexStart = res.IndexOf("game_id");
-                    if (indexStart > 0)
-                    {
-                        indexStart += "game_id".Length + 3;
-                        int indexEnd = res.IndexOf(",", indexStart) - 1;
-                        game = ResolveNameFromId(res.Substring(indexStart, indexEnd - indexStart));
-                        if (game == "ul")
-                        {
-                            game = String.Empty;
-                        }
-                        Console.WriteLine("Stream is online, game: " + game);
                     }
                     else
                     {
-                        Console.WriteLine("Checked stream status. Is online.");
-                    }
-
-                    indexStart = res.IndexOf("viewers");
-                    if (indexStart > 0)
-                    {
-                        indexStart += "viewers".Length + 3;
-                        int indexEnd = res.IndexOf(",", indexStart);
-                        if (uint.TryParse(res.Substring(indexStart, indexEnd - indexStart), out uint Value))
-                        {
-                            this.LastViewers = Value;
-                        }
+                        isOnline = false;
+                        Console.WriteLine("Checked stream status. Is offline.");
                     }
                 }
-                else
+                catch (Exception e)
                 {
+                    ErrorLogging.WriteLine("Error trying to parse Json when doing stream update request: " + e.Message);
                     isOnline = false;
-                    Console.WriteLine("Checked stream status. Is offline.");
                 }
             }
             else
@@ -125,12 +147,11 @@ namespace SuiBot_Core
                 if (JsonGrabber.GrabJson(new Uri("https://api.twitch.tv/helix/games?id=" + id), RequestHeaders, "application/json", "application/vnd.twitchtv.v3+json", "GET", out string res))
                 {
                     oldId = id;
-                    int indexStart = res.IndexOf("name");
-                    if (indexStart > 0)
+                    var jObjectNode = JObject.Parse(res);
+                    var dataNode = jObjectNode["data"].First;
+                    if(dataNode["name"] != null)
                     {
-                        indexStart += "name".Length + 3;
-                        int indexEnd = res.IndexOf(",", indexStart);
-                        return res.Substring(indexStart, indexEnd - indexStart - 1);
+                        return dataNode["name"].ToString();
                     }
                 }
                 return "";

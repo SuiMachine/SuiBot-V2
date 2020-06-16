@@ -207,6 +207,8 @@ namespace SuiBot_Core.Storage
         public bool LeaderboardsEnabled { get; set; }
         [XmlElement]
         public string LeaderboardsUsername { get; set; }
+        [XmlElement]
+        public bool LeaderboardsAutodetectCategory { get; set; }
         #endregion
 
         public ChannelConfig()
@@ -226,6 +228,7 @@ namespace SuiBot_Core.Storage
             LeaderboardsEnabled = false;
             CustomCvarsEnabled = false;
             LeaderboardsUsername = "";
+            LeaderboardsAutodetectCategory = false;
         }
 
         internal void GetProperty(SuiBot_ChannelInstance channelInstance, ChatMessage lastMessage)
