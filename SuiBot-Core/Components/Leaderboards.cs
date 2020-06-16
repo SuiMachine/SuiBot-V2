@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using SuiBot_Core.Extensions.SuiStringExtension;
 using SpeedrunComSharp;
 
@@ -58,7 +57,8 @@ namespace SuiBot_Core.Components
             {"DMC", "DmC: Devil May Cry" },
             {"Hexen 2", "Hexen II" },
             {"Dark Souls 2", "Dark Souls II" },
-            {"Dark Souls 3", "Dark Souls III" }
+            {"Dark Souls 3", "Dark Souls III" },
+            {"Command & Conquer Remastered Collection", "cncremastered" }
         };
 
         private static string GetProxyName(string lookUpGame)

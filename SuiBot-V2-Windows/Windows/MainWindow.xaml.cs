@@ -24,7 +24,7 @@ namespace SuiBot_V2_Windows.Windows
     public partial class MainWindow : Window
     {
         private SuiBot_Core.SuiBot SuiBotInstance { get; set; }
-        private Thread SuiBotThread { get; set; }
+        private Thread SuiBotSlaveThread { get; set; }
         private bool IsBotRunning { get; set; }
         public bool MinimizeToTray { get; set; }
         private Dictionary<string, RichTextBox> ChannelTabs { get; set; }
@@ -103,8 +103,8 @@ namespace SuiBot_V2_Windows.Windows
                 IsBotRunning = true;
                 MenuItem_BotIsRunning.IsChecked = IsBotRunning;
                 UpdateChannelsBranchEnable();
-                SuiBotThread = new Thread(SuiBotInstance.Connect);
-                SuiBotThread.Start();
+                SuiBotSlaveThread = new Thread(SuiBotInstance.Connect);
+                SuiBotSlaveThread.Start();
             }
             else
             {
@@ -148,11 +148,11 @@ namespace SuiBot_V2_Windows.Windows
             IsBotRunning = false;
             MenuItem_BotIsRunning.IsChecked = IsBotRunning;
             UpdateChannelsBranchEnable();
-            if(SuiBotThread.IsAlive)
+            if(SuiBotSlaveThread.IsAlive)
             {
-                SuiBotThread.Abort();
+                SuiBotSlaveThread.Abort();
             }
-            SuiBotThread = null;
+            SuiBotSlaveThread = null;
         }
 
         private void SuiBotInstance_OnModerationActionPerformed(string channel, string user, string response, string duration)
