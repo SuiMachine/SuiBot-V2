@@ -69,7 +69,7 @@ namespace SuiBot_Core
             if (ConfigInstance.LeaderboardsEnabled && !Leaderboards.GameOverride)
                 Leaderboards.CurrentGame = TwitchStatus.game;
 
-            if (ConfigInstance.LeaderboardsAutodetectCategory)
+            if (ConfigInstance.LeaderboardsAutodetectCategory && TwitchStatus.isOnline)
             {
                 if (TwitchStatus.TitleHasChanged || !Leaderboards.LastUpdateSuccessful || vocal)
                     Leaderboards.SetPreferedCategory(TwitchStatus.OldTitle);
