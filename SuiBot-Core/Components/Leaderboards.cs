@@ -11,9 +11,9 @@ namespace SuiBot_Core.Components
     internal class Leaderboards
     {
         public SuiBot_ChannelInstance channelInstance;
-        const string RegexSyntaxGame = "game:\".+?\"";
-        const string RegexSyntaxCategory = "category:\".+?\"";
-        const string RegexSyntaxLevel = "level:\".+?\"";
+        const string RegexSyntaxGame = "game(:|=)\".+?\"";
+        const string RegexSyntaxCategory = "category(:|=)\".+?\"";
+        const string RegexSyntaxLevel = "level(:|=)\".+?\"";
         const string RegexVariables = "TOBEIMPLEMENTEDORNOT";
 
         public bool GameOverride { get; set; }
@@ -22,6 +22,8 @@ namespace SuiBot_Core.Components
         public string CategoryOverride { get; set; }
         public string PreferedCategory { get; set; }
         private string Speedrunusername => channelInstance.ConfigInstance.LeaderboardsUsername;
+        public bool LastUpdateSuccessful { get; private set; }
+
 
         #region ProxyNamesDeclaration
         static readonly Dictionary<string, string> PROXYNAMES = new Dictionary<string, string>()
@@ -84,28 +86,46 @@ namespace SuiBot_Core.Components
             PreferedCategory = "";
         }
 
-        public void SetPreferedCategory(string StreamTitle)
+        public void SetPreferedCategory(string StreamTitle, bool vocal = false)
         {
             var currentTitleLC = StreamTitle.ToLower();
 
-            var srSearch = new SpeedrunComClient();
-            var srGame = srSearch.Games.SearchGame(CurrentGame);
-
-            //Go from longest category titles to shortest (so for example we respect any% NG+, despite it having higher ID
-            var fullGameCategories = srGame.FullGameCategories.OrderByDescending(x => x.Name.Length);
-            foreach(var category in srGame.FullGameCategories)
+            try
             {
-                if (currentTitleLC.Contains(category.Name.ToLower()))
+                var srSearch = new SpeedrunComClient();
+                var srGame = srSearch.Games.SearchGame(CurrentGame);
+
+                if (srGame != null)
                 {
-                    if(PreferedCategory != category.Name)
+                    //Go from longest category titles to shortest (so for example we respect any% NG+, despite it having higher ID
+                    var fullGameCategories = srGame.FullGameCategories.OrderByDescending(x => x.Name.Length);
+                    foreach (var category in fullGameCategories)
                     {
-                        PreferedCategory = category.Name;
-                        channelInstance.SendChatMessage(string.Format("Set leaderboards category to: \"{0}\" based on stream title", PreferedCategory));
+                        if (currentTitleLC.Contains(category.Name.ToLower()))
+                        {
+                            if (PreferedCategory != category.Name || vocal)
+                            {
+                                PreferedCategory = category.Name;
+                                LastUpdateSuccessful = true;
+                                channelInstance.SendChatMessage(string.Format("Set leaderboards category to: \"{0}\" based on stream title", PreferedCategory));
+                            }
+                            return;
+                        }
                     }
+                    PreferedCategory = "";
+                    LastUpdateSuccessful = true;
+                    channelInstance.SendChatMessage("Haven't found the category in stream title.");
                     return;
                 }
+                LastUpdateSuccessful = true;
+                if(vocal)
+                    channelInstance.SendChatMessage("Haven't found the game on speedrun.com. !leaderboards game %GAME TITLE% might be used to force the game.");
             }
-            PreferedCategory = "";
+            catch (Exception e)
+            {
+                ErrorLogging.WriteLine("Error setting prefered category: " + e.Message);
+                LastUpdateSuccessful = false;
+            }
         }
 
         public void DoModWork(ChatMessage lastMessage)
@@ -385,7 +405,7 @@ namespace SuiBot_Core.Components
                 if (level == "" && isCurrentGame && LevelOverride != "")
                     level = LevelOverride;
 
-                if (category == "" && isCurrentGame && CategoryOverride != "")
+                if (category == "" && isCurrentGame)
                 {
                     if (PreferedCategory != "")
                         category = PreferedCategory;

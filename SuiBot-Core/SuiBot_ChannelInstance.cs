@@ -66,15 +66,16 @@ namespace SuiBot_Core
             if (ConfigInstance.ViewerPBEnabled)
                 ViewerPb.UpdateViewerPB(TwitchStatus.LastViewers);
 
-
-
-
-
             if (ConfigInstance.LeaderboardsEnabled && !Leaderboards.GameOverride)
                 Leaderboards.CurrentGame = TwitchStatus.game;
 
-            if (ConfigInstance.LeaderboardsAutodetectCategory && TwitchStatus.TitleHasChanged)
-                Leaderboards.SetPreferedCategory(TwitchStatus.OldTitle);
+            if (ConfigInstance.LeaderboardsAutodetectCategory)
+            {
+                if (TwitchStatus.TitleHasChanged || !Leaderboards.LastUpdateSuccessful || vocal)
+                    Leaderboards.SetPreferedCategory(TwitchStatus.OldTitle);
+            }
+                
+
 
             if (vocal)
                 SendChatMessage(string.Format("New obtained stream status is {0}{1}.",

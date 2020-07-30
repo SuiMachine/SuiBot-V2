@@ -1,11 +1,7 @@
 ﻿using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SuiBot_Core
 {
@@ -41,7 +37,7 @@ namespace SuiBot_Core
             sUrlTwitchStatus = new Uri("https://api.twitch.tv/helix/streams?user_login=" + suiBot_ChannelInstance.Channel);
 
 #if DEBUG  //testing
-            this.channelName = "catalystz";
+            this.channelName = "tezur0";
             sUrlTwitchStatus = new Uri("https://api.twitch.tv/helix/streams?user_login=" + this.channelName);
 
 #endif
@@ -56,7 +52,7 @@ namespace SuiBot_Core
                 try
                 {
                     var response = JObject.Parse(res);
-                    if (response["data"] != null)
+                    if (response["data"] != null && response["data"].Children().Count() > 0)
                     {
                         var dataNode = response["data"].First;
                         if (dataNode["title"] != null)
@@ -95,14 +91,14 @@ namespace SuiBot_Core
                                 {
                                     game = String.Empty;
                                 }
-                                Console.WriteLine("Stream is online, game: " + game);
+                                Console.WriteLine(string.Format("{0} - Checked stream status. Is online, playing {1}", channelName, game));
                             }
                             else
                             {
-                                Console.WriteLine("Checked stream status. Is online.");
+                                Console.WriteLine(string.Format("{0} - Checked stream status. Is online (no game?)", channelName));
                             }
 
-                            if(dataNode["viewer_count"] != null)
+                            if (dataNode["viewer_count"] != null)
                             {
                                 var viewers = dataNode["viewer_count"].ToString();
                                 if (uint.TryParse(viewers, out uint Value))
@@ -115,13 +111,13 @@ namespace SuiBot_Core
                         else
                         {
                             isOnline = false;
-                            Console.WriteLine("Checked stream status. Is offline.");
+                            Console.WriteLine(string.Format("{0} - Checked stream status. Is offline.", channelName));
                         }
                     }
                     else
                     {
                         isOnline = false;
-                        Console.WriteLine("Checked stream status. Is offline.");
+                        Console.WriteLine(string.Format("{0} - Checked stream status. Is offline.", channelName));
                     }
                 }
                 catch (Exception e)

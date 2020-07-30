@@ -2,6 +2,9 @@
 Thumbs.db
 ehthumbs.db
 
+# archive
+*.zip
+
 # Folder config file
 Desktop.ini
 
@@ -63,3 +66,4 @@ SuiBot-V2-Windows/bin/*
 SuiBot-Core/Release/*
 SuiBot-V2/Release/*
 SuiBot-V2-Windows/Release/*
+Release/7za.exe

@@ -14,9 +14,9 @@ namespace SuiBot_Core.Components
     internal class Quotes : IDisposable
     {
         //Magick
-        const string RegexFindID = "(id:\\\")(\\w+)\\\"|id:\\w+";
-        const string RegexFindAuthor = "author:\".+?\"|author:\\w+";
-        const string RegexFindQuote = "quote:\".+?\"|quote:\\w+";
+        const string RegexFindID = "(id(:|=)\\\")(\\w+)\\\"|id(:|=)\\w+";
+        const string RegexFindAuthor = "author(:|=)\".+?\"|author(:|=)\\w+";
+        const string RegexFindQuote = "quote(:|=)\".+?\"|quote(:|=)\\w+";
 
         SuiBot_ChannelInstance ChannelInstance { get; set; }
         Storage.Quotes ChannelQuotes { get; set; }

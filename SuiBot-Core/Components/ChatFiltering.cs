@@ -11,8 +11,8 @@ namespace SuiBot_Core.Components
 {
     internal class ChatFiltering : IDisposable
     {
-        const string RegexFindTimeoutLenght = "duration:\".+?\"";
-        const string RegexFindResponse = "response:\".+?\"";
+        const string RegexFindTimeoutLenght = "duration(:|=)\".+?\"";
+        const string RegexFindResponse = "response(:|=)\".+?\"";
 
         SuiBot_ChannelInstance ChannelInstance;
         Storage.ChatFilters Filters;
