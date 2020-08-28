@@ -61,7 +61,9 @@ namespace SuiBot_Core.Components
             {"Hexen 2", "Hexen II" },
             {"Dark Souls 2", "Dark Souls II" },
             {"Dark Souls 3", "Dark Souls III" },
-            {"Command & Conquer Remastered Collection", "cncremastered" }
+            {"Command & Conquer Remastered Collection", "cncremastered" },
+            { "Lucius II", "Lucius 2" },
+            { "Lucius III", "Lucius 3" }
         };
 
         private static string GetProxyName(string lookUpGame)
