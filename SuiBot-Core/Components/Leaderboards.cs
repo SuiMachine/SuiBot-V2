@@ -14,13 +14,18 @@ namespace SuiBot_Core.Components
         const string RegexSyntaxGame = "game(:|=)\".+?\"";
         const string RegexSyntaxCategory = "category(:|=)\".+?\"";
         const string RegexSyntaxLevel = "level(:|=)\".+?\"";
-        const string RegexVariables = "TOBEIMPLEMENTEDORNOT";
+        //const string RegexSubCategoryShort = "subcategory(:|=)\"(.+)?\"(:|=)\".+?\"";
+        //const string RegexSubCategoryLong = "subcategory(:|=)\"(.+)?\"(:|=)\".+?\"";
+        //const string RegexVariables = "variable(:|=)\"(.+)?\"(:|=)\".+?\"";
 
         public bool GameOverride { get; set; }
         public string CurrentGame { get; set; }
         public string LevelOverride { get; set; }
         public string CategoryOverride { get; set; }
         public string PreferedCategory { get; set; }
+        public Dictionary<string, string> SubcategoriesOverride {get; set;}
+        public Dictionary<string, string> VariablesOverride { get; set; }
+
         private string Speedrunusername => channelInstance.ConfigInstance.LeaderboardsUsername;
         public bool LastUpdateSuccessful { get; private set; }
 
@@ -86,6 +91,7 @@ namespace SuiBot_Core.Components
             LevelOverride = "";
             CategoryOverride = "";
             PreferedCategory = "";
+            SubcategoriesOverride = new Dictionary<string, string>();
         }
 
         public void SetPreferedCategory(string StreamTitle, bool vocal = false)
@@ -193,6 +199,119 @@ namespace SuiBot_Core.Components
                     channelInstance.SendChatMessageResponse(lastMessage, "Disabled category override.");
                 }
             }
+            else if(lastMessage.Message.StartsWithLazy("subcategory"))
+			{
+                lastMessage.Message = lastMessage.Message.StripSingleWord().ToLower();
+                if (lastMessage.Message != "")
+                {
+                    //Precise separation
+                    if (lastMessage.Message.Contains(":"))
+					{
+                        var split = lastMessage.Message.Split(new char[] { ':' }, 2);
+                        var key = split[0].Trim();
+                        var value = split[1].Trim();
+                        if(key != "")
+						{
+                            if (SubcategoriesOverride.ContainsKey(split[0]))
+							{
+                                if (value == "")
+								{
+                                    SubcategoriesOverride.Remove(split[0]);
+                                    channelInstance.SendChatMessageResponse(lastMessage, $"Removed subcategory key \"{key}\"");
+                                }
+                                else
+                                {
+                                    SubcategoriesOverride[key] = value;
+                                    channelInstance.SendChatMessageResponse(lastMessage, $"Set the subcategory key \"{key}\" to \"{value}\"");
+                                }
+
+                            }
+                            else
+							{
+                                if (value == "")
+                                    channelInstance.SendChatMessageResponse(lastMessage, "Nothing was deleted as such key doesn't exist");
+                                else
+                                {
+                                    SubcategoriesOverride.Add(key, value);
+                                    channelInstance.SendChatMessageResponse(lastMessage, $"Added new subcategory override with key \"{key}\" and value \"{value}\"");
+                                }
+                            }
+                        }
+                        else
+						{
+                            channelInstance.SendChatMessageResponse(lastMessage, "Subcategory key can not be empty!");
+                        }
+
+                    }
+                    else  //Lazy seperation
+					{
+                        if (SubcategoriesOverride.ContainsKey(lastMessage.Message))
+                            SubcategoriesOverride[lastMessage.Message] = "";
+                        else
+                            SubcategoriesOverride.Add(lastMessage.Message, "");
+
+                        channelInstance.SendChatMessageResponse(lastMessage, $"Set the generic subcategory value to look for to \"{lastMessage.Message}\"");
+                    }
+                }
+                else
+                {
+                    SubcategoriesOverride.Clear();
+                    channelInstance.SendChatMessageResponse(lastMessage, "Cleared up subcategory overrides.");
+                }
+            }
+            else if (lastMessage.Message.StartsWithLazy("variable"))
+            {
+                lastMessage.Message = lastMessage.Message.StripSingleWord().ToLower();
+                if (lastMessage.Message != "")
+                {
+                    //Precise separation
+                    if (lastMessage.Message.Contains(":"))
+                    {
+                        var split = lastMessage.Message.Split(new char[] { ':' }, 2);
+                        var key = split[0].Trim();
+                        var value = split[1].Trim();
+                        if (key != "")
+                        {
+                            if (VariablesOverride.ContainsKey(split[0]))
+							{
+                                if(value == "")
+								{
+                                    VariablesOverride.Remove(split[0]);
+                                    channelInstance.SendChatMessageResponse(lastMessage, $"Removed variable variable key \"{key}\"");
+                                }
+                                else
+								{
+                                    VariablesOverride[key] = value;
+                                    channelInstance.SendChatMessageResponse(lastMessage, $"Set the variable key \"{key}\" to \"{value}\"");
+                                }
+                            }
+                            else
+							{
+                                if(value == "")
+                                    channelInstance.SendChatMessageResponse(lastMessage, "Nothing was deleted as such key doesn't exist");
+                                else
+								{
+                                    VariablesOverride.Add(key, value);
+                                    channelInstance.SendChatMessageResponse(lastMessage, $"Added new variable with key \"{key}\" and value \"{value}\"");
+                                }
+                            }
+                        }
+                        else
+                        {
+                            channelInstance.SendChatMessageResponse(lastMessage, "Variable key can not be empty!");
+                        }
+                    }
+                    else  //Doing lazy way would be stupid for fariables
+                    {
+                        channelInstance.SendChatMessageResponse(lastMessage, "Setting variables requires key and value");
+                    }
+                }
+                else
+                {
+                    VariablesOverride.Clear();
+                    channelInstance.SendChatMessageResponse(lastMessage, "Cleared up variable overrides.");
+                }
+            }
         }
 
         public void DoWorkWR(ChatMessage lastMessage)
@@ -201,12 +320,12 @@ namespace SuiBot_Core.Components
 
             if (lastMessage.Message == "")
             {
-                channelInstance.SendChatMessageResponse(lastMessage, GetWR(CurrentGame, true, "", "", new string[0]));
+                channelInstance.SendChatMessageResponse(lastMessage, GetWR(CurrentGame, true, "", "", null, null));
             }
             else
             {
                 bool isCurrentGame = false;
-                SeperateElements(lastMessage.Message, out string lookUpGame, out string lookUpCategory, out string lookUpLevel, out string[] lookUpVariables);
+                SeperateElements(lastMessage.Message, out string lookUpGame, out string lookUpCategory, out string lookUpLevel, out Dictionary<string,string> lookUpSubcategories, out Dictionary<string,string> lookUpVariables);
 
                 //Sort out game name
                 if (lookUpGame.ToLower() == "this")
@@ -217,7 +336,7 @@ namespace SuiBot_Core.Components
 
                 if (lookUpGame == "")
                 {
-                    if (lookUpCategory == "" && lookUpLevel == "" && lookUpLevel == "" && lookUpVariables.Length == 0)
+                    if (lookUpCategory == "" && lookUpLevel == "" && lookUpLevel == "" && lookUpSubcategories == null && lookUpVariables == null)
                     {
                         lookUpGame = lastMessage.Message;
                     }
@@ -235,12 +354,12 @@ namespace SuiBot_Core.Components
                 }
                 else
                 {
-                    channelInstance.SendChatMessageResponse(lastMessage, GetWR(lookUpGame, isCurrentGame, lookUpCategory, lookUpLevel, lookUpVariables));
+                    channelInstance.SendChatMessageResponse(lastMessage, GetWR(lookUpGame, isCurrentGame, lookUpCategory, lookUpLevel, lookUpSubcategories, lookUpVariables));
                 }
             }
         }
 
-        private string GetWR(string game, bool isCurrent, string category, string level, string[] variables)
+        private string GetWR(string game, bool isCurrent, string category, string level, Dictionary<string,string> subcategories, Dictionary<string,string> variables)
         {
             try
             {
@@ -254,6 +373,13 @@ namespace SuiBot_Core.Components
                     if (CategoryOverride != "")
                         category = CategoryOverride;
                 }
+
+                if (subcategories == null && isCurrent)
+                    subcategories = SubcategoriesOverride;
+
+                if (variables == null && isCurrent)
+                    variables = VariablesOverride;
+
 
                 if (game == "")
                     return "No game provided";
@@ -280,7 +406,74 @@ namespace SuiBot_Core.Components
                         if (srLevel == null)
                             return "No level was found";
 
-                        var leaderboard = srSearch.Leaderboards.GetLeaderboardForLevel(srGame.ID, srLevel.ID, srCategory.ID, variableFilters: null);
+                        //Haven't tested this for levels
+                        List<VariableValue> lookVariable = null;
+                        if (subcategories != null || variables != null)
+                        {
+                            lookVariable = new List<VariableValue>();
+
+                            //Careful with the names!
+                            foreach (var srVariable in srCategory.Variables)
+                            {
+                                if ((srVariable.Scope.Type == VariableScopeType.AllLevels || srVariable.Scope.Type == VariableScopeType.SingleLevel || srVariable.Scope.Type == VariableScopeType.Global)                                    
+                                    && (srVariable.Category == null || srVariable.Category == srCategory)
+                                    && (srVariable.Level == null || srVariable.Level == srLevel))
+                                {
+                                    if (srVariable.IsSubcategory)
+                                    {
+                                        if (subcategories != null)
+                                        {
+                                            foreach (var subcategory in subcategories)
+                                            {
+                                                if (subcategory.Value == "")
+                                                {
+                                                    if (srVariable.Values.FirstOrDefault(x => x.Value.ToLower() == subcategory.Key) != null)
+                                                    {
+                                                        lookVariable.Add(srVariable.Values.FirstOrDefault(x => x.Value.ToLower() == subcategory.Key));
+                                                        break;
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    if (srVariable.Name == subcategory.Key && srVariable.Values.FirstOrDefault(x => x.Value.ToLower() == subcategory.Value) != null)
+                                                    {
+                                                        lookVariable.Add(srVariable.Values.FirstOrDefault(x => x.Value.ToLower() == subcategory.Value));
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    else if (variables != null)
+                                    {
+                                        foreach (var variable in variables)
+                                        {
+                                            if (variable.Value == "")
+                                            {
+                                                if (srVariable.Values.FirstOrDefault(x => x.Value == variable.Key) != null)
+                                                {
+                                                    lookVariable.Add(srVariable.Values.FirstOrDefault(x => x.Value == variable.Key));
+                                                    break;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                if (srVariable.Name == variable.Key && srVariable.Values.FirstOrDefault(x => x.Value == variable.Value) != null)
+                                                {
+                                                    lookVariable.Add(srVariable.Values.FirstOrDefault(x => x.Value == variable.Value));
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (lookVariable.Count == 0)
+                                lookVariable = null;
+                        }
+
+                        var leaderboard = srSearch.Leaderboards.GetLeaderboardForLevel(srGame.ID, srLevel.ID, srCategory.ID, variableFilters: lookVariable);
 
                         if (leaderboard.Records.Count > 0)
                         {
@@ -320,7 +513,75 @@ namespace SuiBot_Core.Components
                         if (srCategory == null)
                             return "No category was found";
 
-                        var leaderboard = srSearch.Leaderboards.GetLeaderboardForFullGameCategory(srGame.ID, srCategory.ID, variableFilters: null);
+                        List<VariableValue> lookVariable = null;
+                        if(subcategories != null || variables != null)
+						{
+                            lookVariable = new List<VariableValue>();
+
+                            //Careful with the names!
+                            foreach(var srVariable in srCategory.Variables)
+							{
+                                //Make sure we only look up the variables for selected category (it might be a case that SR returns only the ones for currently looked up category, but... eh?)
+                                if((srVariable.Scope.Type == VariableScopeType.FullGame || srVariable.Scope.Type == VariableScopeType.Global)
+                                    && (srVariable.Category == null || srVariable.Category == srCategory))
+								{
+                                    if(srVariable.IsSubcategory)
+									{
+                                        if(subcategories != null)
+										{
+                                            foreach(var subcategory in subcategories)
+											{
+                                                if(subcategory.Value == "")
+												{
+													if (srVariable.Values.FirstOrDefault(x => x.Value.ToLower() == subcategory.Key) != null)
+													{
+                                                        //How deep can you nest.... deep!
+                                                        lookVariable.Add(srVariable.Values.FirstOrDefault(x => x.Value.ToLower() == subcategory.Key));
+                                                        break;
+													}
+												}
+                                                else
+                                                { 
+                                                    if(srVariable.Name == subcategory.Key && srVariable.Values.FirstOrDefault(x => x.Value.ToLower() == subcategory.Value) != null)
+													{
+                                                        lookVariable.Add(srVariable.Values.FirstOrDefault(x => x.Value.ToLower() == subcategory.Value));
+                                                        break;
+                                                    }
+                                                }
+											}
+                                        }
+									}
+                                    else if(variables != null)
+                                    {
+                                        foreach (var variable in variables)
+                                        {
+                                            if (variable.Value == "")
+                                            {
+                                                if (srVariable.Values.FirstOrDefault(x => x.Value == variable.Key) != null)
+                                                {
+                                                    lookVariable.Add(srVariable.Values.FirstOrDefault(x => x.Value == variable.Key));
+                                                    break;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                if (srVariable.Name == variable.Key && srVariable.Values.FirstOrDefault(x => x.Value == variable.Value) != null)
+                                                {
+                                                    lookVariable.Add(srVariable.Values.FirstOrDefault(x => x.Value == variable.Value));
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+								}
+							}
+
+                            if (lookVariable.Count == 0)
+                                lookVariable = null;
+						}
+
+
+                        var leaderboard = srSearch.Leaderboards.GetLeaderboardForFullGameCategory(srGame.ID, srCategory.ID, variableFilters: lookVariable);
 
                         if (leaderboard.Records.Count > 0)
                         {
@@ -363,12 +624,12 @@ namespace SuiBot_Core.Components
 
             if (lastMessage.Message == "")
             {
-                channelInstance.SendChatMessageResponse(lastMessage, GetPB(CurrentGame, true, "", "", new string[0]));
+                channelInstance.SendChatMessageResponse(lastMessage, GetPB(CurrentGame, true, "", "", null, null));
             }
             else
             {
                 bool isCurrentGame = false;
-                SeperateElements(lastMessage.Message, out string lookUpGame, out string lookUpCategory, out string lookUpLevel, out string[] lookUpVariables);
+                SeperateElements(lastMessage.Message, out string lookUpGame, out string lookUpCategory, out string lookUpLevel, out Dictionary<string,string> lookUpSubcategories, out Dictionary<string,string> lookUpVariables);
 
                 //Sort out game name
                 if (lookUpGame.ToLower() == "this")
@@ -379,7 +640,7 @@ namespace SuiBot_Core.Components
 
                 if (lookUpGame == "")
                 {
-                    if (lookUpCategory == "" && lookUpLevel == "" && lookUpLevel == "" && lookUpVariables.Length == 0)
+                    if (lookUpCategory == "" && lookUpLevel == "" && lookUpLevel == "" && lookUpSubcategories == null && lookUpVariables == null)
                     {
                         lookUpGame = lastMessage.Message;
                     }
@@ -392,12 +653,12 @@ namespace SuiBot_Core.Components
                 }
                 else
                 {
-                    channelInstance.SendChatMessageResponse(lastMessage, GetPB(lookUpGame, isCurrentGame, lookUpCategory, lookUpLevel, lookUpVariables));
+                    channelInstance.SendChatMessageResponse(lastMessage, GetPB(lookUpGame, isCurrentGame, lookUpCategory, lookUpLevel, lookUpSubcategories, lookUpVariables));
                 }
             }
         }
 
-        private string GetPB(string game, bool isCurrentGame, string category, string level, string[] variables)
+        private string GetPB(string game, bool isCurrentGame, string category, string level, Dictionary<string,string> subcategories, Dictionary<string,string> variables)
         {
             try
             {
@@ -488,7 +749,7 @@ namespace SuiBot_Core.Components
             }
         }
 
-        private void SeperateElements(string message, out string lookUpGame, out string lookUpCategory, out string lookUpLevel, out string[] lookUpVariables)
+        private void SeperateElements(string message, out string lookUpGame, out string lookUpCategory, out string lookUpLevel, out Dictionary<string, string> lookUpSubcategories, out Dictionary<string, string> lookUpVariables)
         {
             var matchesGames = Regex.Matches(message, RegexSyntaxGame, RegexOptions.IgnoreCase);
             if (matchesGames.Count > 0)
@@ -520,7 +781,8 @@ namespace SuiBot_Core.Components
             else
                 lookUpLevel = "";
 
-            lookUpVariables = new string[0];
+            lookUpSubcategories = null;
+            lookUpVariables = null; ;
 
             /*
             var matchesVariables = Regex.Matches(message, RegexVariables, RegexOptions.IgnoreCase);
