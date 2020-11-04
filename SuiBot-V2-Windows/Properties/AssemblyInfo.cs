@@ -10,9 +10,9 @@ using System.Windows;
 [assembly: AssemblyTitle("SuiBot-V2-Windows")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Microsoft")]
+[assembly: AssemblyCompany("SuicideMachine")]
 [assembly: AssemblyProduct("SuiBot-V2-Windows")]
-[assembly: AssemblyCopyright("Copyright © Microsoft 2018")]
+[assembly: AssemblyCopyright("Copyright © SuicideMachine 2020")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
