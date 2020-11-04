@@ -59,7 +59,7 @@ namespace SuiBot_Core
                 IntervalMessagesInstance.DoTickWork();
         }
 
-        internal void UpdateTwitchStatus(bool vocal = false)
+        internal void UpdateTwitchStatus(bool vocal)
         {
             TwitchStatus.GetStatus();
 
@@ -72,9 +72,8 @@ namespace SuiBot_Core
             if (ConfigInstance.LeaderboardsAutodetectCategory && TwitchStatus.isOnline)
             {
                 if (TwitchStatus.TitleHasChanged || !Leaderboards.LastUpdateSuccessful || vocal)
-                    Leaderboards.SetPreferedCategory(TwitchStatus.OldTitle);
-            }
-                
+                    Leaderboards.SetPreferedCategory(TwitchStatus.OldTitle, SuiBotInstance.IsAfterFirstStatusUpdate, vocal);
+            }                
 
 
             if (vocal)

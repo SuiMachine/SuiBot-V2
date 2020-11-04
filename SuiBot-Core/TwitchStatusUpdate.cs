@@ -7,14 +7,14 @@ namespace SuiBot_Core
 {
     public class TwitchStatusUpdate
     {
-        string channelName;
+		readonly string channelName;
         public bool isOnline = true;
         public string game = "";
         public DateTime StartTime;
         private string oldId = "x";
         public uint LastViewers = 0;
-        Uri sUrlTwitchStatus = null;
-        Dictionary<string, string> RequestHeaders;
+		readonly Uri sUrlTwitchStatus = null;
+		readonly Dictionary<string, string> RequestHeaders;
 
         //Used by Leaderboards
         public bool TitleHasChanged = false;
@@ -37,7 +37,7 @@ namespace SuiBot_Core
             sUrlTwitchStatus = new Uri("https://api.twitch.tv/helix/streams?user_login=" + suiBot_ChannelInstance.Channel);
 
 #if DEBUG  //testing
-            this.channelName = "suicidemachine";
+            this.channelName = "tezur0";
             sUrlTwitchStatus = new Uri("https://api.twitch.tv/helix/streams?user_login=" + this.channelName);
 
 #endif

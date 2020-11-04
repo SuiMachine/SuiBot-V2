@@ -94,7 +94,7 @@ namespace SuiBot_Core.Components
 			SubcategoriesOverride = new Dictionary<string, string>();
 		}
 
-		public void SetPreferedCategory(string StreamTitle, bool vocal = false)
+		public void SetPreferedCategory(string StreamTitle, bool isAfterFirstUpdate, bool vocal)
 		{
 			var currentTitleLC = StreamTitle.ToLower();
 
@@ -115,14 +115,16 @@ namespace SuiBot_Core.Components
 							{
 								PreferedCategory = category.Name;
 								LastUpdateSuccessful = true;
-								channelInstance.SendChatMessage(string.Format("Set leaderboards category to: \"{0}\" based on stream title", PreferedCategory));
+								if(vocal || isAfterFirstUpdate)
+									channelInstance.SendChatMessage(string.Format("Set leaderboards category to: \"{0}\" based on stream title", PreferedCategory));
 							}
 							return;
 						}
 					}
 					PreferedCategory = "";
 					LastUpdateSuccessful = true;
-					channelInstance.SendChatMessage("Haven't found the category in stream title.");
+					if(vocal || isAfterFirstUpdate)
+						channelInstance.SendChatMessage("Haven't found the category in stream title.");
 					return;
 				}
 				LastUpdateSuccessful = true;
@@ -698,7 +700,7 @@ namespace SuiBot_Core.Components
 				foreach (var srVariable in srCategory.Variables)
 				{
 					if ((srVariable.Scope.Type == VariableScopeType.AllLevels || srVariable.Scope.Type == VariableScopeType.SingleLevel || srVariable.Scope.Type == VariableScopeType.Global)
-						&& (srVariable.Category == null || srVariable.Category == srCategory)
+						&& (srVariable.Category == null || srVariable.CategoryID == srCategory.ID)
 						&& (srVariable.Level == null || srVariable.Level == srLevel))
 					{
 						if (srVariable.IsSubcategory)
@@ -770,7 +772,7 @@ namespace SuiBot_Core.Components
 				{
 					//Make sure we only look up the variables for selected category (it might be a case that SR returns only the ones for currently looked up category, but... eh?)
 					if ((srVariable.Scope.Type == VariableScopeType.FullGame || srVariable.Scope.Type == VariableScopeType.Global)
-						&& (srVariable.Category == null || srVariable.Category == srCategory))
+						&& (srVariable.Category == null || srVariable.CategoryID == srCategory.ID))
 					{
 						if (srVariable.IsSubcategory)
 						{

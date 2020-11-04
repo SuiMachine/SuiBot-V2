@@ -15,6 +15,7 @@ namespace SuiBot_Core
         internal IrcClient MeebyIrcClient { get; set; }
         internal ImgUploader ImageUplaoder { get; set; }
         public Dictionary<string, SuiBot_ChannelInstance> ActiveChannels { get; set; }
+        public bool IsAfterFirstStatusUpdate = false;
 
         #region ImgBBGetter
         /// <summary>
@@ -151,9 +152,10 @@ namespace SuiBot_Core
         {
             foreach(var channel in ActiveChannels)
             {
-                channel.Value.UpdateTwitchStatus();
+                channel.Value.UpdateTwitchStatus(false);
                 Thread.Sleep(2000); //A dirty way to make sure we don't go over Request limit
             }
+            IsAfterFirstStatusUpdate = true;
         }
 
         private void IntervalTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)

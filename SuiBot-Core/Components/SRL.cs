@@ -10,27 +10,26 @@ namespace SuiBot_Core.Components
 
         public static void GetRaces(SuiBot_ChannelInstance ChannelInstance)
         {
-            string response = "";
-            try
-            {
-                if (JsonGrabber.GrabJson(GetUri("races"), out response))
-                {
-                    string[] twitches = GetEntrantsTwitches(response, ChannelInstance.Channel);
-                    if (twitches != null)
-                    {
-                        ChannelInstance.SendChatMessage("http://kadgar.net/live/" + string.Join("/", twitches));
-                    }
-                    else
-                    {
-                        ChannelInstance.SendChatMessage("Nothing found");
-                    }
-                }
-            }
-            catch
-            {
-                ChannelInstance.SendChatMessage("Some kind of error. Go, poke Sui to fix that");
-            }
-        }
+			try
+			{
+				if (JsonGrabber.GrabJson(GetUri("races"), out string response))
+				{
+					string[] twitches = GetEntrantsTwitches(response, ChannelInstance.Channel);
+					if (twitches != null)
+					{
+						ChannelInstance.SendChatMessage("http://kadgar.net/live/" + string.Join("/", twitches));
+					}
+					else
+					{
+						ChannelInstance.SendChatMessage("Nothing found");
+					}
+				}
+			}
+			catch
+			{
+				ChannelInstance.SendChatMessage("Some kind of error. Go, poke Sui to fix that");
+			}
+		}
 
         private static string[] GetEntrantsTwitches(string jsonTxt, string channel)
         {
