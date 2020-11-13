@@ -26,5 +26,17 @@ namespace SuiBot_V2_Windows.Windows.EditChannel
             InitializeComponent();
             this.ChatFilterUsersDB = ChatFilterUsersDB;
         }
-    }
+
+		private void Button_OKClicked(object sender, RoutedEventArgs e)
+		{
+            DialogResult = true;
+            this.Close();
+        }
+
+        private void Button_CancelClicked(object sender, RoutedEventArgs e)
+		{
+            DialogResult = false;
+            this.Close();
+		}
+	}
 }

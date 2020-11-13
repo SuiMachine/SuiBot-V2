@@ -7,7 +7,21 @@
         mc:Ignorable="d"
         Title="EditChatFiltersUsers" Height="450" Width="800">
     <Grid>
-        <Label Content="Stub" HorizontalAlignment="Left" Margin="130,108,0,0" VerticalAlignment="Top"/>
-
+        <ListView x:Name="ListView_PurgeFilters" ItemsSource="{Binding ChatFilterUsersDB.DB}" Margin="0,0,0,30" SelectedValuePath="Value">
+            <ListView.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Cancel"/>
+                </ContextMenu>
+            </ListView.ContextMenu>
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Width="Auto" Header="Username" />
+                    <GridViewColumn Width="Auto" Header="Amount" />
+                </GridView>
+            </ListView.View>
+        </ListView>
+        <Button Content="OK" HorizontalAlignment="Right" Margin="0,0,85,5" VerticalAlignment="Bottom" Width="75" Click="Button_OKClicked"/>
+        <Button Content="Cancel" HorizontalAlignment="Right" Margin="0,0,5,5" VerticalAlignment="Bottom" Width="75" Click="Button_CancelClicked"/>
+        <Label Content="Not finished...." HorizontalAlignment="Left" Margin="263,394,0,0"/>
     </Grid>
 </Window>

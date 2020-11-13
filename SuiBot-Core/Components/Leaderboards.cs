@@ -1,10 +1,9 @@
-﻿using System;
+﻿using SpeedrunComSharp;
+using SuiBot_Core.Extensions.SuiStringExtension;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using SuiBot_Core.Extensions.SuiStringExtension;
-using SpeedrunComSharp;
 
 namespace SuiBot_Core.Components
 {
@@ -115,7 +114,7 @@ namespace SuiBot_Core.Components
 							{
 								PreferedCategory = category.Name;
 								LastUpdateSuccessful = true;
-								if(vocal || isAfterFirstUpdate)
+								if (vocal || isAfterFirstUpdate)
 									channelInstance.SendChatMessage(string.Format("Set leaderboards category to: \"{0}\" based on stream title", PreferedCategory));
 							}
 							return;
@@ -123,7 +122,7 @@ namespace SuiBot_Core.Components
 					}
 					PreferedCategory = "";
 					LastUpdateSuccessful = true;
-					if(vocal || isAfterFirstUpdate)
+					if (vocal || isAfterFirstUpdate)
 						channelInstance.SendChatMessage("Haven't found the category in stream title.");
 					return;
 				}
