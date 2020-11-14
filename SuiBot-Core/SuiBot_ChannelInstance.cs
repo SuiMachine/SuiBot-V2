@@ -304,7 +304,7 @@ namespace SuiBot_Core
 
 		private bool PerformActionFiltering(ChatMessage lastMessage)
 		{
-			if (false && lastMessage.UserRole <= Role.VIP)
+			if (lastMessage.UserRole <= Role.VIP)
 				return false;
 			else
 				return ChatFiltering.FilterOutMessages(lastMessage);

@@ -590,7 +590,6 @@ namespace SuiBot_Core.Components
 		/// <returns>Boolean value indicating whatever an action needed to be taken or not.</returns>
 		public bool FilterOutMessages(ChatMessage lastMassage)
 		{
-			int id = 0;
 
 			if (ChannelInstance.ConfigInstance.FilterLinks && !UserDB.CanPostLinks(lastMassage.Username))
 			{
@@ -602,6 +601,7 @@ namespace SuiBot_Core.Components
 				}
 			}
 
+			int id = 0;
 			foreach (var filter in Filters.PurgeFilters)
 			{
 				try
@@ -657,6 +657,7 @@ namespace SuiBot_Core.Components
 			return false;
 		}
 
+		//Checks if message contains a link
 		private bool ContainsLink(ChatMessage lastMassage)
 		{
 			string[] words;
