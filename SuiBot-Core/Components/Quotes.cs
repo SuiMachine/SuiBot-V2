@@ -1,5 +1,6 @@
 ﻿using SuiBot_Core.Extensions.SuiStringExtension;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -10,11 +11,12 @@ namespace SuiBot_Core.Components
 		//Magick
 		const string RegexFindID = "(id(:|=)\\\")(\\w+)\\\"|id(:|=)\\w+";
 		const string RegexFindAuthor = "author(:|=)\".+?\"|author(:|=)\\w+";
-		const string RegexFindQuote = "quote(:|=)\".+?\"|quote(:|=)\\w+";
+		const string RegexFindQuote = "quote[:=]([\\\"\\\'])(?:(?=(\\\\?))\\2.)*?\\1|quote[:=]\\w+";
 
 		SuiBot_ChannelInstance ChannelInstance { get; set; }
 		Storage.Quotes ChannelQuotes { get; set; }
-		Random rng = new Random();
+
+		readonly Random rng = new Random();
 
 		public Quotes(SuiBot_ChannelInstance ChannelInstance)
 		{
@@ -55,7 +57,7 @@ namespace SuiBot_Core.Components
 				quoteID = ChannelQuotes.QuotesList.Count - 1;
 
 			if (quoteID < 0 && authorFilter == "" && quoteTextFilter == "")
-				ChannelInstance.SendChatMessageResponse(lastMessage, "No search data provided?");
+				ChannelInstance.SendChatMessageResponse(lastMessage, "No search data provided or incorrect format");
 			else if (quoteID >= 0 && (authorFilter != "" || quoteTextFilter != ""))
 			{
 				ChannelInstance.SendChatMessageResponse(lastMessage, "ID search is not meant to be used in conjunction with Author Filter or Quote Text Filter!");
@@ -71,13 +73,46 @@ namespace SuiBot_Core.Components
 			}
 			else
 			{
-				var advSearchQuotes = AdvancedSearch(authorFilter, quoteTextFilter);
+
+				Regex authorRegex = null;
+				Regex quoteRegex = null;
+				try
+				{
+					if(authorFilter != "")
+						authorRegex = new Regex(authorFilter, RegexOptions.IgnoreCase);
+				}
+				catch
+				{
+					ChannelInstance.SendChatMessageResponse(lastMessage, "Author regex failed to compile");
+					return;
+				}
+
+				try
+				{
+					if (quoteTextFilter != "")
+						quoteRegex = new Regex(quoteTextFilter, RegexOptions.IgnoreCase);
+				}
+				catch
+				{
+					ChannelInstance.SendChatMessageResponse(lastMessage, "Quote regex failed to compile");
+					return;
+				}
+
+
+				var advSearchQuotes = AdvancedSearch(authorRegex, quoteRegex);
 				if (advSearchQuotes == null)
 					ChannelInstance.SendChatMessageResponse(lastMessage, "Nothing found.");
 				else
 				{
 					if (advSearchQuotes.Length > 1)
-						ChannelInstance.SendChatMessageResponse(lastMessage, string.Format("Found {0} results.", advSearchQuotes.Length));
+					{
+						List<int> ids = new List<int>();
+						foreach(var foundQuote in advSearchQuotes)
+						{
+							ids.Add(ChannelQuotes.QuotesList.IndexOf(foundQuote));
+						}
+						ChannelInstance.SendChatMessageResponse(lastMessage, $"Found {advSearchQuotes.Length} results: {string.Join(", ", ids).TrimEnd(',')}.");
+					}
 					else
 						ChannelInstance.SendChatMessageResponse(lastMessage, advSearchQuotes[0].ToString());
 				}
@@ -118,6 +153,34 @@ namespace SuiBot_Core.Components
 			}
 		}
 
+		private Storage.Quote[] AdvancedSearch(Regex authorSearchPattern, Regex quoteSearchPatern)
+		{
+			if (authorSearchPattern == null)
+			{
+				var filteredOut = ChannelQuotes.QuotesList.Where(x => quoteSearchPatern.IsMatch(x.Text));
+				if (filteredOut.Count() > 0)
+					return filteredOut.ToArray();
+				else
+					return null;
+			}
+			else if (quoteSearchPatern == null)
+			{
+				var filteredOut = ChannelQuotes.QuotesList.Where(x => authorSearchPattern.IsMatch(x.Author));
+				if (filteredOut.Count() > 0)
+					return filteredOut.ToArray();
+				else
+					return null;
+			}
+			else
+			{
+				var filteredOut = ChannelQuotes.QuotesList.Where(x => authorSearchPattern.IsMatch(x.Author) && quoteSearchPatern.IsMatch(x.Text));
+				if (filteredOut.Count() > 0)
+					return filteredOut.ToArray();
+				else
+					return null;
+			}
+		}
+
 		/// <summary>
 		/// Seperates quoteID, Author's Name and Quote from a provided string (quote syntax)
 		/// </summary>
@@ -145,7 +208,7 @@ namespace SuiBot_Core.Components
 			if (authorMatches.Count > 0)
 			{
 				authorFilter = authorMatches[0].Value.Remove(0, "author:".Length);
-				authorFilter = authorFilter.Trim(new char[] { ' ', '\"' });
+				authorFilter = authorFilter.TrimSingleCharacter('\"');
 			}
 			else
 				authorFilter = "";
@@ -154,7 +217,7 @@ namespace SuiBot_Core.Components
 			if (quoteMatches.Count > 0)
 			{
 				quoteTextFilter = quoteMatches[0].Value.Remove(0, "quote:".Length);
-				quoteTextFilter = quoteTextFilter.Trim(new char[] { ' ', '\"' });
+				quoteTextFilter = quoteTextFilter.TrimSingleCharacter('\"');
 			}
 			else
 				quoteTextFilter = "";
@@ -180,7 +243,7 @@ namespace SuiBot_Core.Components
 		{
 			if (lastMessage.UserRole <= Role.VIP)
 			{
-				FilterOutSegments(lastMessage.Message, out int quoteID, out string authorFilter, out string quoteTextFilter);
+				FilterOutSegments(lastMessage.Message, out int _, out string authorFilter, out string quoteTextFilter);
 				if (quoteTextFilter != "")
 				{
 					var newQuote = new Storage.Quote(authorFilter, quoteTextFilter);

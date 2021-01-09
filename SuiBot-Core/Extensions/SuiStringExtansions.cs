@@ -108,6 +108,20 @@ namespace SuiBot_Core.Extensions.SuiStringExtension
 				return new string[0];
 		}
 
+		public static string TrimSingleCharacter(this string v, char chr)
+		{
+			v = v.Trim();
+			if(v.StartsWith(chr.ToString()))
+			{
+				v = v.Substring(1);
+			}
+			if(v.EndsWith(chr.ToString()))
+			{
+				v = v.Remove(v.Length - 1);
+			}
+			return v;
+		}
+
 		public static string GetUrlSafeString(this string v)
 		{
 			return Uri.EscapeDataString(v);

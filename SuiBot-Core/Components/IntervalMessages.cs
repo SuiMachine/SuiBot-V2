@@ -6,15 +6,29 @@ namespace SuiBot_Core.Components
 {
 	internal class IntervalMessages : IDisposable
 	{
+		/// <summary>
+		/// Local copy of referance to SuiBot_ChannelInstance
+		/// </summary>
 		private SuiBot_ChannelInstance ChannelInstance;
+		/// <summary>
+		/// Reference to Storage container for Interval Messages
+		/// </summary>
 		private Storage.IntervalMessages IntervalMessagesStorage;
 
+		/// <summary>
+		/// Constructor for IntervalMessages component created for channel
+		/// </summary>
+		/// <param name="ChannelInstance">Instance of a SuiBot_ChannelInstance</param>
 		public IntervalMessages(SuiBot_ChannelInstance ChannelInstance)
 		{
 			this.ChannelInstance = ChannelInstance;
 			IntervalMessagesStorage = Storage.IntervalMessages.Load(ChannelInstance.Channel);
 		}
 
+		/// <summary>
+		/// Function used for running moderation actions related to interval messages (like adding, removing, finding interval messages)
+		/// </summary>
+		/// <param name="LastMessage">Command posted in chat</param>
 		internal void DoWork(ChatMessage LastMessage)
 		{
 			if (LastMessage.UserRole <= Role.Mod)
@@ -37,6 +51,10 @@ namespace SuiBot_Core.Components
 			ChannelInstance.SendChatMessageResponse(lastMessage, "Invalid command. IntervalMessage commands should be followed by: add / remove / find");
 		}
 
+		/// <summary>
+		/// Function ran to add a new interval message
+		/// </summary>
+		/// <param name="lastMessage">Command</param>
 		private void Add(ChatMessage lastMessage)
 		{
 			lastMessage.Message = lastMessage.Message.StripSingleWord();
@@ -62,11 +80,19 @@ namespace SuiBot_Core.Components
 				ChannelInstance.SendChatMessageResponse(lastMessage, "No seperator provided!");
 		}
 
+		/// <summary>
+		/// Function ran to find already added interval message
+		/// </summary>
+		/// <param name="lastMessage">Command</param>
 		private void Find(ChatMessage lastMessage)
 		{
 			ChannelInstance.SendChatMessageResponse(lastMessage, "Not implemented. Go Away!");
 		}
 
+		/// <summary>
+		/// Function ran to remove interval message
+		/// </summary>
+		/// <param name="lastMessage">Command</param>
 		private void Remove(ChatMessage lastMessage)
 		{
 			lastMessage.Message = lastMessage.Message.StripSingleWord();
@@ -101,6 +127,9 @@ namespace SuiBot_Core.Components
 			}
 		}
 
+		/// <summary>
+		/// Function ran on each timer tick (every minute) that is responsible for posting chat messages
+		/// </summary>
 		internal void DoTickWork()
 		{
 			foreach (var message in IntervalMessagesStorage.Messages)
