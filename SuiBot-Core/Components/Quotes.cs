@@ -227,10 +227,47 @@ namespace SuiBot_Core.Components
 		{
 			if (ChannelQuotes.QuotesList.Count == 0)
 				ChannelInstance.SendChatMessageResponse(lastMessage, "Channel doesn't have any quotes");
-			else if (id == -1)
-				ChannelInstance.SendChatMessageResponse(lastMessage, GetRandomQuote(), true);
 			else
-				ChannelInstance.SendChatMessageResponse(lastMessage, ChannelQuotes.QuotesList[id].ToString(), true);
+			{
+				if (id == -1)
+				{
+					var idOrFilter = lastMessage.Message;
+					if (idOrFilter == "")
+						ChannelInstance.SendChatMessageResponse(lastMessage, GetRandomQuote(), true);
+					else if (int.TryParse(idOrFilter, out var result))
+					{
+						if (result > ChannelQuotes.QuotesList.Count)
+							ChannelInstance.SendChatMessageResponse(lastMessage, $"There is no quote with this ID (max ID + {ChannelQuotes.QuotesList.Count - 1}).", true);
+						else
+						{
+							ChannelInstance.SendChatMessageResponse(lastMessage, ChannelQuotes.QuotesList[result].ToString(), true);
+						}
+					}
+					else
+					{
+						try
+						{
+							Regex searchRegex = new Regex(lastMessage.Message, RegexOptions.IgnoreCase);
+							var possibleQuotes = ChannelQuotes.QuotesList.Where(x => searchRegex.IsMatch(x.Text)).ToList();
+							if(possibleQuotes.Count > 0)
+							{
+								int randomQuoteId = rng.Next(possibleQuotes.Count);
+								ChannelInstance.SendChatMessageResponse(lastMessage, possibleQuotes[randomQuoteId].ToString(), true);
+							}
+							else
+							{
+								ChannelInstance.SendChatMessageResponse(lastMessage, "Nothing found. Use empty \"!quote\" to return random quote.");
+							}
+						}
+						catch
+						{
+							ChannelInstance.SendChatMessageResponse(lastMessage, "Regex failed to compile");
+						}
+					}
+				}
+				else
+					ChannelInstance.SendChatMessageResponse(lastMessage, ChannelQuotes.QuotesList[id].ToString(), true);
+			}
 		}
 
 		private string GetRandomQuote()
