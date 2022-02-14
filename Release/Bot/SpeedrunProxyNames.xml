@@ -1,35 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ArrayOfProxyNameInFile xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <ProxyNameInFile Game="Star Wars: Jedi Knight - Jedi Academy" ProxyName="jka" Category="" />
-  <ProxyNameInFile Game="Star Wars: Jedi Knight II - Jedi Outcast" ProxyName="jk2" Category="" />
-  <ProxyNameInFile Game="Darksiders II" ProxyName="Darksiders 2" Category="" />
-  <ProxyNameInFile Game="GTA3" ProxyName="Grand Theft Auto III" Category="" />
-  <ProxyNameInFile Game="GTA 3" ProxyName="Grand Theft Auto III" Category="" />
-  <ProxyNameInFile Game="Zork" ProxyName="Zork I: The Great Underground Empire" Category="" />
-  <ProxyNameInFile Game="Zork I" ProxyName="Zork I: The Great Underground Empire" Category="" />
-  <ProxyNameInFile Game="Zork 2" ProxyName="Zork II: The Wizard of Frobozz" Category="" />
-  <ProxyNameInFile Game="Zork II" ProxyName="Zork II: The Wizard of Frobozz" Category="" />
-  <ProxyNameInFile Game="Zork 3" ProxyName="Zork III: The Dungeon Master" Category="" />
-  <ProxyNameInFile Game="Zork III" ProxyName="Zork III: The Dungeon Master" Category="" />
-  <ProxyNameInFile Game="Thief" ProxyName="Thief: The Dark Project" Category="" />
-  <ProxyNameInFile Game="F.E.A.R.: First Encounter Assault Recon" ProxyName="F.E.A.R." Category="" />
-  <ProxyNameInFile Game="Judge Dredd: Dredd vs Death" ProxyName="dreddgasm" Category="" />
-  <ProxyNameInFile Game="Heroes of Might and Magic II: The Price of Loyalty" ProxyName="Heroes of Might and Magic II" Category="" />
-  <ProxyNameInFile Game="Heroes of Might and Magic 3" ProxyName="Heroes of Might and Magic III" Category="" />
-  <ProxyNameInFile Game="homm3" ProxyName="Heroes of Might and Magic III" Category="" />
-  <ProxyNameInFile Game="Heroes of Might and Magic III: The Restoration of Erathia" ProxyName="Heroes of Might and Magic III" Category="" />
-  <ProxyNameInFile Game="Heroes of Might and Magic III: Armageddon's Blade" ProxyName="Heroes of Might and Magic III" Category="" />
-  <ProxyNameInFile Game="Heroes of Might and Magic III: In the wake of gods" ProxyName="Heroes of Might and Magic III" Category="" />
-  <ProxyNameInFile Game="Heroes of Might and Magic III: The Shadow of Death" ProxyName="Heroes of Might and Magic III" Category="The Shadow of death" />
-  <ProxyNameInFile Game="Trespasser: Jurassic Park" ProxyName="Jurassic Park: Trespasser" Category="" />
-  <ProxyNameInFile Game="Star Wars: Knights of the Old Republic II - The Sith Lords" ProxyName="Star Wars: Knights of the Old Republic 2 - The Sith Lords" Category="" />
-  <ProxyNameInFile Game="Quake II" ProxyName="Quake II (PC)" Category="" />
+  <ProxyNameInFile Game="Command &amp; Conquer Remastered Collection" ProxyName="cncremastered" Category="" />
   <ProxyNameInFile Game="DMC" ProxyName="DmC: Devil May Cry" Category="" />
-  <ProxyNameInFile Game="Hexen 2" ProxyName="Hexen II" Category="" />
   <ProxyNameInFile Game="Dark Souls 2" ProxyName="Dark Souls II" Category="" />
   <ProxyNameInFile Game="Dark Souls 3" ProxyName="Dark Souls III" Category="" />
-  <ProxyNameInFile Game="Command &amp; Conquer Remastered Collection" ProxyName="cncremastered" Category="" />
+  <ProxyNameInFile Game="Darksiders II" ProxyName="Darksiders 2" Category="" />
+  <ProxyNameInFile Game="F.E.A.R.: First Encounter Assault Recon" ProxyName="F.E.A.R." Category="" />
+  <ProxyNameInFile Game="GTA 3" ProxyName="Grand Theft Auto III" Category="" />
+  <ProxyNameInFile Game="GTA3" ProxyName="Grand Theft Auto III" Category="" />
+  <ProxyNameInFile Game="Heroes of Might and Magic 3" ProxyName="Heroes of Might and Magic III" Category="" />
+  <ProxyNameInFile Game="Heroes of Might and Magic II: The Price of Loyalty" ProxyName="Heroes of Might and Magic II" Category="" />
+  <ProxyNameInFile Game="Heroes of Might and Magic III: Armageddon's Blade" ProxyName="Heroes of Might and Magic III" Category="" />
+  <ProxyNameInFile Game="Heroes of Might and Magic III: In the wake of gods" ProxyName="Heroes of Might and Magic III" Category="" />
+  <ProxyNameInFile Game="Heroes of Might and Magic III: The Restoration of Erathia" ProxyName="Heroes of Might and Magic III" Category="" />
+  <ProxyNameInFile Game="Heroes of Might and Magic III: The Shadow of Death" ProxyName="Heroes of Might and Magic III" Category="The Shadow of death" />
+  <ProxyNameInFile Game="Hexen 2" ProxyName="Hexen II" Category="" />
+  <ProxyNameInFile Game="Judge Dredd: Dredd vs Death" ProxyName="dreddgasm" Category="" />
   <ProxyNameInFile Game="Lucius II" ProxyName="Lucius 2" Category="" />
   <ProxyNameInFile Game="Lucius III" ProxyName="Lucius 3" Category="" />
+  <ProxyNameInFile Game="Quake II" ProxyName="Quake II (PC)" Category="" />
   <ProxyNameInFile Game="Star Trek: The Next Generation - Klingon Honor Guard" ProxyName="Star Trek: Klingon Honor Guard" Category="" />
+  <ProxyNameInFile Game="Star Wars: Jedi Knight - Jedi Academy" ProxyName="jka" Category="" />
+  <ProxyNameInFile Game="Star Wars: Jedi Knight II - Jedi Outcast" ProxyName="jk2" Category="" />
+  <ProxyNameInFile Game="Star Wars: Knights of the Old Republic II - The Sith Lords" ProxyName="Star Wars: Knights of the Old Republic 2 - The Sith Lords" Category="" />
+  <ProxyNameInFile Game="Thief" ProxyName="Thief: The Dark Project" Category="" />
+  <ProxyNameInFile Game="Trespasser: Jurassic Park" ProxyName="Jurassic Park: Trespasser" Category="" />
+  <ProxyNameInFile Game="Zork 2" ProxyName="Zork II: The Wizard of Frobozz" Category="" />
+  <ProxyNameInFile Game="Zork 3" ProxyName="Zork III: The Dungeon Master" Category="" />
+  <ProxyNameInFile Game="Zork I" ProxyName="Zork I: The Great Underground Empire" Category="" />
+  <ProxyNameInFile Game="Zork II" ProxyName="Zork II: The Wizard of Frobozz" Category="" />
+  <ProxyNameInFile Game="Zork III" ProxyName="Zork III: The Dungeon Master" Category="" />
+  <ProxyNameInFile Game="Zork" ProxyName="Zork I: The Great Underground Empire" Category="" />
+  <ProxyNameInFile Game="homm3" ProxyName="Heroes of Might and Magic III" Category="" />
 </ArrayOfProxyNameInFile>
