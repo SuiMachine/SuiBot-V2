@@ -8,7 +8,7 @@ namespace SuiBot_Core.Components
 	{
 		//Stupid Visual Studio....
 #pragma warning disable CS0649
-		[XmlElement] public string Game; //Game on Twitch
+		[XmlAttribute] public string Game; //Game on Twitch
 		[XmlAttribute] public string ProxyName; //Game on Speedrun.com
 		[XmlAttribute] public string Category;
 		//[XmlAttribute] public string Subcategory;
