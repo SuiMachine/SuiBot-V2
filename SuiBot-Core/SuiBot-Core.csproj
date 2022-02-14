@@ -54,6 +54,7 @@
     <Compile Include="Components\GenericUtil.cs" />
     <Compile Include="Components\IntervalMessages.cs" />
     <Compile Include="Components\Leaderboards.cs" />
+    <Compile Include="Components\LeaderboardsProxyNames.cs" />
     <Compile Include="Components\Other\MemeCompnent.cs" />
     <Compile Include="Components\Other\Tombstone.cs" />
     <Compile Include="Components\Other\RatsBirthday.cs" />
