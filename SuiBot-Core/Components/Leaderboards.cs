@@ -76,7 +76,7 @@ namespace SuiBot_Core.Components
 				sr = new StreamReader(filePath);
 				var newObj = (ProxyNameInFile[])serialiser.Deserialize(sr);
 
-				newProxyNamesDictionary = newObj.ToDictionary(x => x.Game, x => (ProxyNameInMemory)x);
+				newProxyNamesDictionary = newObj.ToDictionary(x => x.Game.ToLower(), x => (ProxyNameInMemory)x);
 			}
 			finally
 			{
@@ -346,7 +346,7 @@ namespace SuiBot_Core.Components
 					}
 				}
 
-				if (lookUpCategory != "" && lookUpLevel != "")
+				if (lookUpCategory == "" && lookUpLevel == "")
 					GetProxyName(ref lookUpGame, ref lookUpCategory, ref lookUpLevel);
 
 				if (lookUpGame == "")
@@ -501,7 +501,7 @@ namespace SuiBot_Core.Components
 					}
 				}
 
-				if(lookUpCategory != "" && lookUpLevel != "")
+				if(lookUpCategory == "" && lookUpLevel == "")
 					GetProxyName(ref lookUpGame, ref lookUpCategory, ref lookUpLevel);
 
 				if (lookUpGame == "")
