@@ -2,13 +2,22 @@
 using SuiBot_Core.Extensions.SuiStringExtension;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Net;
+using System.Security.Policy;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using System.Xml;
+using System.Xml.Serialization;
 
 namespace SuiBot_Core.Components
 {
 	internal class Leaderboards
 	{
+		public const string PROXYFILENAMESURL = "https://raw.githubusercontent.com/SuiMachine/SuiBot-V2/master/Release/Bot/SpeedrunProxyNames.xml";
+		public const string PROXYNAMESFILE = "Bot/SpeedrunProxyNames.xml";
 		public SuiBot_ChannelInstance channelInstance;
 		const string RegexSyntaxGame = "game(:|=)\".+?\"";
 		const string RegexSyntaxCategory = "category(:|=)\".+?\"";
@@ -16,7 +25,6 @@ namespace SuiBot_Core.Components
 		//const string RegexSubCategoryShort = "subcategory(:|=)\"(.+)?\"(:|=)\".+?\"";
 		//const string RegexSubCategoryLong = "subcategory(:|=)\"(.+)?\"(:|=)\".+?\"";
 		//const string RegexVariables = "variable(:|=)\"(.+)?\"(:|=)\".+?\"";
-
 		public bool GameOverride { get; set; }
 		public string CurrentGame { get; set; }
 		public string LevelOverride { get; set; }
@@ -27,58 +35,22 @@ namespace SuiBot_Core.Components
 
 		private string Speedrunusername => channelInstance.ConfigInstance.LeaderboardsUsername;
 		public bool LastUpdateSuccessful { get; private set; }
+		Task updateTaskReference = null;
 
 
 		#region ProxyNamesDeclaration
-		static readonly Dictionary<string, string> PROXYNAMES = new Dictionary<string, string>()
+		static Dictionary<string, ProxyNameInMemory> PROXYNAMES = new Dictionary<string, ProxyNameInMemory>()
 		{
-			{"Star Wars: Jedi Knight - Jedi Academy", "jka" },
-			{"Star Wars: Jedi Knight II - Jedi Outcast", "jk2" },
-			{"Darksiders II", "Darksiders 2" },
-			{"GTA3", "gtaiii" },
-			{"GTA 3", "gtaiii" },
-			{"Zork", "Zork I: The Great Underground Empire" },
-			{"Zork I", "Zork I: The Great Underground Empire" },
-			{"Zork 2", "Zork II: The Wizard of Frobozz" },
-			{"Zork II", "Zork II: The Wizard of Frobozz" },
-			{"Zork 3", "Zork III: The Dungeon Master" },
-			{"Zork III", "Zork III: The Dungeon Master" },
-			{"Thief", "Thief: The Dark Project" },
-			{"Thief: Gold", "Thief Gold" },
-			{"Thief 2", "Thief II: The Metal Age" },
-			{"Thief II", "Thief II: The Metal Age" },
-			{"F.E.A.R.: First Encounter Assault Recon", "F.E.A.R." },
-			{"Judge Dredd: Dredd vs Death", "dreddgasm" },
-			{"Heroes of Might and Magic II: The Price of Loyalty", "Heroes of Might and Magic II" },
-			{"Heroes of Might and Magic III: The Restoration of Erathia", "Heroes of Might and Magic III" },
-			{"Heroes of Might and Magic III: Armageddon's Blade", "Heroes of Might and Magic III" },
-			{"Heroes of Might and Magic III: In the wake of gods", "Heroes of Might and Magic III" },
-			{"Heroes of Might and Magic III: The Shadow of Death", "Heroes of Might and Magic III" },
-			{"Heroes of Might and Magic IV", "Heroes of Might and Magic III" },
-			{"Heroes of Might and Magic 3", "Heroes of Might and Magic III" },
-			{"homm3", "Heroes of Might and Magic III" },
-			{"Trespasser: Jurassic Park", "Jurassic Park: Trespasser" },
-			{"Hitman (2016)", "just_hitman" },
-			{"Star Wars: Knights of the Old Republic II - The Sith Lords", "Star Wars: Knights of the Old Republic 2 - The Sith Lords" },
-			{"Quake II", "Quake II (PC)" },
-			{"DMC", "DmC: Devil May Cry" },
-			{"Hexen 2", "Hexen II" },
-			{"Dark Souls 2", "Dark Souls II" },
-			{"Dark Souls 3", "Dark Souls III" },
-			{"Command & Conquer Remastered Collection", "cncremastered" },
-			{ "Lucius II", "Lucius 2" },
-			{ "Lucius III", "Lucius 3" }
 		};
 
-		private static string GetProxyName(string lookUpGame)
+		private static void GetProxyName(ref string lookUpGame, ref string lookUpCategory, ref string lookUpLevel)
 		{
 			lookUpGame = lookUpGame.ToLower().Trim();
-			foreach (var element in PROXYNAMES)
+			if (PROXYNAMES.TryGetValue(lookUpGame, out var proxy))
 			{
-				if (element.Key.ToLower() == lookUpGame)
-					return element.Value;
+				lookUpGame = proxy.ProxyName;
+				lookUpCategory = proxy.Category;
 			}
-			return lookUpGame;
 		}
 		#endregion
 
@@ -91,6 +63,84 @@ namespace SuiBot_Core.Components
 			CategoryOverride = "";
 			PreferedCategory = "";
 			SubcategoriesOverride = new Dictionary<string, string>();
+
+			if (File.Exists(PROXYNAMESFILE))
+			{
+				PROXYNAMES = LoadProxyNamesFromFile(PROXYNAMESFILE);
+			}
+
+			if (this.channelInstance.ConfigInstance.LeaderboardsUpdateProxyNames)
+				UpdateProxyNamesAsync();
+		}
+
+		private void UpdateProxyNamesAsync()
+		{
+			try
+			{
+				WebClient wbClient = new WebClient();
+				wbClient.DownloadFileCompleted += WbClient_DownloadFileCompleted;
+				string tempFile = "TempProxyNames.xml";
+				if (File.Exists(tempFile))
+					File.Delete(tempFile);
+
+				wbClient.DownloadFileAsync(new Uri(PROXYFILENAMESURL), tempFile);
+			}
+			catch(Exception e)
+			{
+				ErrorLogging.WriteLine("Error checking Proxyname XML on Github " + e.Message);
+			}
+		}
+
+		private void WbClient_DownloadFileCompleted(object sender, System.ComponentModel.AsyncCompletedEventArgs e)
+		{
+			if(e.Error != null)
+			{
+				ErrorLogging.WriteLine("Failed to download new proxy names file for leaderboard: " + e.Error.ToString());
+				return;
+			}
+
+			if (e.Cancelled)
+				return;
+
+			var temp = LoadProxyNamesFromFile("TempProxyNames.xml", true);
+			if (temp.Count > 0)
+			{
+				if (File.Exists(PROXYNAMESFILE))
+					File.Delete(PROXYNAMESFILE);
+				File.Move("TempProxyNames.xml", PROXYNAMESFILE);
+				PROXYNAMES = temp;
+			}
+			else
+			{
+				ErrorLogging.WriteLine("Can't serialize new proxy names file");
+				File.Delete("TempProxyNames.xml");
+			}
+		}
+
+		private Dictionary<string, ProxyNameInMemory> LoadProxyNamesFromFile(string filePath, bool hasToLoad = false)
+		{
+			Dictionary<string, ProxyNameInMemory> newProxyNamesDictionary = new Dictionary<string, ProxyNameInMemory>();
+
+			StreamReader sr = null;
+			try
+			{
+				XmlSerializer serialiser = new XmlSerializer(typeof(ProxyNameInFile[]));
+				sr = new StreamReader(filePath);
+				var newObj = (ProxyNameInFile[])serialiser.Deserialize(sr);
+
+				newProxyNamesDictionary = newObj.ToDictionary(x => x.Game.ToLower(), x => (ProxyNameInMemory)x);
+			}
+			finally
+			{
+				if (sr != null)
+					sr.Close();
+			}
+
+			if (newProxyNamesDictionary.Count == 0 || hasToLoad)
+				return PROXYNAMES;
+			else
+				return newProxyNamesDictionary;
+
 		}
 
 		public void SetPreferedCategory(string StreamTitle, bool isAfterFirstUpdate, bool vocal)
@@ -347,7 +397,9 @@ namespace SuiBot_Core.Components
 						isCurrentGame = true;
 					}
 				}
-				lookUpGame = GetProxyName(lookUpGame);
+
+				if (lookUpCategory == "" && lookUpLevel == "")
+					GetProxyName(ref lookUpGame, ref lookUpCategory, ref lookUpLevel);
 
 				if (lookUpGame == "")
 				{
@@ -500,7 +552,9 @@ namespace SuiBot_Core.Components
 						lookUpGame = lastMessage.Message;
 					}
 				}
-				lookUpGame = GetProxyName(lookUpGame);
+
+				if(lookUpCategory == "" && lookUpLevel == "")
+					GetProxyName(ref lookUpGame, ref lookUpCategory, ref lookUpLevel);
 
 				if (lookUpGame == "")
 				{

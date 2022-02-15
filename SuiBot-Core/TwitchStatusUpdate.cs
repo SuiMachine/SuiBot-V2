@@ -36,7 +36,7 @@ namespace SuiBot_Core
 			this.channelName = suiBot_ChannelInstance.Channel;
 			sUrlTwitchStatus = new Uri("https://api.twitch.tv/helix/streams?user_login=" + suiBot_ChannelInstance.Channel);
 
-#if DEBUG  //testing
+#if DEBUG && false  //testing
             this.channelName = "tezur0";
             sUrlTwitchStatus = new Uri("https://api.twitch.tv/helix/streams?user_login=" + this.channelName);
 
