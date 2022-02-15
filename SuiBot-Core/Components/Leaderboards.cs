@@ -136,7 +136,7 @@ namespace SuiBot_Core.Components
 					sr.Close();
 			}
 
-			if (newProxyNamesDictionary.Count == 0 || hasToLoad)
+			if (newProxyNamesDictionary.Count == 0 && !hasToLoad)
 				return PROXYNAMES;
 			else
 				return newProxyNamesDictionary;
