@@ -2,8 +2,11 @@
 using SuiBot_Core.Extensions.SuiStringExtension;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Security.Policy;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml;
@@ -13,7 +16,7 @@ namespace SuiBot_Core.Components
 {
 	internal class Leaderboards
 	{
-		public const string PROXYFILENAMESURL = "Bot/SpeedrunProxyNames.xml";
+		public const string PROXYFILENAMESURL = "https://raw.githubusercontent.com/SuiMachine/SuiBot-V2/master/Release/Bot/SpeedrunProxyNames.xml";
 		public const string PROXYNAMESFILE = "Bot/SpeedrunProxyNames.xml";
 		public SuiBot_ChannelInstance channelInstance;
 		const string RegexSyntaxGame = "game(:|=)\".+?\"";
@@ -67,15 +70,54 @@ namespace SuiBot_Core.Components
 			}
 
 			if (this.channelInstance.ConfigInstance.LeaderboardsUpdateProxyNames)
-				updateTaskReference = Task.Factory.StartNew(UpdateProxyNamesAsync);
+				UpdateProxyNamesAsync();
 		}
 
-		private async Task UpdateProxyNamesAsync()
+		private void UpdateProxyNamesAsync()
 		{
+			try
+			{
+				WebClient wbClient = new WebClient();
+				wbClient.DownloadFileCompleted += WbClient_DownloadFileCompleted;
+				string tempFile = "TempProxyNames.xml";
+				if (File.Exists(tempFile))
+					File.Delete(tempFile);
 
+				wbClient.DownloadFileAsync(new Uri(PROXYFILENAMESURL), tempFile);
+			}
+			catch(Exception e)
+			{
+				ErrorLogging.WriteLine("Error checking Proxyname XML on Github " + e.Message);
+			}
 		}
 
-		private Dictionary<string, ProxyNameInMemory> LoadProxyNamesFromFile(string filePath)
+		private void WbClient_DownloadFileCompleted(object sender, System.ComponentModel.AsyncCompletedEventArgs e)
+		{
+			if(e.Error != null)
+			{
+				ErrorLogging.WriteLine("Failed to download new proxy names file for leaderboard: " + e.Error.ToString());
+				return;
+			}
+
+			if (e.Cancelled)
+				return;
+
+			var temp = LoadProxyNamesFromFile("TempProxyNames.xml", true);
+			if (temp.Count > 0)
+			{
+				if (File.Exists(PROXYNAMESFILE))
+					File.Delete(PROXYNAMESFILE);
+				File.Move("TempProxyNames.xml", PROXYNAMESFILE);
+				PROXYNAMES = temp;
+			}
+			else
+			{
+				ErrorLogging.WriteLine("Can't serialize new proxy names file");
+				File.Delete("TempProxyNames.xml");
+			}
+		}
+
+		private Dictionary<string, ProxyNameInMemory> LoadProxyNamesFromFile(string filePath, bool hasToLoad = false)
 		{
 			Dictionary<string, ProxyNameInMemory> newProxyNamesDictionary = new Dictionary<string, ProxyNameInMemory>();
 
@@ -94,7 +136,7 @@ namespace SuiBot_Core.Components
 					sr.Close();
 			}
 
-			if (newProxyNamesDictionary.Count == 0)
+			if (newProxyNamesDictionary.Count == 0 || hasToLoad)
 				return PROXYNAMES;
 			else
 				return newProxyNamesDictionary;
