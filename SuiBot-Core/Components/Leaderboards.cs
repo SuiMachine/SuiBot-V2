@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
 
@@ -12,6 +13,7 @@ namespace SuiBot_Core.Components
 {
 	internal class Leaderboards
 	{
+		public const string PROXYFILENAMESURL = "Bot/SpeedrunProxyNames.xml";
 		public const string PROXYNAMESFILE = "Bot/SpeedrunProxyNames.xml";
 		public SuiBot_ChannelInstance channelInstance;
 		const string RegexSyntaxGame = "game(:|=)\".+?\"";
@@ -20,7 +22,6 @@ namespace SuiBot_Core.Components
 		//const string RegexSubCategoryShort = "subcategory(:|=)\"(.+)?\"(:|=)\".+?\"";
 		//const string RegexSubCategoryLong = "subcategory(:|=)\"(.+)?\"(:|=)\".+?\"";
 		//const string RegexVariables = "variable(:|=)\"(.+)?\"(:|=)\".+?\"";
-
 		public bool GameOverride { get; set; }
 		public string CurrentGame { get; set; }
 		public string LevelOverride { get; set; }
@@ -31,6 +32,7 @@ namespace SuiBot_Core.Components
 
 		private string Speedrunusername => channelInstance.ConfigInstance.LeaderboardsUsername;
 		public bool LastUpdateSuccessful { get; private set; }
+		Task updateTaskReference = null;
 
 
 		#region ProxyNamesDeclaration
@@ -63,6 +65,14 @@ namespace SuiBot_Core.Components
 			{
 				PROXYNAMES = LoadProxyNamesFromFile(PROXYNAMESFILE);
 			}
+
+			if (this.channelInstance.ConfigInstance.LeaderboardsUpdateProxyNames)
+				updateTaskReference = Task.Factory.StartNew(UpdateProxyNamesAsync);
+		}
+
+		private async Task UpdateProxyNamesAsync()
+		{
+
 		}
 
 		private Dictionary<string, ProxyNameInMemory> LoadProxyNamesFromFile(string filePath)
