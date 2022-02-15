@@ -2,14 +2,10 @@
 using SuiBot_Core.Extensions.SuiStringExtension;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Security.Policy;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Xml;
 using System.Xml.Serialization;
 
 namespace SuiBot_Core.Components
@@ -35,13 +31,10 @@ namespace SuiBot_Core.Components
 
 		private string Speedrunusername => channelInstance.ConfigInstance.LeaderboardsUsername;
 		public bool LastUpdateSuccessful { get; private set; }
-		Task updateTaskReference = null;
 
 
 		#region ProxyNamesDeclaration
-		static Dictionary<string, ProxyNameInMemory> PROXYNAMES = new Dictionary<string, ProxyNameInMemory>()
-		{
-		};
+		static Dictionary<string, ProxyNameInMemory> PROXYNAMES = null;
 
 		private static void GetProxyName(ref string lookUpGame, ref string lookUpCategory, ref string lookUpLevel)
 		{
@@ -64,13 +57,19 @@ namespace SuiBot_Core.Components
 			PreferedCategory = "";
 			SubcategoriesOverride = new Dictionary<string, string>();
 
-			if (File.Exists(PROXYNAMESFILE))
+
+			if (PROXYNAMES == null)
 			{
-				PROXYNAMES = LoadProxyNamesFromFile(PROXYNAMESFILE);
+				PROXYNAMES = new Dictionary<string, ProxyNameInMemory>();
+				if (File.Exists(PROXYNAMESFILE))
+				{
+					PROXYNAMES = LoadProxyNamesFromFile(PROXYNAMESFILE);
+				}
+
+				if (this.channelInstance.ConfigInstance.LeaderboardsUpdateProxyNames)
+					UpdateProxyNamesAsync();
 			}
 
-			if (this.channelInstance.ConfigInstance.LeaderboardsUpdateProxyNames)
-				UpdateProxyNamesAsync();
 		}
 
 		private void UpdateProxyNamesAsync()
@@ -85,7 +84,7 @@ namespace SuiBot_Core.Components
 
 				wbClient.DownloadFileAsync(new Uri(PROXYFILENAMESURL), tempFile);
 			}
-			catch(Exception e)
+			catch (Exception e)
 			{
 				ErrorLogging.WriteLine("Error checking Proxyname XML on Github " + e.Message);
 			}
@@ -93,7 +92,7 @@ namespace SuiBot_Core.Components
 
 		private void WbClient_DownloadFileCompleted(object sender, System.ComponentModel.AsyncCompletedEventArgs e)
 		{
-			if(e.Error != null)
+			if (e.Error != null)
 			{
 				ErrorLogging.WriteLine("Failed to download new proxy names file for leaderboard: " + e.Error.ToString());
 				return;
@@ -514,7 +513,8 @@ namespace SuiBot_Core.Components
 								);
 						}
 						else
-							return "Leaderboard doesn't have any records! " + leaderboard.WebLink; ;
+							return "Leaderboard doesn't have any records! " + leaderboard.WebLink;
+						;
 					}
 				}
 			}
@@ -553,7 +553,7 @@ namespace SuiBot_Core.Components
 					}
 				}
 
-				if(lookUpCategory == "" && lookUpLevel == "")
+				if (lookUpCategory == "" && lookUpLevel == "")
 					GetProxyName(ref lookUpGame, ref lookUpCategory, ref lookUpLevel);
 
 				if (lookUpGame == "")
@@ -704,7 +704,8 @@ namespace SuiBot_Core.Components
 				lookUpLevel = "";
 
 			lookUpSubcategories = null;
-			lookUpVariables = null; ;
+			lookUpVariables = null;
+			;
 
 			/*
             var matchesVariables = Regex.Matches(message, RegexVariables, RegexOptions.IgnoreCase);
@@ -887,6 +888,5 @@ namespace SuiBot_Core.Components
 				return null;
 		}
 		#endregion
-
 	}
 }
