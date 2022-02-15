@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ArrayOfProxyNameInFile xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <ProxyNameInFile Game="Command &amp; Conquer Remastered Collection" ProxyName="cncremastered" Category="" />
+  <ProxyNameInFile Game="Deus Ex: Human Revolution - Director's Cut" ProxyName="Deus Ex: Human Revolution" Category="Director's Cut Any%" />
   <ProxyNameInFile Game="DMC" ProxyName="DmC: Devil May Cry" Category="" />
   <ProxyNameInFile Game="Dark Souls 2" ProxyName="Dark Souls II" Category="" />
   <ProxyNameInFile Game="Dark Souls 3" ProxyName="Dark Souls III" Category="" />
