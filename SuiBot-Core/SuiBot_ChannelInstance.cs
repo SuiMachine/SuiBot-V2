@@ -151,6 +151,11 @@ namespace SuiBot_Core
 			SuiBotInstance.MeebyIrcClient.WriteLine(string.Format(":{0}!{0}@{0}.tmi.twitch.tv PRIVMSG #{1} :.timeout {2} {3} {4})", SuiBotInstance.BotName, Channel, username, duration, message));
 		}
 
+		public void UserShoutout(string username)
+		{
+			SuiBotInstance.MeebyIrcClient.WriteLine(string.Format(":{0}!{0}@{0}.tmi.twitch.tv PRIVMSG #{1} :.shoutout {2}", SuiBotInstance.BotName, Channel, username));
+		}
+
 		public void UserBan(string username, string message = "")
 		{
 			SuiBotInstance.MeebyIrcClient.WriteLine(string.Format(":{0}!{0}@{0}.tmi.twitch.tv PRIVMSG #{1} :.ban {2} {3})", SuiBotInstance.BotName, Channel, username, message));
@@ -268,6 +273,11 @@ namespace SuiBot_Core
 			//GenericUtilComponents
 			if (ConfigInstance.GenericUtil.ENABLE)
 			{
+				if(ConfigInstance.GenericUtil.Shoutout && messageLazy.StartsWith("so"))
+				{
+					GenericUtil.Shoutout(lastMessage);
+				}
+
 				if (ConfigInstance.GenericUtil.UptimeEnabled && messageLazy.StartsWith("uptime"))
 				{
 					GenericUtil.GetUpTime(lastMessage);

@@ -478,12 +478,14 @@ namespace SuiBot_Core.Storage
 		public bool ENABLE { get; set; }
 		[XmlElement]
 		public bool UptimeEnabled { get; set; }
+		[XmlElement]
+		public bool Shoutout { get; set; }
 
 		public GenericUtilConfig()
 		{
 			ENABLE = false;
 			UptimeEnabled = false;
+			Shoutout = false;
 		}
-
 	}
 }
