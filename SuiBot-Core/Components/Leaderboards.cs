@@ -370,7 +370,11 @@ namespace SuiBot_Core.Components
 
 			if (lastMessage.Message == "")
 			{
-				channelInstance.SendChatMessageResponse(lastMessage, GetWR(CurrentGame, true, "", "", null, null));
+				var currentGame = CurrentGame;
+				var category = "";
+				var level = "";
+				GetProxyName(ref currentGame, ref category, ref level);
+				channelInstance.SendChatMessageResponse(lastMessage, GetWR(currentGame, true, category, level, null, null));
 			}
 			else
 			{
