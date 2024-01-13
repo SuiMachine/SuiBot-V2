@@ -55,7 +55,8 @@
     <Compile Include="Components\IntervalMessages.cs" />
     <Compile Include="Components\Leaderboards.cs" />
     <Compile Include="Components\LeaderboardsProxyNames.cs" />
-    <Compile Include="Components\Other\MemeCompnent.cs" />
+    <Compile Include="Components\Other\MemeComponent.cs" />
+    <Compile Include="Components\Other\Lurk.cs" />
     <Compile Include="Components\Other\Tombstone.cs" />
     <Compile Include="Components\Other\RatsBirthday.cs" />
     <Compile Include="Components\Other\_MemeComponents.cs" />
@@ -82,6 +83,7 @@
     <Compile Include="Storage\Config.cs" />
     <Compile Include="Storage\IntervalMessages.cs" />
     <Compile Include="TwitchStatusUpdate.cs" />
+    <Compile Include="XML_Utils.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SpeedrunComSharp\SpeedrunComSharp\SpeedrunComSharp.csproj">

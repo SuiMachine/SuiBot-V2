@@ -36,36 +36,17 @@ namespace SuiBot_Core.Storage
 		/// <returns>Component storing all interval messages for the channel</returns>
 		public static IntervalMessages Load(string Channel)
 		{
-			string FilePath = string.Format("Bot/Channels/{0}/IntervalMessages.xml", Channel);
-			IntervalMessages obj;
-			if (File.Exists(FilePath))
-			{
-				XmlSerializer serializer = new XmlSerializer(typeof(IntervalMessages));
-				FileStream fs = new FileStream(FilePath, FileMode.Open);
-				obj = (IntervalMessages)serializer.Deserialize(fs);
-				fs.Close();
-				obj.Channel = Channel;
-				obj.SetTicksToIntervals();
-				return obj;
-			}
-			else
-				return new IntervalMessages() { Channel = Channel, Messages = new List<IntervalMessage>() };
+			string FilePath = $"Bot/Channels/{Channel}/IntervalMessages.xml";
+			var newObj = XML_Utils.Load(FilePath, new IntervalMessages() { Messages = new List<IntervalMessage>() });
+			newObj.Channel = Channel;
+			newObj.SetTicksToIntervals();
+			return newObj;
 		}
 
 		/// <summary>
 		/// Function for storing interval messages back to XML
 		/// </summary>
-		public void Save()
-		{
-			string DirectoryPath = string.Format("Bot/Channels/{0}/", Channel);
-			string FilePath = DirectoryPath + "IntervalMessages.xml";
-			XmlSerializer serializer = new XmlSerializer(typeof(IntervalMessages));
-			if (!Directory.Exists(DirectoryPath))
-				Directory.CreateDirectory(DirectoryPath);
-			StreamWriter fw = new StreamWriter(FilePath);
-			serializer.Serialize(fw, this);
-			fw.Close();
-		}
+		public void Save() => XML_Utils.Save($"Bot/Channels/{Channel}/IntervalMessages.xml", this);
 
 		/// <summary>
 		/// Sets local intervalTick values based on Interval value and IntervalOffset when bot componenent is initalized with Load function

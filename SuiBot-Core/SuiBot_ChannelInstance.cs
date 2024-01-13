@@ -329,7 +329,6 @@ namespace SuiBot_Core
 		{
 			ConfigInstance.Save();
 			QuotesInstance.Dispose();
-			IntervalMessagesInstance.Dispose();
 			ChatFiltering.Dispose();
 			Cvars.Dispose();
 			SuiBotInstance.LeaveChannel(Channel);
