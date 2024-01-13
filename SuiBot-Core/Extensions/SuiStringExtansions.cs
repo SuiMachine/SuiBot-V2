@@ -111,11 +111,11 @@ namespace SuiBot_Core.Extensions.SuiStringExtension
 		public static string TrimSingleCharacter(this string v, char chr)
 		{
 			v = v.Trim();
-			if(v.StartsWith(chr.ToString()))
+			if (v.StartsWith(chr.ToString()))
 			{
 				v = v.Substring(1);
 			}
-			if(v.EndsWith(chr.ToString()))
+			if (v.EndsWith(chr.ToString()))
 			{
 				v = v.Remove(v.Length - 1);
 			}

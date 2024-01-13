@@ -35,12 +35,12 @@ namespace SuiBot_Core.Components
 
 		public void Shoutout(ChatMessage LastMessage)
 		{
-			if(LastMessage.UserRole <= Role.Mod)
+			if (LastMessage.UserRole <= Role.Mod)
 			{
 				if (LastMessage.Message.Contains(" "))
 				{
-					var split = LastMessage.Message.Split(new char[] { ' '}, 2)[1].Trim();
-					if(split != "")
+					var split = LastMessage.Message.Split(new char[] { ' ' }, 2)[1].Trim();
+					if (split != "")
 					{
 						ChannelInstance.UserShoutout(split);
 					}

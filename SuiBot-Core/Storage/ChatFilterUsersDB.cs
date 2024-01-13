@@ -1,6 +1,5 @@
 ﻿using SuiBot_Core.SerializableDictionary;
 using System;
-using System.IO;
 using System.Xml.Serialization;
 
 namespace SuiBot_Core.Storage
@@ -21,31 +20,14 @@ namespace SuiBot_Core.Storage
 
 		public static ChatFilterUsersDB Load(string Channel)
 		{
-			string FilePath = string.Format("Bot/Channels/{0}/ChatFilterUsers.xml", Channel);
-			ChatFilterUsersDB obj;
-			if (File.Exists(FilePath))
-			{
-				XmlSerializer serializer = new XmlSerializer(typeof(ChatFilterUsersDB));
-				FileStream fs = new FileStream(FilePath, FileMode.Open);
-				obj = (ChatFilterUsersDB)serializer.Deserialize(fs);
-				fs.Close();
-				obj.Channel = Channel;
-				return obj;
-			}
-			else
-				return new ChatFilterUsersDB() { Channel = Channel };
+			string FilePath = $"Bot/Channels/{Channel}/ChatFilterUsers.xml";
+			var obj = XML_Utils.Load(FilePath, new ChatFilterUsersDB());
+			obj.Channel = Channel;
+			return obj;
 		}
 
-		public void Save()
-		{
-			string DirectoryPath = string.Format("Bot/Channels/{0}/", Channel);
-			string FilePath = DirectoryPath + "ChatFilterUsers.xml";
-			XmlSerializer serializer = new XmlSerializer(typeof(ChatFilterUsersDB));
-			if (!Directory.Exists(DirectoryPath))
-				Directory.CreateDirectory(DirectoryPath);
-			StreamWriter fw = new StreamWriter(FilePath);
-			serializer.Serialize(fw, this);
-		}
+		public void Save() => XML_Utils.Save($"Bot/Channels/{Channel}/ChatFilterUsers.xml", this);
+
 
 		internal bool CanPostLinks(string UserName)
 		{

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Xml.Serialization;
 
 namespace SuiBot_Core.Storage
@@ -16,32 +15,13 @@ namespace SuiBot_Core.Storage
 
 		public static Quotes Load(string Channel)
 		{
-			string FilePath = string.Format("Bot/Channels/{0}/Quotes.xml", Channel);
-			Quotes obj;
-			if (File.Exists(FilePath))
-			{
-				XmlSerializer serializer = new XmlSerializer(typeof(Quotes));
-				FileStream fs = new FileStream(FilePath, FileMode.Open);
-				obj = (Quotes)serializer.Deserialize(fs);
-				fs.Close();
-				obj.Channel = Channel;
-				return obj;
-			}
-			else
-				return new Quotes() { Channel = Channel, QuotesList = new List<Quote>() };
+			string FilePath = $"Bot/Channels/{Channel}/Quotes.xml";
+			var obj = XML_Utils.Load(FilePath, new Quotes() { QuotesList = new List<Quote>() });
+			obj.Channel = Channel;
+			return obj;
 		}
 
-		public void Save()
-		{
-			string DirectoryPath = string.Format("Bot/Channels/{0}/", Channel);
-			string FilePath = DirectoryPath + "Quotes.xml";
-			XmlSerializer serializer = new XmlSerializer(typeof(Quotes));
-			if (!Directory.Exists(DirectoryPath))
-				Directory.CreateDirectory(DirectoryPath);
-			StreamWriter fw = new StreamWriter(FilePath);
-			serializer.Serialize(fw, this);
-			fw.Close();
-		}
+		public void Save() => XML_Utils.Save($"Bot/Channels/{Channel}/Quotes.xml", this);
 	}
 
 	[Serializable]

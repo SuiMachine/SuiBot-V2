@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
 
@@ -69,31 +68,13 @@ namespace SuiBot_Core.Storage
 
 		public static CustomCvars Load(string Channel)
 		{
-			string FilePath = string.Format("Bot/Channels/{0}/Cvars.xml", Channel);
-			CustomCvars obj;
-			if (File.Exists(FilePath) && File.ReadAllText(FilePath).Length > 0)
-			{
-				XmlSerializer serializer = new XmlSerializer(typeof(CustomCvars));
-				FileStream fs = new FileStream(FilePath, FileMode.Open);
-				obj = (CustomCvars)serializer.Deserialize(fs);
-				fs.Close();
-				obj.Channel = Channel;
-				return obj;
-			}
-			else
-				return new CustomCvars() { Channel = Channel };
+			string FilePath = $"Bot/Channels/{Channel}/Cvars.xml";
+			var obj = XML_Utils.Load(FilePath, new CustomCvars());
+			obj.Channel = Channel;
+			return obj;
 		}
 
-		public void Save()
-		{
-			string DirectoryPath = string.Format("Bot/Channels/{0}/", Channel);
-			string FilePath = DirectoryPath + "Cvars.xml";
-			XmlSerializer serializer = new XmlSerializer(typeof(CustomCvars));
-			if (!Directory.Exists(DirectoryPath))
-				Directory.CreateDirectory(DirectoryPath);
-			StreamWriter fw = new StreamWriter(FilePath);
-			serializer.Serialize(fw, this);
-		}
+		public void Save() => XML_Utils.Save($"Bot/Channels/{Channel}/Cvars.xml", this);
 	}
 
 	[Serializable]

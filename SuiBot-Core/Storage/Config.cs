@@ -50,8 +50,7 @@ namespace SuiBot_Core.Storage
 			this.ImgBBApiKey = ImgBBApiKey;
 		}
 
-		[XmlIgnore]
-		public bool IsValidConfig => Server != null && Port != 0 && Username != null && Password != null && Username != "" && Password != "";
+		public bool IsValidConfig() => Server != null && Port != 0 && Username != null && Password != null && Username != "" && Password != "";
 
 		public static bool ConfigExists()
 		{
@@ -64,11 +63,7 @@ namespace SuiBot_Core.Storage
 		/// <returns>SuiBot_Config object</returns>
 		public static ConnectionConfig Load()
 		{
-			ConnectionConfig obj;
-			XmlSerializer serializer = new XmlSerializer(typeof(ConnectionConfig));
-			FileStream fs = new FileStream("Bot/ConnectionConfig.suixml", FileMode.Open); //Extension is NOT *.xml on purpose so that in case of streaming monitor, it's not tied to normal text editors, as it contains authy token (password).
-			obj = (ConnectionConfig)serializer.Deserialize(fs);
-			fs.Close();
+			var obj = XML_Utils.Load("Bot/ConnectionConfig.suixml", new ConnectionConfig());
 			obj.FillEmpty();
 			return obj;
 		}
@@ -95,15 +90,7 @@ namespace SuiBot_Core.Storage
 		/// Saves config to Bot/Config.suixml.
 		/// </summary>
 		/// <param name="obj">Instance of SuiBot_Config object.</param>
-		public void Save()
-		{
-			XmlSerializer serializer = new XmlSerializer(typeof(ConnectionConfig));
-			if (!Directory.Exists("Bot"))
-				Directory.CreateDirectory("Bot");
-			StreamWriter fw = new StreamWriter("Bot/ConnectionConfig.suixml");
-			serializer.Serialize(fw, this);
-			fw.Close();
-		}
+		public void Save() => XML_Utils.Save("Bot/ConnectionConfig.suixml", this);
 	}
 
 	/// <summary>
@@ -132,32 +119,16 @@ namespace SuiBot_Core.Storage
 		public static CoreConfig Load()
 		{
 			if (File.Exists("Bot/Config.xml"))
-			{
-				CoreConfig obj;
-				XmlSerializer serializer = new XmlSerializer(typeof(CoreConfig));
-				FileStream fs = new FileStream("Bot/Config.xml", FileMode.Open);
-				obj = (CoreConfig)serializer.Deserialize(fs);
-				fs.Close();
-				return obj;
-			}
+				return XML_Utils.Load<CoreConfig>("Bot/Config.xml", null);
 			else
 				return new CoreConfig();
-
 		}
 
 		/// <summary>
 		/// Saves config to Bot/Config.suixml.
 		/// </summary>
 		/// <param name="obj">Instance of SuiBot_Config object.</param>
-		public void Save()
-		{
-			XmlSerializer serializer = new XmlSerializer(typeof(CoreConfig));
-			if (!Directory.Exists("Bot"))
-				Directory.CreateDirectory("Bot");
-			StreamWriter fw = new StreamWriter("Bot/Config.xml");
-			serializer.Serialize(fw, this);
-			fw.Close();
-		}
+		public void Save() => XML_Utils.Save("Bot/Config.xml", this);
 	}
 
 	/*
@@ -418,16 +389,12 @@ namespace SuiBot_Core.Storage
 
 		public static ChannelConfig Load(string channel)
 		{
-			string FilePath = string.Format("Bot/Channels/{0}.xml", channel);
+			string FilePath = $"Bot/Channels/{channel}.xml";
 			if (File.Exists(FilePath))
 			{
-				ChannelConfig obj;
-				XmlSerializer serializer = new XmlSerializer(typeof(ChannelConfig));
-				FileStream fs = new FileStream(FilePath, FileMode.Open);
-				obj = (ChannelConfig)serializer.Deserialize(fs);
+				var obj = XML_Utils.Load(FilePath, new ChannelConfig());
 				obj.ChannelName = channel;
 				obj.Filters = ChatFilters.Load(channel);
-				fs.Close();
 				return obj;
 			}
 			else
@@ -438,15 +405,7 @@ namespace SuiBot_Core.Storage
 			}
 		}
 
-		public void Save()
-		{
-			XmlSerializer serializer = new XmlSerializer(typeof(ChannelConfig));
-			if (!Directory.Exists("Bot/Channels"))
-				Directory.CreateDirectory("Bot/Channels");
-			StreamWriter fw = new StreamWriter(string.Format("Bot/Channels/{0}.xml", ChannelName));
-			serializer.Serialize(fw, this);
-			fw.Close();
-		}
+		public void Save() => XML_Utils.Save($"Bot/Channels/{ChannelName}.xml", this);
 	}
 
 	/// <summary>

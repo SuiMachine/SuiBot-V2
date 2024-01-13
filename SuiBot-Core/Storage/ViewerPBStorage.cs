@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Xml.Serialization;
 
 namespace SuiBot_Core.Storage
@@ -15,31 +14,11 @@ namespace SuiBot_Core.Storage
 
 		public static ViewerPBStorage Load(string Channel)
 		{
-			string FilePath = string.Format("Bot/Channels/{0}/ViewerPB.xml", Channel);
-			ViewerPBStorage obj;
-			if (File.Exists(FilePath))
-			{
-				XmlSerializer serializer = new XmlSerializer(typeof(ViewerPBStorage));
-				FileStream fs = new FileStream(FilePath, FileMode.Open);
-				obj = (ViewerPBStorage)serializer.Deserialize(fs);
-				fs.Close();
-				obj.Channel = Channel;
-				return obj;
-			}
-			else
-				return new ViewerPBStorage() { Channel = Channel, ViewerPB = 0 };
+			var newObj = XML_Utils.Load($"Bot/Channels/{Channel}/ViewerPB.xml", new ViewerPBStorage() { ViewerPB = 0 });
+			newObj.Channel = Channel;
+			return newObj;
 		}
 
-		public void Save()
-		{
-			string DirectoryPath = string.Format("Bot/Channels/{0}/", Channel);
-			string FilePath = DirectoryPath + "ViewerPB.xml";
-			XmlSerializer serializer = new XmlSerializer(typeof(ViewerPBStorage));
-			if (!Directory.Exists(DirectoryPath))
-				Directory.CreateDirectory(DirectoryPath);
-			StreamWriter fw = new StreamWriter(FilePath);
-			serializer.Serialize(fw, this);
-			fw.Close();
-		}
+		public void Save() => XML_Utils.Save($"Bot/Channels/{Channel}/ViewerPB.xml", this);
 	}
 }

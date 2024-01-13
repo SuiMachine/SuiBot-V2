@@ -1,5 +1,4 @@
 ﻿using SuiBot_Core.Extensions.SuiStringExtension;
-using System;
 using System.Linq;
 
 namespace SuiBot_Core.Components

@@ -254,7 +254,7 @@ namespace SuiBot_Core
 		{
 			//This should be async, but whatever
 
-			if (!BotConnectionConfig.IsValidConfig)
+			if (!BotConnectionConfig.IsValidConfig())
 				throw new Exception("Invalid config!");
 
 			MeebyIrcClient = new IrcClient()
@@ -292,7 +292,7 @@ namespace SuiBot_Core
 
 		public void Connect()
 		{
-			if (!BotConnectionConfig.IsValidConfig)
+			if (!BotConnectionConfig.IsValidConfig())
 				throw new Exception("Invalid config!");
 
 			MeebyIrcClient = new IrcClient()

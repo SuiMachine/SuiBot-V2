@@ -76,7 +76,7 @@ namespace SuiBot_V2_Windows.Windows
 				var connectionConfig = SuiBot_Core.Storage.ConnectionConfig.Load();
 				var coreConfig = SuiBot_Core.Storage.CoreConfig.Load();
 
-				if (!connectionConfig.IsValidConfig)
+				if (!connectionConfig.IsValidConfig())
 				{
 					MessageBox.Show("Invalid connection config!", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
 					return;
