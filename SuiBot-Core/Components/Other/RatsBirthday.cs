@@ -1,6 +1,6 @@
 ﻿namespace SuiBot_Core.Components.Other
 {
-    class RatsBirthday : MemeCompnent
+    class RatsBirthday : MemeComponent
     {
         public override void DoWork(SuiBot_ChannelInstance channelInstance, ChatMessage lastMessage)
         {

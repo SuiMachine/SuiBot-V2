@@ -2,7 +2,7 @@
 
 namespace SuiBot_Core.Components.Other
 {
-    class Tombstone : MemeCompnent
+    class Tombstone : MemeComponent
     {
         public override void DoWork(SuiBot_ChannelInstance channelInstance, ChatMessage lastMessage)
         {
