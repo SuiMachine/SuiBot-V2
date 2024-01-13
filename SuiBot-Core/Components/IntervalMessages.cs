@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace SuiBot_Core.Components
 {
-	internal class IntervalMessages : IDisposable
+	internal class IntervalMessages
 	{
 		/// <summary>
 		/// Local copy of referance to SuiBot_ChannelInstance
@@ -144,10 +144,6 @@ namespace SuiBot_Core.Components
 					}
 				}
 			}
-		}
-
-		public void Dispose()
-		{
 		}
 	}
 }
