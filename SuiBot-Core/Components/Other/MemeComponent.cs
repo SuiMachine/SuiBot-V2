@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SuiBot_Core.Components.Other
+﻿namespace SuiBot_Core.Components.Other
 {
-    public class MemeCompnent
+	public class MemeComponent
     {
-        public MemeCompnent() { }
+        public MemeComponent() { }
 
         public virtual void DoWork(SuiBot_ChannelInstance channelInstance, ChatMessage lastMessage)
         {

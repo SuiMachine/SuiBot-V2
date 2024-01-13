@@ -10,7 +10,7 @@ namespace SuiBot_Core.Components.Other
     class _MemeComponents
     {
         SuiBot_ChannelInstance channelInstance;
-        Dictionary<string, MemeCompnent> memeComponents;
+        Dictionary<string, MemeComponent> memeComponents;
         Storage.MemeConfig memeConfig;
 
 
@@ -18,7 +18,7 @@ namespace SuiBot_Core.Components.Other
         {
             this.channelInstance = channelInstance;
             this.memeConfig = memeConfig;
-            this.memeComponents = new Dictionary<string,MemeCompnent>();
+            this.memeComponents = new Dictionary<string,MemeComponent>();
             ReloadComponents(false);
         }
 
