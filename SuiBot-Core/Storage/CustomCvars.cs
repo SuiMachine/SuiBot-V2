@@ -71,7 +71,7 @@ namespace SuiBot_Core.Storage
 		{
 			string FilePath = string.Format("Bot/Channels/{0}/Cvars.xml", Channel);
 			CustomCvars obj;
-			if (File.Exists(FilePath))
+			if (File.Exists(FilePath) && File.ReadAllText(FilePath).Length > 0)
 			{
 				XmlSerializer serializer = new XmlSerializer(typeof(CustomCvars));
 				FileStream fs = new FileStream(FilePath, FileMode.Open);
