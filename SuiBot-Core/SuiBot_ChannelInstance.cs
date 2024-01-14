@@ -103,11 +103,6 @@ namespace SuiBot_Core
 			}
 		}
 
-		public void SaveConfig()
-		{
-
-		}
-
 		private void SetUserCooldown(ChatMessage messageToRespondTo, int coodown)
 		{
 			if (messageToRespondTo.UserRole <= Role.Mod)
@@ -289,7 +284,10 @@ namespace SuiBot_Core
 			//MemeCompoenents
 			if (ConfigInstance.MemeComponents.ENABLE)
 			{
-				MemeComponents.DoWork(lastMessage);
+				if(MemeComponents.DoWork(lastMessage))
+				{
+					SetUserCooldown(lastMessage, DefaultCooldown);
+				}
 			}
 
 

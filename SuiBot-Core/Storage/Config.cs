@@ -420,6 +420,8 @@ namespace SuiBot_Core.Storage
 		public bool RatsBirthday { get; set; }
 		[XmlElement]
 		public bool Tombstone { get; set; }
+		[XmlElement]
+		public bool Lurk { get; set; }
 
 
 		public MemeConfig()
@@ -427,6 +429,7 @@ namespace SuiBot_Core.Storage
 			ENABLE = false;
 			RatsBirthday = false;
 			Tombstone = false;
+			Lurk = false;
 		}
 	}
 

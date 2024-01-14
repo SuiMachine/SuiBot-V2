@@ -4,7 +4,7 @@ namespace SuiBot_Core.Components.Other
 {
     class Tombstone : MemeComponent
     {
-        public override void DoWork(SuiBot_ChannelInstance channelInstance, ChatMessage lastMessage)
+        public override bool DoWork(SuiBot_ChannelInstance channelInstance, ChatMessage lastMessage)
         {
             var chunks = lastMessage.Message.GetChunks('\"');
             if (chunks.Length > 4)
@@ -14,7 +14,6 @@ namespace SuiBot_Core.Components.Other
             else if(chunks.Length < 1)
             {
                 channelInstance.SendChatMessageResponse(lastMessage, "Tombstome requires at least 1 (and max. 4) lines. e.g. !tombstone \"Line1\" \"Blah line 2\" etc.");
-
             }
             else
             {
@@ -26,6 +25,7 @@ namespace SuiBot_Core.Components.Other
                     );
                 channelInstance.SendChatMessageResponse(lastMessage, urlBuilder);
             }
+            return true;
         }
     }
 }

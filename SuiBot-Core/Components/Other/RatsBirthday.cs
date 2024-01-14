@@ -2,7 +2,7 @@
 {
     class RatsBirthday : MemeComponent
     {
-        public override void DoWork(SuiBot_ChannelInstance channelInstance, ChatMessage lastMessage)
+        public override bool DoWork(SuiBot_ChannelInstance channelInstance, ChatMessage lastMessage)
         {
             //Blame Jerma - https://www.youtube.com/watch?v=vdVnnMOTe3Q
             if (lastMessage.Message.Contains(" "))
@@ -20,6 +20,7 @@
             {
                 channelInstance.SendChatMessageResponse(lastMessage, "!RatsBirthday requires a target to be specified after \"spacebar\", e.g. !ratsbirthday SuiBot");
             }
+            return true;
         }
     }
 }
