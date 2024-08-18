@@ -10,7 +10,7 @@ SuiBot-V2 was written in [Visual Studios Community Edition 2017](https://visuals
 
 Credits
 -------
-  * [SuicideMachine](http://twitch.tv/suicidemachine)
+  * [SuicideMachine](http://twitch.tv/suimachine)
   * Bot uses [SpeedrunComSharp](https://github.com/LiveSplit/SpeedrunComSharp) libary, written by CryZe.
   * Bot uses [SmartIrc4Net](https://github.com/meebey/SmartIrc4net) for its IRC connection.
   * WPF client uses [Hardcodet.NotifyIcon.Wpf](https://www.nuget.org/packages/Hardcodet.NotifyIcon.Wpf/) by hardcodet to display tray icon.
