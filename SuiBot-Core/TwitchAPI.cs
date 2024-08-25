@@ -1,13 +1,16 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace SuiBot_Core
 {
-	public class TwitchStatusUpdate
+	public class TwitchAPI
 	{
+		public Dictionary<string, string> UserNameToId = new Dictionary<string, string>();
 		readonly string channelName;
+		private string botName;
 		public bool isOnline = true;
 		public string game = "";
 		public DateTime StartTime;
@@ -21,7 +24,7 @@ namespace SuiBot_Core
 		public string OldTitle = "";
 
 		//For testing
-		public TwitchStatusUpdate(string channelName, string oauth)
+		public TwitchAPI(string channelName, string oauth)
 		{
 			RequestHeaders = new Dictionary<string, string>();
 			sUrlTwitchStatus = new Uri("https://api.twitch.tv/helix/streams?user_login=" + channelName);
@@ -30,9 +33,10 @@ namespace SuiBot_Core
 			RequestHeaders.Add("Authorization", "Bearer " + oauth);
 		}
 
-		public TwitchStatusUpdate(SuiBot_ChannelInstance suiBot_ChannelInstance, string oauth)
+		public TwitchAPI(SuiBot_ChannelInstance suiBot_ChannelInstance, string oauth)
 		{
 			RequestHeaders = new Dictionary<string, string>();
+			this.botName = suiBot_ChannelInstance.BotName;
 			this.channelName = suiBot_ChannelInstance.Channel;
 			sUrlTwitchStatus = new Uri("https://api.twitch.tv/helix/streams?user_login=" + suiBot_ChannelInstance.Channel);
 
@@ -47,7 +51,7 @@ namespace SuiBot_Core
 
 		public void GetStatus()
 		{
-			if (JsonGrabber.GrabJson(sUrlTwitchStatus, RequestHeaders, "application/json", "application/vnd.twitchtv.v3+json", "GET", out string res))
+			if (HttpWebRequestHandlers.PerformGetRequest(sUrlTwitchStatus, RequestHeaders, out string res))
 			{
 				try
 				{
@@ -140,11 +144,11 @@ namespace SuiBot_Core
 			}
 			else
 			{
-				if (JsonGrabber.GrabJson(new Uri("https://api.twitch.tv/helix/games?id=" + id), RequestHeaders, "application/json", "application/vnd.twitchtv.v3+json", "GET", out string res))
+				if (HttpWebRequestHandlers.PerformGetRequest(new Uri("https://api.twitch.tv/helix/games?id=" + id), RequestHeaders, out string res))
 				{
 					oldId = id;
-					var jObjectNode = JObject.Parse(res);
-					var dataNode = jObjectNode["data"].First;
+					JObject jObjectNode = JObject.Parse(res);
+					JToken dataNode = jObjectNode["data"].First;
 					if (dataNode["name"] != null)
 					{
 						return dataNode["name"].ToString();
@@ -155,7 +159,122 @@ namespace SuiBot_Core
 
 		}
 
-		internal void RequestUpdate(SuiBot_ChannelInstance instance)
+		public void RequestRemoveMessage(string channel, string messageID)
+		{
+			string botId = GetUserId(botName);
+			if (botId == "")
+			{
+				ErrorLogging.WriteLine($"Can't obtain bot user id!");
+				return;
+			}
+
+			string channelID = GetUserId(channel);
+			if (channelID == "")
+			{
+				ErrorLogging.WriteLine($"Can't obtain id for channel: {channel}");
+				return;
+			}
+
+			_ = HttpWebRequestHandlers.PerformDelete(new Uri($"https://api.twitch.tv/helix/moderation/chat?broadcaster_id={channelID}&moderator_id={botId}&message_id={messageID}"), RequestHeaders, out string _);
+		}
+
+		public void RequestTimeout(string channel, string userId, uint length, string reason)
+		{
+			var botId = GetUserId(botName);
+			if (botId == "")
+			{
+				ErrorLogging.WriteLine($"Can't obtain bot user id!");
+				return;
+			}
+
+			var channelID = GetUserId(channel);
+			if (channelID == "")
+			{
+				ErrorLogging.WriteLine($"Can't obtain id for channel: {channel}");
+				return;
+			}
+
+			API_Structs.API_Data data = new API_Structs.API_Data()
+			{
+				data = new API_Structs.API_Timeout()
+				{
+					user_id = userId,
+					duration = length == 0 ? 1 : length,
+					reason = string.IsNullOrEmpty(reason) ? null : reason
+				}
+			};
+
+			string dataStr = JsonConvert.SerializeObject(data);
+
+			if (HttpWebRequestHandlers.PerformPost(new Uri($"https://api.twitch.tv/helix/moderation/bans?broadcaster_id={channelID}&moderator_id={botId}"), RequestHeaders, dataStr, out string _))
+			{
+
+			}
+		}
+
+		public void RequestBan(string channel, string userId, string reason)
+		{
+			var botId = GetUserId(botName);
+			if (botId == "")
+			{
+				ErrorLogging.WriteLine($"Can't obtain bot user id!");
+				return;
+			}
+
+			var channelID = GetUserId(channel);
+			if (channelID == "")
+			{
+				ErrorLogging.WriteLine($"Can't obtain id for channel: {channel}");
+				return;
+			}
+
+			API_Structs.API_Data data = new API_Structs.API_Data()
+			{
+				data = new API_Structs.API_Timeout()
+				{
+					user_id = userId,
+					duration = 0,
+					reason = string.IsNullOrEmpty(reason) ? null : reason
+				}
+			};
+
+			string dataStr = JsonConvert.SerializeObject(data);
+
+			if (HttpWebRequestHandlers.PerformPost(new Uri($"https://api.twitch.tv/helix/moderation/bans?broadcaster_id={channelID}&moderator_id={botId}"), RequestHeaders, dataStr, out string _))
+			{
+
+			}
+		}
+
+		private string GetUserId(string userName)
+		{
+			if (UserNameToId.TryGetValue(userName, out string userId))
+				return userId;
+			else
+			{
+				if (HttpWebRequestHandlers.PerformGetRequest(new Uri($"https://api.twitch.tv/helix/users?login={userName}"), RequestHeaders, out string res))
+				{
+					var response = JObject.Parse(res);
+					if (response["data"] != null && response["data"].Children().Count() > 0)
+					{
+						var dataNode = response["data"].First;
+						if (dataNode["id"] != null)
+						{
+							//Just to make sure some other instance hasn't added it already
+							if (!UserNameToId.ContainsKey(userName))
+							{
+								UserNameToId.Add(userName, dataNode["id"].ToString());
+								return dataNode["id"].ToString();
+							}
+						}
+					}
+				}
+			}
+
+			return "";
+		}
+
+		public void RequestUpdate(SuiBot_ChannelInstance instance)
 		{
 			GetStatus();
 			if (game != string.Empty)

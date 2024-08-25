@@ -5,9 +5,9 @@ namespace SuiBot_Core.Components
 	public class GenericUtil
 	{
 		private SuiBot_ChannelInstance ChannelInstance;
-		private TwitchStatusUpdate TwitchUpdateInstance;
+		private TwitchAPI TwitchUpdateInstance;
 
-		public GenericUtil(SuiBot_ChannelInstance ChannelInstance, TwitchStatusUpdate TwitchUpdateInstance)
+		public GenericUtil(SuiBot_ChannelInstance ChannelInstance, TwitchAPI TwitchUpdateInstance)
 		{
 			this.ChannelInstance = ChannelInstance;
 			this.TwitchUpdateInstance = TwitchUpdateInstance;

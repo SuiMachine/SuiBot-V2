@@ -83,7 +83,7 @@ namespace SuiBot_V2_Windows.Windows
 				}
 
 				RemoveNonLogTabs();
-				SuiBotInstance = new SuiBot_Core.SuiBot(connectionConfig, coreConfig);
+				SuiBotInstance = new SuiBot(connectionConfig, coreConfig);
 				SuiBotInstance.OnChannelJoining += SuiBotInstance_OnChannelJoining;
 				SuiBotInstance.OnChannelLeaving += SuiBotInstance_OnChannelLeaving;
 				SuiBotInstance.OnChannelStatusUpdate += SuiBotInstance_OnChannelStatusUpdate;

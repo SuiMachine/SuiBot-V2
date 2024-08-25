@@ -11,6 +11,7 @@ namespace SuiBot_Core
 		public string Channel { get; set; }
 		public Storage.ChannelConfig ConfigInstance { get; set; }
 		Storage.CoreConfig CoreConfigInstance { get; set; }
+		public string BotName => SuiBotInstance.BotName;
 		SuiBot SuiBotInstance { get; set; }
 		#region Components
 		Components.Quotes QuotesInstance { get; set; }
@@ -25,7 +26,7 @@ namespace SuiBot_Core
 		Components.Other._MemeComponents MemeComponents { get; set; }
 		#endregion
 		#endregion
-		TwitchStatusUpdate TwitchStatus { get; set; }
+		TwitchAPI API { get; set; }
 		Dictionary<string, DateTime> UserCooldowns { get; set; }
 
 		//Cause of course now you have to have Oauth
@@ -39,12 +40,12 @@ namespace SuiBot_Core
 			this.IntervalMessagesInstance = new Components.IntervalMessages(this);
 			this.Leaderboards = new Components.Leaderboards(this);
 			this.ChatFiltering = new Components.ChatFiltering(this);
-			this.TwitchStatus = new TwitchStatusUpdate(this, Oauth);
+			this.API = new TwitchAPI(this, Oauth);
 			this.Cvars = new Components.CustomCvars(this);
 			this.UserCooldowns = new Dictionary<string, DateTime>();
 			this.ViewerPb = new Components.ViewerPB(this);
-			this.PCGW = new Components.PCGW(this, TwitchStatus);
-			this.GenericUtil = new Components.GenericUtil(this, TwitchStatus);
+			this.PCGW = new Components.PCGW(this, API);
+			this.GenericUtil = new Components.GenericUtil(this, API);
 
 			//Other
 			MemeComponents = new Components.Other._MemeComponents(this, ConfigInstance.MemeComponents);
@@ -52,31 +53,31 @@ namespace SuiBot_Core
 
 		internal void TimerTick()
 		{
-			if (ConfigInstance.IntervalMessageEnabled && TwitchStatus.isOnline)
+			if (ConfigInstance.IntervalMessageEnabled && API.isOnline)
 				IntervalMessagesInstance.DoTickWork();
 		}
 
 		internal void UpdateTwitchStatus(bool vocal)
 		{
-			TwitchStatus.GetStatus();
+			API.GetStatus();
 
 			if (ConfigInstance.ViewerPBEnabled)
-				ViewerPb.UpdateViewerPB(TwitchStatus.LastViewers);
+				ViewerPb.UpdateViewerPB(API.LastViewers);
 
 			if (ConfigInstance.LeaderboardsEnabled && !Leaderboards.GameOverride)
-				Leaderboards.CurrentGame = TwitchStatus.game;
+				Leaderboards.CurrentGame = API.game;
 
-			if (ConfigInstance.LeaderboardsAutodetectCategory && TwitchStatus.isOnline)
+			if (ConfigInstance.LeaderboardsAutodetectCategory && API.isOnline)
 			{
-				if (TwitchStatus.TitleHasChanged || !Leaderboards.LastUpdateSuccessful || vocal)
-					Leaderboards.SetPreferedCategory(TwitchStatus.OldTitle, SuiBotInstance.IsAfterFirstStatusUpdate, vocal);
+				if (API.TitleHasChanged || !Leaderboards.LastUpdateSuccessful || vocal)
+					Leaderboards.SetPreferedCategory(API.OldTitle, SuiBotInstance.IsAfterFirstStatusUpdate, vocal);
 			}
 
 
 			if (vocal)
 				SendChatMessage(string.Format("New obtained stream status is {0}{1}.",
-					TwitchStatus.isOnline == false ? "offline" : "online",
-					TwitchStatus.game == "" ? "" : " and game is " + TwitchStatus.game
+					API.isOnline == false ? "offline" : "online",
+					API.game == "" ? "" : " and game is " + API.game
 					));
 		}
 
@@ -110,10 +111,10 @@ namespace SuiBot_Core
 
 			switch (messageToRespondTo.UserRole)
 			{
-				case (Role.VIP):
+				case Role.VIP:
 					coodown /= 20;
 					break;
-				case (Role.Subscriber):
+				case Role.Subscriber:
 					coodown /= 2;
 					break;
 				default:
@@ -136,25 +137,16 @@ namespace SuiBot_Core
 			SuiBotInstance.MeebyIrcClient.SendDelay = originalDelay;
 		}
 
-		public void UserPurge(string username, string message = "")
-		{
-			UserTimeout(username, 1, message);
-		}
-
-		public void UserTimeout(string username, uint duration, string message = "")
-		{
-			SuiBotInstance.MeebyIrcClient.WriteLine(string.Format(":{0}!{0}@{0}.tmi.twitch.tv PRIVMSG #{1} :.timeout {2} {3} {4})", SuiBotInstance.BotName, Channel, username, duration, message));
-		}
-
 		public void UserShoutout(string username)
 		{
 			SuiBotInstance.MeebyIrcClient.WriteLine(string.Format(":{0}!{0}@{0}.tmi.twitch.tv PRIVMSG #{1} :.shoutout {2}", SuiBotInstance.BotName, Channel, username));
 		}
 
-		public void UserBan(string username, string message = "")
-		{
-			SuiBotInstance.MeebyIrcClient.WriteLine(string.Format(":{0}!{0}@{0}.tmi.twitch.tv PRIVMSG #{1} :.ban {2} {3})", SuiBotInstance.BotName, Channel, username, message));
-		}
+		public void RemoveUserMessage(ChatMessage lastMassage) => API.RequestRemoveMessage(Channel, lastMassage.MessageID);
+
+		public void UserTimetout(ChatMessage lastMassage, uint length, string reason = null) => API.RequestTimeout(Channel, lastMassage.UserID, length, reason);
+
+		public void UserBan(ChatMessage lastMassage, string reason = null) => API.RequestBan(Channel, lastMassage.UserID, reason);
 
 		internal void DoWork(ChatMessage lastMessage)
 		{
@@ -268,7 +260,7 @@ namespace SuiBot_Core
 			//GenericUtilComponents
 			if (ConfigInstance.GenericUtil.ENABLE)
 			{
-				if(ConfigInstance.GenericUtil.Shoutout && messageLazy.StartsWith("so"))
+				if (ConfigInstance.GenericUtil.Shoutout && messageLazy.StartsWith("so"))
 				{
 					GenericUtil.Shoutout(lastMessage);
 				}
@@ -284,7 +276,7 @@ namespace SuiBot_Core
 			//MemeCompoenents
 			if (ConfigInstance.MemeComponents.ENABLE)
 			{
-				if(MemeComponents.DoWork(lastMessage))
+				if (MemeComponents.DoWork(lastMessage))
 				{
 					SetUserCooldown(lastMessage, DefaultCooldown);
 				}

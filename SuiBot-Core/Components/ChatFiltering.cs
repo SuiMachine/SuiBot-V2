@@ -595,20 +595,24 @@ namespace SuiBot_Core.Components
 			{
 				if (ContainsLink(lastMassage))
 				{
-					ChannelInstance.UserPurge(lastMassage.Username, "A minimum of 3 messages are required to post links in chat!");
+					ChannelInstance.RemoveUserMessage(lastMassage);
+
 					UserDB.ResetCounter(lastMassage.Username);
+					if (!lastMassage.IsFirstMessage)
+						ChannelInstance.SendChatMessageResponse(lastMassage, string.Format("Please make sure you have more than 3 messages in the chat before posting a link."));
 					return true;
 				}
 			}
 
 			int id = 0;
-			foreach (var filter in Filters.PurgeFilters)
+			foreach (ChatFilter filter in Filters.PurgeFilters)
 			{
 				try
 				{
-					if (filter.CompiledSyntax.IsMatch(lastMassage.Message)) //should be faster than Regex.IsMatch(lastMassage.Message, filter.Syntax, RegexOptions.IgnoreCase))
+					if (filter.CompiledSyntax.IsMatch(lastMassage.Message))
 					{
-						ChannelInstance.UserPurge(lastMassage.Username, string.Format("{0} (filterID: {1})", filter.Response, id));
+						ChannelInstance.RemoveUserMessage(lastMassage);
+						ChannelInstance.SendChatMessageResponse(lastMassage, string.Format("Removed message: {0} (filterID: {1})", filter.Response, id));
 						return true;
 					}
 				}
@@ -621,13 +625,13 @@ namespace SuiBot_Core.Components
 			}
 
 			id = 0;
-			foreach (var filter in Filters.TimeOutFilter)
+			foreach (ChatFilter filter in Filters.TimeOutFilter)
 			{
 				try
 				{
-					if (filter.CompiledSyntax.IsMatch(lastMassage.Message)) //should be faster than Regex.IsMatch(lastMassage.Message, filter.Syntax, RegexOptions.IgnoreCase))
+					if (filter.CompiledSyntax.IsMatch(lastMassage.Message))
 					{
-						ChannelInstance.UserTimeout(lastMassage.Username, filter.Duration, string.Format("{0} (filterID: {1})", filter.Response, id));
+						ChannelInstance.UserTimetout(lastMassage, filter.Duration, string.Format("{0} (filterID: {1})", filter.Response, id));
 						return true;
 					}
 				}
@@ -638,13 +642,14 @@ namespace SuiBot_Core.Components
 			}
 
 			id = 0;
-			foreach (var filter in Filters.BanFilters)
+			foreach (ChatFilter filter in Filters.BanFilters)
 			{
 				try
 				{
-					if (filter.CompiledSyntax.IsMatch(lastMassage.Message)) //should be faster than Regex.IsMatch(lastMassage.Message, filter.Syntax, RegexOptions.IgnoreCase))
+					if (filter.CompiledSyntax.IsMatch(lastMassage.Message))
 					{
-						ChannelInstance.UserBan(lastMassage.Username, string.Format("{0} (filterID: {1})", filter.Response, id));
+						ChannelInstance.UserBan(lastMassage, string.Format("{0} (filterID: {1})", filter.Response, id));
+
 						return true;
 					}
 					id++;

@@ -54,13 +54,36 @@ namespace SuiBot_Core
 		{
 			return new Uri(string.Format("https://id.twitch.tv/oauth2/authorize?client_id=rmi9m0sheo4pp5882o8s24zu7h09md&redirect_uri=https://suimachine.github.io/twitchauthy/&response_type=token&scope={0}",
 				string.Join(" ", new string[] {
-					"channel_check_subscription",
-					"channel_editor",
-					"channel_subscriptions",
-					"channel:moderate",
+					"channel:bot",
+					"channel:read:editors",
+					"channel:read:guest_star",
+					"channel:read:polls",
+					"channel:manage:polls",
+					"channel:read:predictions",
+					"channel:manage:predictions",
+					"channel:read:redemptions",
+					"channel:manage:redemptions",
+					"channel:read:subscriptions",
+					"channel:read:vips",
+					"moderation:read",
+					"moderator:manage:announcements",
+					"moderator:read:banned_users",
+					"moderator:manage:banned_users",
+					"moderator:read:chat_messages",
+					"moderator:manage:blocked_terms",
+					"moderator:manage:chat_messages",
+					"moderator:read:chat_settings",
+					"moderator:manage:chat_settings",
+					"moderator:read:chatters",
+					"moderator:read:followers",
+					"moderator:read:moderators",
+					"moderator:read:shoutouts",
+					"moderator:manage:shoutouts",
+					"moderator:read:vips",
+					"user:bot",
+					"user:write:chat",
 					"chat:edit",
 					"chat:read",
-					"channel:moderate"
 				}))).ToString();
 		}
 
@@ -103,9 +126,25 @@ namespace SuiBot_Core
 			{
 				if (e.Data.Channel != null && e.Data.Nick != null && e.Data.Message != null && ActiveChannels.ContainsKey(e.Data.Channel))
 				{
-					LastMessage.Update(GetRoleFromTags(e), e.Data.Nick, e.Data.Message,
-						e.Data.Tags.ContainsKey("msg-id") ? e.Data.Tags["msg-id"] == "highlighted-message" : false, //if message is highlighted using Twitch points
-						e.Data.Tags.ContainsKey("custom-reward-id") ? e.Data.Tags["custom-reward-id"] : null //custom reward using viewer points
+					string messageId = e.Data.Tags["id"];
+
+
+					Role role = GetRoleFromTags(e);
+					string userName = e.Data.Nick;
+					string userID = e.Data.Tags["user-id"];
+					string messageContent = e.Data.Message;
+					bool messageHighlighted = e.Data.Tags.ContainsKey("msg-id") ? e.Data.Tags["msg-id"] == "highlighted-message" : false;
+					string customReward = e.Data.Tags.ContainsKey("custom-reward-id") ? e.Data.Tags["custom-reward-id"] : null;
+					bool isFirstMessage = e.Data.Tags["first-msg"] == "1"; 
+
+					LastMessage.Update(messageId,
+						role,
+						userName,
+						userID,
+						messageContent,
+						isFirstMessage,
+						messageHighlighted, //if message is highlighted using Twitch points
+						customReward //custom reward using viewer points
 						);
 					this.OnChatMessageReceived?.Invoke(e.Data.Channel, LastMessage);
 					ActiveChannels[e.Data.Channel].DoWork(LastMessage);

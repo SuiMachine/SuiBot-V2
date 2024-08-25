@@ -49,6 +49,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="API_Structs\API_Timeout.cs" />
     <Compile Include="Components\ChatFiltering.cs" />
     <Compile Include="Components\CustomCvars.cs" />
     <Compile Include="Components\GenericUtil.cs" />
@@ -68,7 +69,7 @@
     <Compile Include="Events\BotEvents.cs" />
     <Compile Include="Extensions\SuiStringExtansions.cs" />
     <Compile Include="ImgUploader.cs" />
-    <Compile Include="JsonGrabber.cs" />
+    <Compile Include="HttpWebRequestHandlers.cs" />
     <Compile Include="ChatMessage.cs" />
     <Compile Include="Components\RNG.cs" />
     <Compile Include="Storage\ChatFilters.cs" />
@@ -82,7 +83,7 @@
     <Compile Include="SuiBot_ChannelInstance.cs" />
     <Compile Include="Storage\Config.cs" />
     <Compile Include="Storage\IntervalMessages.cs" />
-    <Compile Include="TwitchStatusUpdate.cs" />
+    <Compile Include="TwitchAPI.cs" />
     <Compile Include="XML_Utils.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -6,9 +6,12 @@
 	public struct ChatMessage
 	{
 		public Role UserRole;
+		public string MessageID;
 		public string Username;
+		public string UserID;
 		public string Message;
 		public bool HighlightedMessage;
+		public bool IsFirstMessage;
 		public string RewardID;
 
 		/// <summary>
@@ -17,13 +20,16 @@
 		/// <param name="UserRole">Role of a user.</param>
 		/// <param name="Username">Name of a user.</param>
 		/// <param name="Message">Message posted by a user.</param>
-		public void Update(Role UserRole, string Username, string Message, bool HighlightedMessage = false, string RewardID = null)
+		public void Update(string MessageID, Role UserRole, string Username, string UserID, string Message, bool IsFirstMessage, bool HighlightedMessage = false, string RewardID = null)
 		{
+			this.MessageID = MessageID;
 			this.UserRole = UserRole;
 			this.Username = Username;
+			this.UserID = UserID;
 			this.Message = Message;
 			this.HighlightedMessage = HighlightedMessage;
 			this.RewardID = RewardID;
+			this.IsFirstMessage = IsFirstMessage;
 		}
 	}
 

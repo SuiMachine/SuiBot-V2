@@ -12,7 +12,7 @@ namespace SuiBot_Core.Components
 		{
 			try
 			{
-				if (JsonGrabber.GrabJson(GetUri("races"), out string response))
+				if (HttpWebRequestHandlers.GrabJson(GetUri("races"), out string response))
 				{
 					string[] twitches = GetEntrantsTwitches(response, ChannelInstance.Channel);
 					if (twitches != null)

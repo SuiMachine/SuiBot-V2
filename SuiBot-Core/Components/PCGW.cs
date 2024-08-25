@@ -12,9 +12,9 @@ namespace SuiBot_Core.Components
 		private const string PCGW_API_URI = "https://www.pcgamingwiki.com/w/api.php";
 
 		private SuiBot_ChannelInstance ChannelInstance;
-		private TwitchStatusUpdate TwitchUpdateInstance;
+		private TwitchAPI TwitchUpdateInstance;
 
-		public PCGW(SuiBot_ChannelInstance ChannelInstance, TwitchStatusUpdate TwitchUpdateInstance)
+		public PCGW(SuiBot_ChannelInstance ChannelInstance, TwitchAPI TwitchUpdateInstance)
 		{
 			this.ChannelInstance = ChannelInstance;
 			this.TwitchUpdateInstance = TwitchUpdateInstance;
@@ -49,10 +49,10 @@ namespace SuiBot_Core.Components
 		{
 			try
 			{
-				if (JsonGrabber.GrabJson(JsonGrabber.BuildRequestUri(PCGW_API_URI, new string[] {
-					JsonGrabber.FormatParameter("action", "ask"),
-					JsonGrabber.FormatParameter("format", "json"),
-					JsonGrabber.FormatParameter("query", "[[Category:Games]] [[" + GameName + "]]")
+				if (HttpWebRequestHandlers.GrabJson(HttpWebRequestHandlers.BuildRequestUri(PCGW_API_URI, new string[] {
+					HttpWebRequestHandlers.FormatParameter("action", "ask"),
+					HttpWebRequestHandlers.FormatParameter("format", "json"),
+					HttpWebRequestHandlers.FormatParameter("query", "[[Category:Games]] [[" + GameName + "]]")
 				}), out string result))
 				{
 					if (result != "")

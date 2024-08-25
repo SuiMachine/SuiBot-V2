@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Text;
 
 namespace SuiBot_Core
 {
-	internal static class JsonGrabber
+	internal static class HttpWebRequestHandlers
 	{
 		/// <summary>
 		/// Does a request and gets a Json response.
@@ -45,7 +46,7 @@ namespace SuiBot_Core
 		/// <param name="Method">Method</param>
 		/// <param name="result">JSON returned of request (or empty on failed)</param>
 		/// <returns>True if successed, False if failed.</returns>
-		public static bool GrabJson(Uri address, Dictionary<string, string> headers, string contantType, string acceptStr, string Method, out string result)
+		public static bool PerformGetRequest(Uri address, Dictionary<string, string> headers, out string result)
 		{
 			try
 			{
@@ -60,24 +61,9 @@ namespace SuiBot_Core
 					}
 				}
 
-				//ConstantType
-				if (contantType != null)
-				{
-					wRequest.ContentType = contantType;
-				}
-
-				//AcceptString
-				if (acceptStr != null)
-				{
-					wRequest.Accept = acceptStr;
-				}
-
-				//Method
-				if (Method != null)
-				{
-					wRequest.Method = Method;
-				}
-
+				wRequest.ContentType = "application/json";
+				wRequest.Accept = "application/vnd.twitchtv.v3+json";
+				wRequest.Method = "GET";
 
 				dynamic wResponse = wRequest.GetResponse().GetResponseStream();
 				StreamReader reader = new StreamReader(wResponse);
@@ -88,6 +74,81 @@ namespace SuiBot_Core
 			}
 			catch (Exception)
 			{
+				result = "";
+				return false;
+			}
+		}
+
+		public static bool PerformDelete(Uri address, Dictionary<string, string> headers, out string result)
+		{
+			try
+			{
+				WebRequest wRequest = WebRequest.Create(address);
+
+				//Headers
+				if (headers != null)
+				{
+					foreach (var header in headers)
+					{
+						wRequest.Headers[header.Key] = header.Value;
+					}
+				}
+				wRequest.Method = "DELETE";
+
+				dynamic wResponse = wRequest.GetResponse().GetResponseStream();
+				StreamReader reader = new StreamReader(wResponse);
+				result = reader.ReadToEnd();
+				reader.Close();
+				wResponse.Close();
+				return true;
+			}
+			catch (Exception ex)
+			{
+#if DEBUG
+				System.Diagnostics.Debug.WriteLine("Error doing Delete: " + ex.ToString());
+#endif
+				result = "";
+				return false;
+			}
+		}
+
+		public static bool PerformPost(Uri address, Dictionary<string, string> headers, string postData, out string result)
+		{
+			try
+			{
+				HttpWebRequest wRequest = (HttpWebRequest)HttpWebRequest.Create(address);
+
+				//Headers
+				if (headers != null)
+				{
+					foreach (var header in headers)
+					{
+						wRequest.Headers[header.Key] = header.Value;
+					}
+				}
+
+				byte[] encodedPostData = Encoding.UTF8.GetBytes(postData);
+				wRequest.ContentType = "application/json";
+				wRequest.Accept = "application/vnd.twitchtv.v3+json";
+				wRequest.Method = "POST";
+				wRequest.ContentLength = encodedPostData.LongLength;
+
+				Stream requestStream = wRequest.GetRequestStream();
+				requestStream.Write(encodedPostData, 0, encodedPostData.Length);
+				requestStream.Close();
+
+				dynamic wResponse = wRequest.GetResponse().GetResponseStream();
+				StreamReader reader = new StreamReader(wResponse);
+				result = reader.ReadToEnd();
+				reader.Close();
+				wResponse.Close();
+				return true;
+			}
+			catch (Exception ex)
+			{
+#if DEBUG
+				System.Diagnostics.Debug.WriteLine("Error doing Post: " + ex.ToString());
+#endif
 				result = "";
 				return false;
 			}
