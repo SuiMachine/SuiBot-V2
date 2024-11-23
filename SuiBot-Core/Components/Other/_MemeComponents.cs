@@ -40,6 +40,11 @@ namespace SuiBot_Core.Components.Other
 					memeComponents.Add("unlurk", new Unlurk());
 				}
 
+				if(memeConfig.Lurk)
+				{
+					memeComponents.Add("hug", new Hug());
+				}
+
 				if (notify)
 					channelInstance.SendChatMessage("Meme components reloaded!");
 			}

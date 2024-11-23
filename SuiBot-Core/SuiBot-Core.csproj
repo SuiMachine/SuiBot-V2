@@ -56,6 +56,7 @@
     <Compile Include="Components\IntervalMessages.cs" />
     <Compile Include="Components\Leaderboards.cs" />
     <Compile Include="Components\LeaderboardsProxyNames.cs" />
+    <Compile Include="Components\Other\Hug.cs" />
     <Compile Include="Components\Other\MemeComponent.cs" />
     <Compile Include="Components\Other\Lurk.cs" />
     <Compile Include="Components\Other\Tombstone.cs" />
@@ -64,6 +65,7 @@
     <Compile Include="Components\PCGW.cs" />
     <Compile Include="Components\Quotes.cs" />
     <Compile Include="Components\SRL.cs" />
+    <Compile Include="Components\Timezones.cs" />
     <Compile Include="Components\ViewerPB.cs" />
     <Compile Include="ErrorLogging.cs" />
     <Compile Include="Events\BotEvents.cs" />

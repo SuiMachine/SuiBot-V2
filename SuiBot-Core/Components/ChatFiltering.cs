@@ -14,17 +14,15 @@ namespace SuiBot_Core.Components
 		static readonly List<string> UrlMarks = new List<string>() { "http://", "www.", "https://", "ftp://", "ftps://", "sftp://", "imap://" };
 		static readonly Regex UrlMatchRegex = new Regex(@"[(http(s)?):\/\/(www\.)?a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)", RegexOptions.IgnoreCase | RegexOptions.Compiled);  //this has been literally taken from the internet... because I'm dumb
 
-
-
 		SuiBot_ChannelInstance ChannelInstance;
-		Storage.ChatFilters Filters;
-		Storage.ChatFilterUsersDB UserDB;
+		ChatFilters Filters;
+		ChatFilterUsersDB UserDB;
 
 		public ChatFiltering(SuiBot_ChannelInstance ChannelInstance)
 		{
 			this.ChannelInstance = ChannelInstance;
-			Filters = Storage.ChatFilters.Load(ChannelInstance.Channel);
-			UserDB = Storage.ChatFilterUsersDB.Load(ChannelInstance.Channel);
+			Filters = ChatFilters.Load(ChannelInstance.Channel);
+			UserDB = ChatFilterUsersDB.Load(ChannelInstance.Channel);
 		}
 
 		public void Dispose()
@@ -45,15 +43,15 @@ namespace SuiBot_Core.Components
 					lastMassage.Message = lastMassage.Message.StripSingleWord();
 					if (lastMassage.Message.StartsWithWordLazy("purge"))
 					{
-						AddFilter(Storage.ChatFilters.FilterType.Purge, lastMassage);
+						AddFilter(ChatFilters.FilterType.Purge, lastMassage);
 					}
 					else if (lastMassage.Message.StartsWithWordLazy("timeout"))
 					{
-						AddFilter(Storage.ChatFilters.FilterType.Timeout, lastMassage);
+						AddFilter(ChatFilters.FilterType.Timeout, lastMassage);
 					}
 					else if (lastMassage.Message.StartsWithWordLazy("ban"))
 					{
-						AddFilter(Storage.ChatFilters.FilterType.Ban, lastMassage);
+						AddFilter(ChatFilters.FilterType.Ban, lastMassage);
 					}
 					else
 						ChannelInstance.SendChatMessageResponse(lastMassage, "Invalid command. Chatfilter add messages should be followed by purge / timeout / ban");
@@ -63,15 +61,15 @@ namespace SuiBot_Core.Components
 					lastMassage.Message = lastMassage.Message.StripSingleWord();
 					if (lastMassage.Message.StartsWithWordLazy("purge"))
 					{
-						RemoveFilter(Storage.ChatFilters.FilterType.Purge, lastMassage);
+						RemoveFilter(ChatFilters.FilterType.Purge, lastMassage);
 					}
 					else if (lastMassage.Message.StartsWithWordLazy("timeout"))
 					{
-						RemoveFilter(Storage.ChatFilters.FilterType.Timeout, lastMassage);
+						RemoveFilter(ChatFilters.FilterType.Timeout, lastMassage);
 					}
 					else if (lastMassage.Message.StartsWithWordLazy("ban"))
 					{
-						RemoveFilter(Storage.ChatFilters.FilterType.Ban, lastMassage);
+						RemoveFilter(ChatFilters.FilterType.Ban, lastMassage);
 					}
 					else
 						ChannelInstance.SendChatMessageResponse(lastMassage, "Invalid command. Chatfilter remove messages should be followed by purge / timeout / ban and then filter ID.");
@@ -81,15 +79,15 @@ namespace SuiBot_Core.Components
 					lastMassage.Message = lastMassage.Message.StripSingleWord();
 					if (lastMassage.Message.StartsWithWordLazy("purge"))
 					{
-						SearchFilter(Storage.ChatFilters.FilterType.Purge, lastMassage);
+						SearchFilter(ChatFilters.FilterType.Purge, lastMassage);
 					}
 					else if (lastMassage.Message.StartsWithWordLazy("timeout"))
 					{
-						SearchFilter(Storage.ChatFilters.FilterType.Timeout, lastMassage);
+						SearchFilter(ChatFilters.FilterType.Timeout, lastMassage);
 					}
 					else if (lastMassage.Message.StartsWithWordLazy("ban"))
 					{
-						SearchFilter(Storage.ChatFilters.FilterType.Ban, lastMassage);
+						SearchFilter(ChatFilters.FilterType.Ban, lastMassage);
 					}
 					else if (lastMassage.Message.StartsWith("lookup"))
 					{
@@ -103,15 +101,15 @@ namespace SuiBot_Core.Components
 					lastMassage.Message = lastMassage.Message.StripSingleWord();
 					if (lastMassage.Message.StartsWithWordLazy("purge"))
 					{
-						UpdateFilter(Storage.ChatFilters.FilterType.Purge, lastMassage);
+						UpdateFilter(ChatFilters.FilterType.Purge, lastMassage);
 					}
 					else if (lastMassage.Message.StartsWithWordLazy("timeout"))
 					{
-						UpdateFilter(Storage.ChatFilters.FilterType.Timeout, lastMassage);
+						UpdateFilter(ChatFilters.FilterType.Timeout, lastMassage);
 					}
 					else if (lastMassage.Message.StartsWithWordLazy("ban"))
 					{
-						UpdateFilter(Storage.ChatFilters.FilterType.Ban, lastMassage);
+						UpdateFilter(ChatFilters.FilterType.Ban, lastMassage);
 					}
 					else
 						ChannelInstance.SendChatMessageResponse(lastMassage, "Invalid command. Chatfilter update messages should be followed by purge / timeout / ban, then ID or Last and then parsable information.");
@@ -145,7 +143,7 @@ namespace SuiBot_Core.Components
 
 					switch (filterType)
 					{
-						case (Storage.ChatFilters.FilterType.Purge):
+						case ChatFilters.FilterType.Purge:
 							{
 								if (Filters.PurgeFilters.Count > 0)
 								{
@@ -156,7 +154,7 @@ namespace SuiBot_Core.Components
 									ChannelInstance.SendChatMessageResponse(lastMassage, "There are no purge filters definied.");
 							}
 							break;
-						case (Storage.ChatFilters.FilterType.Timeout):
+						case ChatFilters.FilterType.Timeout:
 							{
 								if (Filters.TimeOutFilter.Count > 0)
 								{
@@ -167,7 +165,7 @@ namespace SuiBot_Core.Components
 									ChannelInstance.SendChatMessageResponse(lastMassage, "There are no timeout filters definied.");
 							}
 							break;
-						case (Storage.ChatFilters.FilterType.Ban):
+						case ChatFilters.FilterType.Ban:
 							{
 								if (Filters.BanFilters.Count > 0)
 								{
@@ -192,7 +190,7 @@ namespace SuiBot_Core.Components
 						{
 							switch (filterType)
 							{
-								case (Storage.ChatFilters.FilterType.Purge):
+								case ChatFilters.FilterType.Purge:
 									{
 										if (id >= Filters.PurgeFilters.Count)
 											ChannelInstance.SendChatMessageResponse(lastMassage, string.Format("ID was higher than a current last ID of Purge Filters ({0})", Filters.PurgeFilters.Count - 1));
@@ -203,7 +201,7 @@ namespace SuiBot_Core.Components
 										}
 									}
 									break;
-								case (Storage.ChatFilters.FilterType.Timeout):
+								case ChatFilters.FilterType.Timeout:
 									{
 										if (id >= Filters.TimeOutFilter.Count)
 											ChannelInstance.SendChatMessageResponse(lastMassage, string.Format("ID was higher than a current last ID of Timeout Filters ({0})", Filters.TimeOutFilter.Count - 1));
@@ -214,7 +212,7 @@ namespace SuiBot_Core.Components
 										}
 									}
 									break;
-								case (Storage.ChatFilters.FilterType.Ban):
+								case ChatFilters.FilterType.Ban:
 									{
 										if (id >= Filters.BanFilters.Count)
 											ChannelInstance.SendChatMessageResponse(lastMassage, string.Format("ID was higher than a current last ID of Ban Filters ({0})", Filters.BanFilters.Count - 1));
@@ -240,7 +238,7 @@ namespace SuiBot_Core.Components
 		/// </summary>
 		/// <param name="filterType">Type of filter to be added based on FilterType enum.</param>
 		/// <param name="lastMassage">Message to get the filter from.</param>
-		private void AddFilter(Storage.ChatFilters.FilterType filterType, ChatMessage lastMassage)
+		private void AddFilter(ChatFilters.FilterType filterType, ChatMessage lastMassage)
 		{
 			lastMassage.Message = lastMassage.Message.StripSingleWord();
 			if (lastMassage.Message == "")
@@ -262,26 +260,26 @@ namespace SuiBot_Core.Components
 
 			switch (filterType)
 			{
-				case (Storage.ChatFilters.FilterType.Purge):
+				case ChatFilters.FilterType.Purge:
 					{
 						var newFilter = lastMassage.Message;
-						Filters.PurgeFilters.Add(new Storage.ChatFilter(newFilter, "", 1));
+						Filters.PurgeFilters.Add(new ChatFilter(newFilter, "", 1));
 						Filters.Save();
 						ChannelInstance.SendChatMessageResponse(lastMassage, "Added! You can update it further using command: !chatfilter update purge last Response:\"Custom response\"");
 					}
 					break;
-				case (Storage.ChatFilters.FilterType.Timeout):
+				case ChatFilters.FilterType.Timeout:
 					{
 						var newFilter = lastMassage.Message;
-						Filters.TimeOutFilter.Add(new Storage.ChatFilter(newFilter, "", 1));
+						Filters.TimeOutFilter.Add(new ChatFilter(newFilter, "", 1));
 						Filters.Save();
 						ChannelInstance.SendChatMessageResponse(lastMassage, "Added! You can update it further using command: !chatfilter update timeout last Response:\"Custom response\", Duration:\"Lenght\"");
 					}
 					break;
-				case (Storage.ChatFilters.FilterType.Ban):
+				case ChatFilters.FilterType.Ban:
 					{
 						var newFilter = lastMassage.Message;
-						Filters.BanFilters.Add(new Storage.ChatFilter(newFilter, "", 1));
+						Filters.BanFilters.Add(new ChatFilter(newFilter, "", 1));
 						Filters.Save();
 						ChannelInstance.SendChatMessageResponse(lastMassage, "Added! You can update it further using command: !chatfilter update ban last Response:\"Custom response\"");
 					}
@@ -294,7 +292,7 @@ namespace SuiBot_Core.Components
 		/// </summary>
 		/// <param name="filterType">Type of filter to be added based on FilterType enum.</param>
 		/// <param name="lastMassage">Message from which to get Response and Duration from.</param>
-		private void UpdateFilter(Storage.ChatFilters.FilterType filterType, ChatMessage lastMassage)
+		private void UpdateFilter(ChatFilters.FilterType filterType, ChatMessage lastMassage)
 		{
 			lastMassage.Message = lastMassage.Message.StripSingleWord();
 			if (lastMassage.Message == "")
@@ -308,7 +306,7 @@ namespace SuiBot_Core.Components
 
 				switch (filterType)
 				{
-					case (Storage.ChatFilters.FilterType.Purge):
+					case ChatFilters.FilterType.Purge:
 						{
 							if (Filters.PurgeFilters.Count > 0)
 							{
@@ -324,7 +322,7 @@ namespace SuiBot_Core.Components
 								ChannelInstance.SendChatMessageResponse(lastMassage, "There are no purge filters definied.");
 						}
 						break;
-					case (Storage.ChatFilters.FilterType.Timeout):
+					case ChatFilters.FilterType.Timeout:
 						{
 							if (Filters.TimeOutFilter.Count > 0)
 							{
@@ -340,7 +338,7 @@ namespace SuiBot_Core.Components
 								ChannelInstance.SendChatMessageResponse(lastMassage, "There are no timeout filters definied.");
 						}
 						break;
-					case (Storage.ChatFilters.FilterType.Ban):
+					case ChatFilters.FilterType.Ban:
 						{
 							if (Filters.BanFilters.Count > 0)
 							{
@@ -373,7 +371,7 @@ namespace SuiBot_Core.Components
 						{
 							switch (filterType)
 							{
-								case (Storage.ChatFilters.FilterType.Purge):
+								case ChatFilters.FilterType.Purge:
 									{
 										if (id >= Filters.PurgeFilters.Count)
 											ChannelInstance.SendChatMessageResponse(lastMassage, string.Format("ID was higher than a current last ID of Purge Filters ({0})", Filters.PurgeFilters.Count - 1));
@@ -389,7 +387,7 @@ namespace SuiBot_Core.Components
 										}
 									}
 									break;
-								case (Storage.ChatFilters.FilterType.Timeout):
+								case ChatFilters.FilterType.Timeout:
 									{
 										if (id >= Filters.TimeOutFilter.Count)
 											ChannelInstance.SendChatMessageResponse(lastMassage, string.Format("ID was higher than a current last ID of Timeout Filters ({0})", Filters.TimeOutFilter.Count - 1));
@@ -405,7 +403,7 @@ namespace SuiBot_Core.Components
 										}
 									}
 									break;
-								case (Storage.ChatFilters.FilterType.Ban):
+								case ChatFilters.FilterType.Ban:
 									{
 										if (id >= Filters.BanFilters.Count)
 											ChannelInstance.SendChatMessageResponse(lastMassage, string.Format("ID was higher than a current last ID of Ban Filters ({0})", Filters.BanFilters.Count - 1));
@@ -445,7 +443,7 @@ namespace SuiBot_Core.Components
 		/// </summary>
 		/// <param name="filterType">Type of filter to be removed based on FilterType enum.</param>
 		/// <param name="lastMassage">Message from which to get id from.</param>
-		private void RemoveFilter(Storage.ChatFilters.FilterType filterType, ChatMessage lastMassage)
+		private void RemoveFilter(ChatFilters.FilterType filterType, ChatMessage lastMassage)
 		{
 			lastMassage.Message = lastMassage.Message.StripSingleWord();
 			if (lastMassage.Message == "")
@@ -459,7 +457,7 @@ namespace SuiBot_Core.Components
 
 				switch (filterType)
 				{
-					case (Storage.ChatFilters.FilterType.Purge):
+					case ChatFilters.FilterType.Purge:
 						{
 							if (Filters.PurgeFilters.Count > 0)
 							{
@@ -471,7 +469,7 @@ namespace SuiBot_Core.Components
 								ChannelInstance.SendChatMessageResponse(lastMassage, "There are no purge filters definied.");
 						}
 						break;
-					case (Storage.ChatFilters.FilterType.Timeout):
+					case ChatFilters.FilterType.Timeout:
 						{
 							if (Filters.TimeOutFilter.Count > 0)
 							{
@@ -483,7 +481,7 @@ namespace SuiBot_Core.Components
 								ChannelInstance.SendChatMessageResponse(lastMassage, "There are no timeout filters definied.");
 						}
 						break;
-					case (Storage.ChatFilters.FilterType.Ban):
+					case ChatFilters.FilterType.Ban:
 						{
 							if (Filters.BanFilters.Count > 0)
 							{
@@ -509,7 +507,7 @@ namespace SuiBot_Core.Components
 					{
 						switch (filterType)
 						{
-							case (Storage.ChatFilters.FilterType.Purge):
+							case ChatFilters.FilterType.Purge:
 								{
 									if (id >= Filters.PurgeFilters.Count)
 										ChannelInstance.SendChatMessageResponse(lastMassage, string.Format("ID was higher than a total number of Purge Filters ({0})", Filters.PurgeFilters.Count - 1));
@@ -521,7 +519,7 @@ namespace SuiBot_Core.Components
 									}
 								}
 								break;
-							case (Storage.ChatFilters.FilterType.Timeout):
+							case ChatFilters.FilterType.Timeout:
 								{
 									if (id >= Filters.TimeOutFilter.Count)
 										ChannelInstance.SendChatMessageResponse(lastMassage, string.Format("ID was higher than a total number of Purge Filters ({0})", Filters.TimeOutFilter.Count - 1));
@@ -533,7 +531,7 @@ namespace SuiBot_Core.Components
 									}
 								}
 								break;
-							case (Storage.ChatFilters.FilterType.Ban):
+							case ChatFilters.FilterType.Ban:
 								{
 									if (id >= Filters.BanFilters.Count)
 										ChannelInstance.SendChatMessageResponse(lastMassage, string.Format("ID was higher than a total number of Purge Filters ({0})", Filters.BanFilters.Count - 1));
@@ -550,10 +548,7 @@ namespace SuiBot_Core.Components
 				}
 				else
 					ChannelInstance.SendChatMessageResponse(lastMassage, "Failed to parse ID.");
-
-
 			}
-
 		}
 
 		/// <summary>
@@ -564,7 +559,7 @@ namespace SuiBot_Core.Components
 		/// <param name="lenght">Duration lenght (1 if none provided of error)</param>
 		private void AdvancedFilters(string message, out string response, out uint lenght)
 		{
-			var responseMatches = Regex.Matches(message, RegexFindResponse, RegexOptions.IgnoreCase);
+			MatchCollection responseMatches = Regex.Matches(message, RegexFindResponse, RegexOptions.IgnoreCase);
 			if (responseMatches.Count > 0)
 			{
 				response = responseMatches[0].Value.Remove(0, "response:".Length).Trim(new char[] { ' ', '\"' });
@@ -572,7 +567,7 @@ namespace SuiBot_Core.Components
 			else
 				response = "";
 
-			var lenghtMatches = Regex.Matches(message, RegexFindTimeoutLenght, RegexOptions.IgnoreCase);
+			MatchCollection lenghtMatches = Regex.Matches(message, RegexFindTimeoutLenght, RegexOptions.IgnoreCase);
 			if (lenghtMatches.Count > 0)
 			{
 				var timeStripped = lenghtMatches[0].Value.Remove(0, "duration:".Length).Trim(new char[] { ' ', '\"' });
@@ -590,7 +585,6 @@ namespace SuiBot_Core.Components
 		/// <returns>Boolean value indicating whatever an action needed to be taken or not.</returns>
 		public bool FilterOutMessages(ChatMessage lastMassage)
 		{
-
 			if (ChannelInstance.ConfigInstance.FilterLinks && !UserDB.CanPostLinks(lastMassage.Username))
 			{
 				if (ContainsLink(lastMassage))
@@ -671,7 +665,7 @@ namespace SuiBot_Core.Components
 			else
 				words = new string[] { lastMassage.Message };
 
-			foreach (var word in words)
+			foreach (string word in words)
 			{
 				if (UrlMarks.Any(x => word.StartsWithLazy(x)))
 					return true;

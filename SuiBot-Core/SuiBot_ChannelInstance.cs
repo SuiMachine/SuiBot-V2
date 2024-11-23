@@ -22,6 +22,8 @@ namespace SuiBot_Core
 		Components.ViewerPB ViewerPb { get; set; }
 		Components.GenericUtil GenericUtil { get; set; }
 		Components.PCGW PCGW { get; set; }
+		Components.Timezones Timezones { get; set; }
+
 		#region Other
 		Components.Other._MemeComponents MemeComponents { get; set; }
 		#endregion
@@ -46,6 +48,7 @@ namespace SuiBot_Core
 			this.ViewerPb = new Components.ViewerPB(this);
 			this.PCGW = new Components.PCGW(this, API);
 			this.GenericUtil = new Components.GenericUtil(this, API);
+			this.Timezones = new Components.Timezones(this);
 
 			//Other
 			MemeComponents = new Components.Other._MemeComponents(this, ConfigInstance.MemeComponents);
@@ -241,6 +244,12 @@ namespace SuiBot_Core
 			{
 				PCGW.DoWork(lastMessage);
 				return;
+			}
+
+			//Timezones
+			if(messageLazy.StartsWith("time"))
+			{
+				Timezones.DoWork(lastMessage);
 			}
 
 			//Twitch update
