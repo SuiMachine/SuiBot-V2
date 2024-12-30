@@ -169,8 +169,6 @@ namespace SuiBot_Core.Storage
 		[XmlIgnore]
 		public ChatFilters Filters { get; set; }
 		[XmlElement]
-		public bool ViewerPBEnabled { get; set; }
-		[XmlElement]
 		public bool IntervalMessageEnabled { get; set; }
 		[XmlElement]
 		public bool LeaderboardsEnabled { get; set; }
@@ -194,7 +192,6 @@ namespace SuiBot_Core.Storage
 			FilteringEnabled = false;
 			FilterLinks = false;
 			Filters = new ChatFilters();
-			ViewerPBEnabled = false;
 			IntervalMessageEnabled = false;
 			LeaderboardsEnabled = false;
 			CustomCvarsEnabled = false;

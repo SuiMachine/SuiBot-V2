@@ -19,7 +19,6 @@ namespace SuiBot_Core
 		Components.ChatFiltering ChatFiltering { get; set; }
 		Components.Leaderboards Leaderboards { get; set; }
 		Components.CustomCvars Cvars { get; set; }
-		Components.ViewerPB ViewerPb { get; set; }
 		Components.GenericUtil GenericUtil { get; set; }
 		Components.PCGW PCGW { get; set; }
 		Components.Timezones Timezones { get; set; }
@@ -30,6 +29,8 @@ namespace SuiBot_Core
 		#endregion
 		TwitchAPI API { get; set; }
 		Dictionary<string, DateTime> UserCooldowns { get; set; }
+		Dictionary<string, DateTime> LastUserActivity { get; set; }
+
 
 		//Cause of course now you have to have Oauth
 		public SuiBot_ChannelInstance(string Channel, string Oauth, SuiBot SuiBotInstance, Storage.ChannelConfig ConfigInstance)
@@ -45,7 +46,7 @@ namespace SuiBot_Core
 			this.API = new TwitchAPI(this, Oauth);
 			this.Cvars = new Components.CustomCvars(this);
 			this.UserCooldowns = new Dictionary<string, DateTime>();
-			this.ViewerPb = new Components.ViewerPB(this);
+			this.LastUserActivity = new Dictionary<string, DateTime>();
 			this.PCGW = new Components.PCGW(this, API);
 			this.GenericUtil = new Components.GenericUtil(this, API);
 			this.Timezones = new Components.Timezones(this);
@@ -63,9 +64,6 @@ namespace SuiBot_Core
 		internal void UpdateTwitchStatus(bool vocal)
 		{
 			API.GetStatus();
-
-			if (ConfigInstance.ViewerPBEnabled)
-				ViewerPb.UpdateViewerPB(API.LastViewers);
 
 			if (ConfigInstance.LeaderboardsEnabled && !Leaderboards.GameOverride)
 				Leaderboards.CurrentGame = API.game;
@@ -153,6 +151,8 @@ namespace SuiBot_Core
 
 		internal void DoWork(ChatMessage lastMessage)
 		{
+			UpdateActiveUser(lastMessage.Username);
+
 			//If Filtering is enabled and timeouted or banned, we don't need to do anything else
 			if (ConfigInstance.FilteringEnabled && PerformActionFiltering(lastMessage))
 				return;
@@ -247,7 +247,7 @@ namespace SuiBot_Core
 			}
 
 			//Timezones
-			if(messageLazy.StartsWith("time"))
+			if (messageLazy.StartsWith("time"))
 			{
 				Timezones.DoWork(lastMessage);
 			}
@@ -309,6 +309,29 @@ namespace SuiBot_Core
 				if (Cvars.PerformCustomCvar(lastMessage))
 					return;
 			}
+		}
+
+		public void UpdateActiveUser(string username)
+		{
+			if (string.IsNullOrEmpty(username))
+				return;
+
+			username = username.ToLower();
+
+			if (LastUserActivity.ContainsKey(username))
+				LastUserActivity[username] = DateTime.UtcNow;
+			else
+				LastUserActivity.Add(username, DateTime.UtcNow);
+		}
+
+		public bool ActiveUsersContains(string username)
+		{
+			username = username.ToLower();
+
+			if (LastUserActivity.TryGetValue(username, out DateTime userActivity))
+				return userActivity + TimeSpan.FromMinutes(30) > DateTime.UtcNow;
+			else
+				return false;
 		}
 
 		private bool PerformActionFiltering(ChatMessage lastMessage)

@@ -70,17 +70,26 @@ namespace SuiBot_Core.Components.Other
 			var trimLength = "!hug ".Length;
 			if (lastMessage.Message.Length > trimLength)
 			{
-				string trim = lastMessage.Message.Substring(trimLength).Trim().TrimStart('@');
+				string trim = lastMessage.Message.Substring(trimLength).Trim().TrimStart('@').Trim();
 				if (trim.Length > 0)
 				{
-					string randomResponse = Responses[rng.Next(Responses.Count)];
-					channelInstance.SendChatMessage(string.Format(randomResponse, lastMessage.Username, trim));
+					if (trim.ToLower() == lastMessage.Username.ToLower())
+						channelInstance.SendChatMessage($"{lastMessage.Username} hugs themselves - somehow...");
+					else if (channelInstance.ActiveUsersContains(trim))
+					{
+						string randomResponse = Responses[rng.Next(Responses.Count)];
+						channelInstance.SendChatMessage(string.Format(randomResponse, lastMessage.Username, trim));
+					}
+					else
+					{
+						channelInstance.SendChatMessage($"{lastMessage.Username} - doesn't seem like such user has been recently active...");
+					}
 				}
 				else
-					channelInstance.SendChatMessage($"{lastMessage.Username} hugs himself - somehow...");
+					channelInstance.SendChatMessage($"{lastMessage.Username} hugs themselves - somehow...");
 			}
 			else
-				channelInstance.SendChatMessage($"{lastMessage.Username} hugs himself - somehow...");
+				channelInstance.SendChatMessage($"{lastMessage.Username} hugs themselves - somehow...");
 
 			return true;
 		}

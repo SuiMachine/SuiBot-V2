@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using WebSocket4Net;
 
 namespace SuiBot_Core
 {
@@ -13,6 +14,7 @@ namespace SuiBot_Core
 		private Storage.ConnectionConfig BotConnectionConfig { get; set; }
 		public Storage.CoreConfig BotCoreConfig { get; set; }
 		internal IrcClient MeebyIrcClient { get; set; }
+		internal WebSocket TwitchSocket { get; set; }
 		internal ImgUploader ImageUplaoder { get; set; }
 		public Dictionary<string, SuiBot_ChannelInstance> ActiveChannels { get; set; }
 		public bool IsAfterFirstStatusUpdate = false;
@@ -124,10 +126,9 @@ namespace SuiBot_Core
 		{
 			try
 			{
-				if (e.Data.Channel != null && e.Data.Nick != null && e.Data.Message != null && ActiveChannels.ContainsKey(e.Data.Channel))
+				if (e.Data.Channel != null && e.Data.Nick != null && e.Data.Message != null && ActiveChannels.TryGetValue(e.Data.Channel, out SuiBot_ChannelInstance channel))
 				{
 					string messageId = e.Data.Tags["id"];
-
 
 					Role role = GetRoleFromTags(e);
 					string userName = e.Data.Nick;
@@ -135,7 +136,7 @@ namespace SuiBot_Core
 					string messageContent = e.Data.Message;
 					bool messageHighlighted = e.Data.Tags.ContainsKey("msg-id") ? e.Data.Tags["msg-id"] == "highlighted-message" : false;
 					string customReward = e.Data.Tags.ContainsKey("custom-reward-id") ? e.Data.Tags["custom-reward-id"] : null;
-					bool isFirstMessage = e.Data.Tags["first-msg"] == "1"; 
+					bool isFirstMessage = e.Data.Tags["first-msg"] == "1";
 
 					LastMessage.Update(messageId,
 						role,
@@ -147,7 +148,7 @@ namespace SuiBot_Core
 						customReward //custom reward using viewer points
 						);
 					this.OnChatMessageReceived?.Invoke(e.Data.Channel, LastMessage);
-					ActiveChannels[e.Data.Channel].DoWork(LastMessage);
+					channel.DoWork(LastMessage);
 				}
 			}
 			catch (Exception ex)
@@ -216,8 +217,13 @@ namespace SuiBot_Core
 
 		private void IrcClient_OnJoin(object sender, JoinEventArgs e)
 		{
-			//ErrorLogging.WriteLine(e.Channel + "! JOINED: " + e.Data.Nick);
-			Console.WriteLine("! JOINED: " + e.Data.Nick);
+			if (e.Data.Channel != null && e.Data.Nick != null && ActiveChannels.TryGetValue(e.Data.Channel, out SuiBot_ChannelInstance channel))
+			{
+#if DEBUG
+				channel.UpdateActiveUser(e.Data.Nick);
+#endif
+				Console.WriteLine($"{e.Data.Nick} joined {e.Data.Channel}");
+			}
 		}
 
 		internal void LeaveChannel(string channelToLeave)
@@ -333,6 +339,12 @@ namespace SuiBot_Core
 		{
 			if (!BotConnectionConfig.IsValidConfig())
 				throw new Exception("Invalid config!");
+
+			TwitchSocket = new WebSocket("wss://eventsub.wss.twitch.tv/ws?keepalive_timeout_seconds=30");
+			TwitchSocket.MessageReceived += (sender, package) =>
+			{
+
+			};
 
 			MeebyIrcClient = new IrcClient()
 			{

@@ -29,6 +29,79 @@
             An error is displayed.
             </summary>
         </member>
+        <member name="T:Hardcodet.Wpf.TaskbarNotification.IconExtensions">
+            <summary>
+            Extension to support using different types to set the tray Icon
+            With added FrameworkElement support, one now can use the PackIcon from
+            <a href="https://github.com/ControlzEx/ControlzEx">ControlzEx</a>
+            and
+            <a href="https://github.com/MahApps/MahApps.Metro.IconPacks">MahApps.Metro.IconPacks</a>
+            </summary>
+        </member>
+        <member name="M:Hardcodet.Wpf.TaskbarNotification.IconExtensions.ToIcon(System.Windows.Media.ImageSource)">
+            <summary>
+            Reads a given image resource into a WinForms icon.
+            </summary>
+            <param name="imageSource">Image source pointing to an icon file (*.ico).</param>
+            <returns>An icon object that can be used with the taskbar area.</returns>
+        </member>
+        <member name="M:Hardcodet.Wpf.TaskbarNotification.IconExtensions.GetBestFitIcon(System.IO.Stream,System.Drawing.Size)">
+            <summary>
+            Finds the best fitting icon from a stream based on the desired size.
+            </summary>
+            <param name="iconStream">The stream containing the icon data.</param>
+            <param name="desiredSize">The desired size of the icon.</param>
+            <returns>The best fitting icon as an <see cref="T:System.Drawing.Icon"/> object.</returns>
+            <exception cref="T:System.IO.InvalidDataException">Thrown if the ICO file header is invalid or contains no images.</exception>
+            <exception cref="T:System.IO.EndOfStreamException">Thrown if the complete icon image data could not be read.</exception>
+        </member>
+        <member name="T:Hardcodet.Wpf.TaskbarNotification.IconExtensions.IconEntry">
+            <summary>
+            Represents an entry in the icon directory.
+            </summary>
+        </member>
+        <member name="M:Hardcodet.Wpf.TaskbarNotification.IconExtensions.ToIcon(System.Windows.FrameworkElement,System.Nullable{System.Int32})">
+            <summary>
+                Render a frameworkElement to a "GDI" Icon with a specified size or the system's default size.
+            </summary>
+            <param name="frameworkElement">FrameworkElement</param>
+            <param name="size">Optional, specifies the size, if not given the system default is used</param>
+            <returns>Icon</returns>
+        </member>
+        <member name="M:Hardcodet.Wpf.TaskbarNotification.IconExtensions.ToIconMemoryStream(System.Windows.FrameworkElement,System.Collections.Generic.IEnumerable{System.Int32})">
+            <summary>
+            Create a "GDI" icon from the supplied FrameworkElement, it is possible to specify multiple icon sizes.
+            Note: this doesn't work on Windows versions BEFORE Windows Vista!
+            </summary>
+            <param name="frameworkElement">FrameworkElement to convert to an icon</param>
+            <param name="optionalIconSizes">Optional, IEnumerable with icon sizes, default Icon sizes (as specified by windows): 16x16, 32x32, 48x48, 256x256</param>
+            <returns>MemoryStream with the icon data</returns>
+        </member>
+        <member name="M:Hardcodet.Wpf.TaskbarNotification.IconExtensions.ToIconMemoryStream(System.Collections.Generic.IList{System.Windows.Media.Imaging.BitmapFrame})">
+            <summary>
+            Helper method to write one more BitmapFrames to a MemoryStream with GDI Icon data
+            This can be written to a .ico or used with new Icon(stream)
+            </summary>
+            <param name="bitmapFrames">IList of BitmapFrames</param>
+            <returns>MemoryStream with the icon data</returns>
+        </member>
+        <member name="M:Hardcodet.Wpf.TaskbarNotification.IconExtensions.ToBitmapSource(System.Windows.FrameworkElement,System.Nullable{System.Windows.Size},System.Double,System.Double)">
+            <summary>
+                Render the frameworkElement to a BitmapSource
+            </summary>
+            <param name="frameworkElement">FrameworkElement</param>
+            <param name="size">Size, using the bound as size by default</param>
+            <param name="dpiX">Horizontal DPI settings</param>
+            <param name="dpiY">Vertical DPI settings</param>
+            <returns>BitmapSource</returns>
+        </member>
+        <member name="M:Hardcodet.Wpf.TaskbarNotification.IconExtensions.RemoveChild(System.Windows.DependencyObject,System.Windows.UIElement)">
+            <summary>
+            Disassociate the child from the parent
+            </summary>
+            <param name="parent">DependencyObject</param>
+            <param name="child">UIElement</param>
+        </member>
         <member name="T:Hardcodet.Wpf.TaskbarNotification.Interop.AppBarInfo">
             <summary>
             This contains the logic to access the location of the app bar and communicate with it.
@@ -466,6 +539,21 @@
             Y coordinate.
             </summary>
         </member>
+        <member name="T:Hardcodet.Wpf.TaskbarNotification.Interop.Size">
+            <summary>
+            Win API struct representing a size with width and height.
+            </summary>
+        </member>
+        <member name="F:Hardcodet.Wpf.TaskbarNotification.Interop.Size.Width">
+            <summary>
+            Width.
+            </summary>
+        </member>
+        <member name="F:Hardcodet.Wpf.TaskbarNotification.Interop.Size.Height">
+            <summary>
+            Height.
+            </summary>
+        </member>
         <member name="T:Hardcodet.Wpf.TaskbarNotification.Interop.SystemInfo">
             <summary>
             This class is a helper for system information, currently to get the DPI factors
@@ -498,12 +586,17 @@
             <param name="point"></param>
             <returns>Point</returns>
         </member>
+        <member name="P:Hardcodet.Wpf.TaskbarNotification.Interop.SystemInfo.SmallIconSize">
+            <summary>
+            Gets a value indicating the recommended size, in pixels, of a small icon
+            </summary>
+        </member>
         <member name="T:Hardcodet.Wpf.TaskbarNotification.Interop.TrayInfo">
             <summary>
             Resolves the current tray position.
             </summary>
         </member>
-        <member name="M:Hardcodet.Wpf.TaskbarNotification.Interop.TrayInfo.GetTrayLocation">
+        <member name="M:Hardcodet.Wpf.TaskbarNotification.Interop.TrayInfo.GetTrayLocation(System.Int32)">
             <summary>
             Gets the position of the system tray.
             </summary>
@@ -579,6 +672,19 @@
             Gets the screen coordinates of the current mouse position.
             </summary>
         </member>
+        <member name="M:Hardcodet.Wpf.TaskbarNotification.Interop.WinApi.GetCursorPosition(Hardcodet.Wpf.TaskbarNotification.Interop.NotifyIconVersion)">
+            <summary>
+            Gets the screen coordinates of the current mouse position.
+            in device coordinates
+            </summary>
+            <param name="version"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Hardcodet.Wpf.TaskbarNotification.Interop.WinApi.GetSystemMetrics(System.Int32)">
+            <summary>
+            Gets the specified system metric.
+            </summary>
+        </member>
         <member name="T:Hardcodet.Wpf.TaskbarNotification.Interop.WindowProcedureHandler">
             <summary>
             Callback delegate which is used by the Windows API to
@@ -649,6 +755,12 @@
             <summary>
             Fired in case the user clicked or moved within
             the taskbar icon area.
+            </summary>
+        </member>
+        <member name="E:Hardcodet.Wpf.TaskbarNotification.Interop.WindowMessageSink.ContextMenuReceived">
+            <summary>
+            Fired in case the user uses the WM_CONTEXTMENU-key
+            on the taskbar icon.
             </summary>
         </member>
         <member name="E:Hardcodet.Wpf.TaskbarNotification.Interop.WindowMessageSink.BalloonToolTipChanged">
@@ -943,6 +1055,11 @@
             The item is displayed whenever a click occurs.
             </summary>
         </member>
+        <member name="F:Hardcodet.Wpf.TaskbarNotification.PopupActivationMode.None">
+            <summary>
+            The item is displayed manually from code.
+            </summary>
+        </member>
         <member name="T:Hardcodet.Wpf.TaskbarNotification.RoutedEventHelper">
             <summary>
             Helper class used by routed events of the
@@ -1026,6 +1143,11 @@
             Indicates whether custom tooltips are supported, which depends
             on the OS. Windows Vista or higher is required in order to
             support this feature.
+            </summary>
+        </member>
+        <member name="F:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon.showSystemToolTip">
+            <summary>
+            Indicates that ToolTipText should be displayed.
             </summary>
         </member>
         <member name="P:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon.IsPopupOpen">
@@ -1119,6 +1241,14 @@
             its own, but takes advance of Popup's internal <see cref="P:System.Windows.UIElement.IsHitTestVisible"/>
             property which prevents this issue.</remarks>
         </member>
+        <member name="M:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon.WithTrayToolTip(Hardcodet.Wpf.TaskbarNotification.Interop.IconDataMembers)">
+            <summary>
+            Shell_NotifyIcon requires NIF_SHOWTIP to be specified for every call to Shell_NotifyIcon.
+            This modifies <paramref name="flags"/> to include this if required.
+            </summary>
+            <param name="flags">Passed through flags fo Shell_NotifyIcon.</param>
+            <returns>Flags amended with NIF_SHOWTIP if required.</returns>
+        </member>
         <member name="M:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon.WriteToolTipSettings">
             <summary>
             Sets tooltip settings for the class depending on defined
@@ -1140,7 +1270,12 @@
             its own, but takes advance of Popup's internal <see cref="P:System.Windows.UIElement.IsHitTestVisible"/>
             property which prevents this issue.</remarks>
         </member>
-        <member name="M:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon.ShowTrayPopup(Hardcodet.Wpf.TaskbarNotification.Interop.Point)">
+        <member name="M:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon.CloseTrayPopup">
+            <summary>
+            Hide the <see cref="P:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon.TrayPopup"/> control if it was visible.
+            </summary>
+        </member>
+        <member name="M:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon.ShowTrayPopup">
             <summary>
             Displays the <see cref="P:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon.TrayPopup"/> control if it was set.
             </summary>
@@ -1270,7 +1405,7 @@
             can be disposed.
             </summary>
             <param name="disposing">If disposing equals <c>false</c>, the method
-            has been called by the runtime from inside the finalizer and you
+            has been called by the runtime from inside the finalizer, and you
             should not reference other objects. Only unmanaged resources can
             be disposed.</param>
             <remarks>Check the <see cref="P:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon.IsDisposed"/> property to determine whether
@@ -1366,7 +1501,7 @@
         </member>
         <member name="F:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon.IconSourceProperty">
             <summary>
-            Resolves an image source and updates the <see cref="P:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon.Icon" /> property accordingly.
+            Resolves an <see cref="T:System.Windows.Media.ImageSource"/> and updates the <see cref="P:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon.Icon" /> property accordingly.
             </summary>
         </member>
         <member name="P:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon.IconSource">
@@ -1376,19 +1511,30 @@
             Resolves an image source and updates the <see cref="P:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon.Icon" /> property accordingly.
             </summary>
         </member>
-        <member name="M:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon.IconSourcePropertyChanged(System.Windows.DependencyObject,System.Windows.DependencyPropertyChangedEventArgs)">
+        <member name="F:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon.IconFrameworkElementSourceProperty">
+            <summary>
+            Resolves a <see cref="T:System.Windows.FrameworkElement"/> and updates the <see cref="P:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon.Icon" /> property accordingly.
+            </summary>
+        </member>
+        <member name="P:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon.IconFrameworkElementSource">
+            <summary>
+            A property wrapper for the <see cref="F:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon.IconFrameworkElementSourceProperty"/> dependency property:<br/>
+            Renders a FrameworkElement to an Icon and updates the <see cref="P:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon.Icon" /> property accordingly.
+            </summary>
+        </member>
+        <member name="M:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon.IconPropertyChanged(System.Windows.DependencyObject,System.Windows.DependencyPropertyChangedEventArgs)">
             <summary>
             A static callback listener which is being invoked if the
             <see cref="F:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon.IconSourceProperty"/> dependency property has
-            been changed. Invokes the <see cref="M:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon.OnIconSourcePropertyChanged(System.Windows.DependencyPropertyChangedEventArgs)"/>
+            been changed. Invokes the <see cref="M:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon.IconPropertyChanged(System.Windows.DependencyObject,System.Windows.DependencyPropertyChangedEventArgs)"/>
             instance method of the changed instance.
             </summary>
             <param name="d">The currently processed owner of the property.</param>
             <param name="e">Provides information about the updated property.</param>
         </member>
-        <member name="M:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon.OnIconSourcePropertyChanged(System.Windows.DependencyPropertyChangedEventArgs)">
+        <member name="M:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon.OnIconPropertyChanged(System.Windows.DependencyPropertyChangedEventArgs)">
             <summary>
-            Handles changes of the <see cref="F:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon.IconSourceProperty"/> dependency property. As
+            Handles changes of the <see cref="F:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon.IconSourceProperty"/> and <see cref="F:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon.IconFrameworkElementSourceProperty"/> dependency property. As
             WPF internally uses the dependency property system and bypasses the
             <see cref="P:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon.IconSource"/> property wrapper, updates of the property's value
             should be handled here.
@@ -1520,6 +1666,44 @@
             dependency property:<br/>
             Defines what mouse events trigger the <see cref="P:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon.TrayPopup" />.
             Default is <see cref="F:Hardcodet.Wpf.TaskbarNotification.PopupActivationMode.LeftClick" />.
+            </summary>
+        </member>
+        <member name="F:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon.PopupPlacementProperty">
+            <summary>
+            Defines popup placement mode <see cref="P:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon.TrayPopup" />.
+            Default is <see cref="F:System.Windows.Controls.Primitives.PlacementMode.AbsolutePoint" />.
+            </summary>
+        </member>
+        <member name="P:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon.PopupPlacement">
+            <summary>
+            A property wrapper for the <see cref="F:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon.PopupPlacementProperty"/>
+            dependency property:<br/>
+            Defines popup placement mode <see cref="P:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon.TrayPopup" />.
+            Default is <see cref="F:System.Windows.Controls.Primitives.PlacementMode.AbsolutePoint" />.
+            </summary>
+        </member>
+        <member name="F:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon.PopupHorizontalOffsetProperty">
+            <summary>
+            Defines popup HorizontalOffset <see cref="P:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon.TrayPopup" />.
+            </summary>
+        </member>
+        <member name="P:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon.PopupHorizontalOffset">
+            <summary>
+            A property wrapper for the <see cref="F:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon.PopupHorizontalOffsetProperty"/>
+            dependency property:<br/>
+            Defines popup HorizontalOffset<see cref="P:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon.TrayPopup" />.
+            </summary>
+        </member>
+        <member name="F:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon.PopupVerticalOffsetProperty">
+            <summary>
+            Defines popup VerticalOffset <see cref="P:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon.TrayPopup" />.
+            </summary>
+        </member>
+        <member name="P:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon.PopupVerticalOffset">
+            <summary>
+            A property wrapper for the <see cref="F:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon.PopupVerticalOffsetProperty"/>
+            dependency property:<br/>
+            Defines popup VerticalOffset <see cref="P:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon.TrayPopup" />.
             </summary>
         </member>
         <member name="M:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon.VisibilityPropertyChanged(System.Windows.DependencyObject,System.Windows.DependencyPropertyChangedEventArgs)">
@@ -2201,6 +2385,32 @@
             <param name="target">UIElement or ContentElement on which to raise the event</param>
             <param name="source">The <see cref="T:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon"/> instance that manages the balloon.</param>
         </member>
+        <member name="F:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon.BalloonClosedEvent">
+            <summary>
+            BalloonClosed Attached Routed Event
+            </summary>
+        </member>
+        <member name="M:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon.AddBalloonClosedHandler(System.Windows.DependencyObject,System.Windows.RoutedEventHandler)">
+            <summary>
+            Adds a handler for the BalloonClosed attached event
+            </summary>
+            <param name="element">UIElement or ContentElement that listens to the event</param>
+            <param name="handler">Event handler to be added</param>
+        </member>
+        <member name="M:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon.RemoveBalloonClosedHandler(System.Windows.DependencyObject,System.Windows.RoutedEventHandler)">
+            <summary>
+            Removes a handler for the BalloonClosed attached event
+            </summary>
+            <param name="element">UIElement or ContentElement that listens to the event</param>
+            <param name="handler">Event handler to be removed</param>
+        </member>
+        <member name="M:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon.RaiseBalloonClosedEvent(System.Windows.DependencyObject,Hardcodet.Wpf.TaskbarNotification.TaskbarIcon)">
+            <summary>
+            A static helper method to raise the BalloonClosed event on a target element.
+            </summary>
+            <param name="target">UIElement or ContentElement on which to raise the event</param>
+            <param name="source">The <see cref="T:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon"/> instance that manages the balloon.</param>
+        </member>
         <member name="F:Hardcodet.Wpf.TaskbarNotification.TaskbarIcon.ParentTaskbarIconProperty">
             <summary>
             An attached property that is assigned to displayed UI elements (balloons, tooltips, context menus), and
@@ -2274,15 +2484,6 @@
             matches a given <see cref="T:Hardcodet.Wpf.TaskbarNotification.BalloonIcon"/>.
             </summary>
         </member>
-        <member name="M:Hardcodet.Wpf.TaskbarNotification.Util.ToIcon(System.Windows.Media.ImageSource)">
-            <summary>
-            Reads a given image resource into a WinForms icon.
-            </summary>
-            <param name="imageSource">Image source pointing to
-            an icon file (*.ico).</param>
-            <returns>An icon object that can be used with the
-            taskbar area.</returns>
-        </member>
         <member name="M:Hardcodet.Wpf.TaskbarNotification.Util.Is``1(``0,``0[])">
             <summary>
             Checks a list of candidates for equality to a given
@@ -2290,7 +2491,7 @@
             </summary>
             <typeparam name="T"></typeparam>
             <param name="value">The evaluated value.</param>
-            <param name="candidates">A liste of possible values that are
+            <param name="candidates">A list of possible values that are
             regarded valid.</param>
             <returns>True if one of the submitted <paramref name="candidates"/>
             matches the evaluated value. If the <paramref name="candidates"/>
