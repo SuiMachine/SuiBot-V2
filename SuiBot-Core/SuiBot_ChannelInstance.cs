@@ -316,10 +316,22 @@ namespace SuiBot_Core
 			if (string.IsNullOrEmpty(username))
 				return;
 
+			username = username.ToLower();
+
 			if (LastUserActivity.ContainsKey(username))
 				LastUserActivity[username] = DateTime.UtcNow;
 			else
 				LastUserActivity.Add(username, DateTime.UtcNow);
+		}
+
+		public bool ActiveUsersContains(string username)
+		{
+			username = username.ToLower();
+
+			if (LastUserActivity.TryGetValue(username, out DateTime userActivity))
+				return userActivity + TimeSpan.FromMinutes(30) > DateTime.UtcNow;
+			else
+				return false;
 		}
 
 		private bool PerformActionFiltering(ChatMessage lastMessage)

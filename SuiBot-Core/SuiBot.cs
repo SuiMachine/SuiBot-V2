@@ -136,7 +136,7 @@ namespace SuiBot_Core
 					string messageContent = e.Data.Message;
 					bool messageHighlighted = e.Data.Tags.ContainsKey("msg-id") ? e.Data.Tags["msg-id"] == "highlighted-message" : false;
 					string customReward = e.Data.Tags.ContainsKey("custom-reward-id") ? e.Data.Tags["custom-reward-id"] : null;
-					bool isFirstMessage = e.Data.Tags["first-msg"] == "1"; 
+					bool isFirstMessage = e.Data.Tags["first-msg"] == "1";
 
 					LastMessage.Update(messageId,
 						role,
@@ -219,9 +219,11 @@ namespace SuiBot_Core
 		{
 			if (e.Data.Channel != null && e.Data.Nick != null && ActiveChannels.TryGetValue(e.Data.Channel, out SuiBot_ChannelInstance channel))
 			{
+#if DEBUG
 				channel.UpdateActiveUser(e.Data.Nick);
+#endif
+				Console.WriteLine($"{e.Data.Nick} joined {e.Data.Channel}");
 			}
-			Console.WriteLine("! JOINED: " + e.Data.Nick);
 		}
 
 		internal void LeaveChannel(string channelToLeave)
