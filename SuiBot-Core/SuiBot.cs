@@ -14,7 +14,7 @@ namespace SuiBot_Core
 		private Storage.ConnectionConfig BotConnectionConfig { get; set; }
 		public Storage.CoreConfig BotCoreConfig { get; set; }
 		internal IrcClient MeebyIrcClient { get; set; }
-		internal WebSocket TwitchSocket { get; set; }
+		//internal WebSocket TwitchSocket { get; set; }
 		internal ImgUploader ImageUplaoder { get; set; }
 		public Dictionary<string, SuiBot_ChannelInstance> ActiveChannels { get; set; }
 		public bool IsAfterFirstStatusUpdate = false;
@@ -340,11 +340,11 @@ namespace SuiBot_Core
 			if (!BotConnectionConfig.IsValidConfig())
 				throw new Exception("Invalid config!");
 
-			TwitchSocket = new WebSocket("wss://eventsub.wss.twitch.tv/ws?keepalive_timeout_seconds=30");
+/*			TwitchSocket = new WebSocket("wss://eventsub.wss.twitch.tv/ws?keepalive_timeout_seconds=30");
 			TwitchSocket.MessageReceived += (sender, package) =>
 			{
 
-			};
+			};*/
 
 			MeebyIrcClient = new IrcClient()
 			{
