@@ -6,7 +6,7 @@ SuiBot-V2 is a successor to [SuiBot_Console](https://github.com/SuiMachine/SuiBo
 
 Compilation
 -------
-SuiBot-V2 was written in [Visual Studios Community Edition 2017](https://visualstudio.microsoft.com/). After some minor changes it should compile in 2015 and possibly [Mono Develop](https://www.monodevelop.com/). This is partially due to some inline expressions used that were added 2017 version of Visual Studio.
+SuiBot-V2 was written in [Visual Studios Community Edition 2022](https://visualstudio.microsoft.com/). After some changes it should compile with [Mono Develop](https://www.monodevelop.com/).
 
 Credits
 -------
