@@ -126,10 +126,9 @@ namespace SuiBot_Core
 		{
 			try
 			{
-				if (e.Data.Channel != null && e.Data.Nick != null && e.Data.Message != null && ActiveChannels.ContainsKey(e.Data.Channel))
+				if (e.Data.Channel != null && e.Data.Nick != null && e.Data.Message != null && ActiveChannels.TryGetValue(e.Data.Channel, out SuiBot_ChannelInstance channel))
 				{
 					string messageId = e.Data.Tags["id"];
-
 
 					Role role = GetRoleFromTags(e);
 					string userName = e.Data.Nick;
@@ -149,7 +148,7 @@ namespace SuiBot_Core
 						customReward //custom reward using viewer points
 						);
 					this.OnChatMessageReceived?.Invoke(e.Data.Channel, LastMessage);
-					ActiveChannels[e.Data.Channel].DoWork(LastMessage);
+					channel.DoWork(LastMessage);
 				}
 			}
 			catch (Exception ex)
@@ -218,7 +217,10 @@ namespace SuiBot_Core
 
 		private void IrcClient_OnJoin(object sender, JoinEventArgs e)
 		{
-			//ErrorLogging.WriteLine(e.Channel + "! JOINED: " + e.Data.Nick);
+			if (e.Data.Channel != null && e.Data.Nick != null && ActiveChannels.TryGetValue(e.Data.Channel, out SuiBot_ChannelInstance channel))
+			{
+				channel.UpdateActiveUser(e.Data.Nick);
+			}
 			Console.WriteLine("! JOINED: " + e.Data.Nick);
 		}
 
