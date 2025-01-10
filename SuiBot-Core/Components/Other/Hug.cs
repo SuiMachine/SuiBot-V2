@@ -75,7 +75,7 @@ namespace SuiBot_Core.Components.Other
 				{
 					if (trim.ToLower() == lastMessage.Username.ToLower())
 						channelInstance.SendChatMessage($"{lastMessage.Username} hugs themselves - somehow...");
-					else if (channelInstance.ActiveUsersContains(trim))
+					else if (channelInstance.ActiveUsersContains(trim) || channelInstance.Channel == trim)
 					{
 						string randomResponse = Responses[rng.Next(Responses.Count)];
 						channelInstance.SendChatMessage(string.Format(randomResponse, lastMessage.Username, trim));
