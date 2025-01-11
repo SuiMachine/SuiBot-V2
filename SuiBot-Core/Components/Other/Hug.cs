@@ -27,7 +27,7 @@ namespace SuiBot_Core.Components.Other
 						{
 							Responses.Add(split);
 							SaveResponses(channelInstance);
-							channelInstance.SendChatMessage($"Added a new response. e.g.: {string.Format(split, lastMessage.Username)}");
+							channelInstance.SendChatMessage($"Added a new response. e.g.: {string.Format(split, lastMessage.Username, "<target_here>")}");
 						}
 						else
 							channelInstance.SendChatMessage("Added response must contain {0} and {1}");
