@@ -356,6 +356,8 @@ namespace SuiBot_Core
 
 		internal bool IsSuperMod(string username)
 		{
+			if (Channel == username)
+				return true;
 			return ConfigInstance.SuperMods.Contains(username);
 		}
 
