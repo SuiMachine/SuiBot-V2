@@ -40,7 +40,7 @@ namespace SuiBot_Core.Components.Other
 					memeComponents.Add("unlurk", new Unlurk());
 				}
 
-				if(memeConfig.Lurk)
+				if(memeConfig.Hug)
 				{
 					memeComponents.Add("hug", new Hug());
 				}
