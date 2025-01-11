@@ -84,8 +84,20 @@ namespace SuiBot_Core
 
 		public void SendChatMessage(string message)
 		{
-			SuiBotInstance.SendChatMessageFeedback("#" + Channel, message);
-			SuiBotInstance.MeebyIrcClient.SendMessage(Meebey.SmartIrc4net.SendType.Message, "#" + Channel, message);
+			if (message.Length <= 500)
+			{
+				SuiBotInstance.SendChatMessageFeedback("#" + Channel, message);
+				SuiBotInstance.MeebyIrcClient.SendMessage(Meebey.SmartIrc4net.SendType.Message, "#" + Channel, message);
+			}
+			else
+			{
+				var messages = message.SplitMessage(500);
+				foreach (var subMessage in messages)
+				{
+					SuiBotInstance.SendChatMessageFeedback("#" + Channel, subMessage);
+					SuiBotInstance.MeebyIrcClient.SendMessage(Meebey.SmartIrc4net.SendType.Message, "#" + Channel, subMessage);
+				}
+			}
 		}
 
 		public void SendChatMessageResponse(ChatMessage messageToRespondTo, string message, bool noPersonMention = false)
@@ -105,7 +117,7 @@ namespace SuiBot_Core
 			}
 		}
 
-		private void SetUserCooldown(ChatMessage messageToRespondTo, int coodown)
+		private void SetUserCooldown(ChatMessage messageToRespondTo, int cooldown)
 		{
 			if (messageToRespondTo.UserRole <= Role.Mod)
 				return;
@@ -113,20 +125,20 @@ namespace SuiBot_Core
 			switch (messageToRespondTo.UserRole)
 			{
 				case Role.VIP:
-					coodown /= 20;
+					cooldown /= 20;
 					break;
 				case Role.Subscriber:
-					coodown /= 2;
+					cooldown /= 2;
 					break;
 				default:
 					break;
 			}
 
 			if (!UserCooldowns.ContainsKey(messageToRespondTo.Username))
-				UserCooldowns.Add(messageToRespondTo.Username, DateTime.UtcNow + TimeSpan.FromSeconds(coodown));
+				UserCooldowns.Add(messageToRespondTo.Username, DateTime.UtcNow + TimeSpan.FromSeconds(cooldown));
 			else
 			{
-				UserCooldowns[messageToRespondTo.Username] = DateTime.UtcNow + TimeSpan.FromSeconds(coodown);
+				UserCooldowns[messageToRespondTo.Username] = DateTime.UtcNow + TimeSpan.FromSeconds(cooldown);
 			}
 		}
 

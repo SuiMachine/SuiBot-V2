@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>SuiBot_Core</RootNamespace>
     <AssemblyName>SuiBot-Core</AssemblyName>
-    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
     <TargetFrameworkProfile />
@@ -133,6 +133,15 @@
     <Compile Include="Components\IntervalMessages.cs" />
     <Compile Include="Components\Leaderboards.cs" />
     <Compile Include="Components\LeaderboardsProxyNames.cs" />
+    <Compile Include="Components\Other\CharacterAI.cs" />
+    <Compile Include="Components\Other\CharacterAI\CharacterAiClient.cs" />
+    <Compile Include="Components\Other\CharacterAI\Exceptions.cs" />
+    <Compile Include="Components\Other\CharacterAI\Models\Common.cs" />
+    <Compile Include="Components\Other\CharacterAI\Models\Input.cs" />
+    <Compile Include="Components\Other\CharacterAI\Models\WsRequestMessage.cs" />
+    <Compile Include="Components\Other\CharacterAI\Models\WsResponseMessage.cs" />
+    <Compile Include="Components\Other\CharacterAI\Models\WS_Data.cs" />
+    <Compile Include="Components\Other\CharacterAI\WsConnection.cs" />
     <Compile Include="Components\Other\Hug.cs" />
     <Compile Include="Components\Other\MemeComponent.cs" />
     <Compile Include="Components\Other\Lurk.cs" />

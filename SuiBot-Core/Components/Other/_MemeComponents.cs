@@ -1,9 +1,6 @@
 ﻿using SuiBot_Core.Extensions.SuiStringExtension;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SuiBot_Core.Components.Other
 {
@@ -40,9 +37,18 @@ namespace SuiBot_Core.Components.Other
 					memeComponents.Add("unlurk", new Unlurk());
 				}
 
-				if(memeConfig.Hug)
+				if (memeConfig.Hug)
 				{
 					memeComponents.Add("hug", new Hug());
+				}
+
+				if (memeConfig.AskAI)
+				{
+					var characterAI = new CharacterAI();
+					if (characterAI.IsConfigured(channelInstance))
+						memeComponents.Add("ai", characterAI);
+					else
+						memeConfig.AskAI = false;
 				}
 
 				if (notify)

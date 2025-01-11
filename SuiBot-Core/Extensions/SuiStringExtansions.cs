@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace SuiBot_Core.Extensions.SuiStringExtension
 {
@@ -125,6 +126,33 @@ namespace SuiBot_Core.Extensions.SuiStringExtension
 		public static string GetUrlSafeString(this string v)
 		{
 			return Uri.EscapeDataString(v);
+		}
+
+		public static List<string> SplitMessage(this string v, int length)
+		{
+			if (v.Length <= length)
+				return new List<string>() { v };
+
+			var result = new List<string>();
+			var split = v.Split(' ');
+
+			var stringBuilder = new StringBuilder(500);
+			for (int i = 0; i < split.Length; i++)
+			{
+				if (stringBuilder.Length + 1 + split[i].Length > 500)
+				{
+					result.Add(stringBuilder.ToString());
+					stringBuilder.Clear();
+				}
+
+				if(stringBuilder.Length > 0)
+					stringBuilder.Append(' ');
+
+				stringBuilder.Append(split[i]);
+			}
+
+			result.Add(stringBuilder.ToString());
+			return result;
 		}
 	}
 }

@@ -156,8 +156,6 @@ namespace SuiBot_Core.Storage
 		[XmlElement]
 		public bool CustomCvarsEnabled { get; set; }
 		[XmlElement]
-		public bool AskEnabled { get; set; }
-		[XmlElement]
 		public MemeConfig MemeComponents { get; set; }
 		[XmlElement]
 		public GenericUtilConfig GenericUtil { get; set; }
@@ -186,7 +184,6 @@ namespace SuiBot_Core.Storage
 			SuperMods = new List<string>();
 
 			QuotesEnabled = false;
-			AskEnabled = false;
 			MemeComponents = new MemeConfig();
 			GenericUtil = new GenericUtilConfig();
 			FilteringEnabled = false;
@@ -414,6 +411,8 @@ namespace SuiBot_Core.Storage
 		[XmlElement]
 		public bool ENABLE { get; set; }
 		[XmlElement]
+		public bool AskAI { get; set; }
+		[XmlElement]
 		public bool RatsBirthday { get; set; }
 		[XmlElement]
 		public bool Tombstone { get; set; }
@@ -426,6 +425,7 @@ namespace SuiBot_Core.Storage
 		public MemeConfig()
 		{
 			ENABLE = false;
+			AskAI = false;
 			RatsBirthday = false;
 			Tombstone = false;
 			Lurk = false;

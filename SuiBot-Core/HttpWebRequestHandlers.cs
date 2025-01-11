@@ -37,7 +37,7 @@ namespace SuiBot_Core
 		}
 
 		/// <summary>
-		/// A more complex function for duing HTTP requests.
+		/// A more complex function for during HTTP requests.
 		/// </summary>
 		/// <param name="address">Address to perform HTTP requests on</param>
 		/// <param name="headers">Dictionary for HTTP headers</param>
@@ -45,7 +45,7 @@ namespace SuiBot_Core
 		/// <param name="acceptStr">Accept typestring</param>
 		/// <param name="Method">Method</param>
 		/// <param name="result">JSON returned of request (or empty on failed)</param>
-		/// <returns>True if successed, False if failed.</returns>
+		/// <returns>True if succeeds, False if failed.</returns>
 		public static bool PerformGetRequest(Uri address, Dictionary<string, string> headers, out string result)
 		{
 			try
