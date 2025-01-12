@@ -10,8 +10,10 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.WebSockets;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace CharacterAi.Client
@@ -297,7 +299,7 @@ namespace CharacterAi.Client
 					payload = payload
 				};
 
-				wsConnection.Send(JsonConvert.SerializeObject(wsRequestMessage));
+				wsConnection.SendAsync(JsonConvert.SerializeObject(wsRequestMessage));
 
 				// Wait for response 30 seconds
 				for (var i = 0; i < 30; i++)
@@ -372,7 +374,7 @@ namespace CharacterAi.Client
 				};
 
 				var serializationTest = JsonConvert.SerializeObject(wsRequestMessage);
-				wsConnection.Send(serializationTest);
+				wsConnection.SendAsync(serializationTest);
 
 				// Wait for response 60 seconds
 				for (var i = 0; i < 30; i++)
@@ -425,31 +427,47 @@ namespace CharacterAi.Client
 				return connection;
 			}
 
+			var webSocket = new ClientWebSocket();
+			webSocket.Options.SetRequestHeader("Cookie", $"HTTP_AUTHORIZATION=\"Token {authToken}\"");
+
+			var theTokenThatGetsYouCancelledFuckOff = new CancellationToken();
+
 			var newConnection = new WsConnection
 			{
-				Client = new WebSocket4Net.WebSocket("wss://neo.character.ai/ws/", customHeaderItems: new List<KeyValuePair<string, string>>()
-				{
-					new KeyValuePair<string, string>("Cookie", $"HTTP_AUTHORIZATION=\"Token {authToken}\"")
-				})
+				Client = webSocket,
+				CancellationToken = theTokenThatGetsYouCancelledFuckOff
 			};
-			newConnection.Client.Open();
-			while (newConnection.Client.State == WebSocket4Net.WebSocketState.Connecting)
-				System.Threading.Thread.Sleep(100);
 
 			if (WsConnections.TryAdd(authToken, newConnection))
 			{
-				newConnection.Client.MessageReceived += (object sender, WebSocket4Net.MessageReceivedEventArgs e) =>
-				{
-					var wsResponseMessage = JsonConvert.DeserializeObject<WsResponseMessage>(e.Message); // {"command": "neo_error", "request_id": null, "comment": "Self harm message detected", "error_code": 400, "sub_code": 101}
-					newConnection.Messages.Add(wsResponseMessage);
+				webSocket.ConnectAsync(new Uri("wss://neo.character.ai/ws/"), CancellationToken.None);
+				while (webSocket.State == WebSocketState.Connecting)
+					System.Threading.Thread.Sleep(100);
 
-					//Debug.Write(e.Message);
-				};
-
-				newConnection.Client.Closed += (object sender, EventArgs e) =>
+				Task.Run(async () =>
 				{
-					_ = WsConnections.TryRemove(authToken, out var _);
-				};
+					while (webSocket.State == WebSocketState.Open)
+					{
+						byte[] buffer = new byte[4096];
+						var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+
+						switch(result.MessageType)
+						{
+							case WebSocketMessageType.Text:
+								var responseString = System.Text.Encoding.UTF8.GetString(buffer);
+								var wsResponseMessage = JsonConvert.DeserializeObject<WsResponseMessage>(responseString);
+								newConnection.Messages.Add(wsResponseMessage);
+								break;
+							case WebSocketMessageType.Close:
+								_ = WsConnections.TryRemove(authToken, out var _);
+								await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
+								break;
+							case WebSocketMessageType.Binary:
+								Console.WriteLine("Unhandled websocket data format");
+								break;
+						}
+					}
+				});
 
 				return newConnection;
 			}
