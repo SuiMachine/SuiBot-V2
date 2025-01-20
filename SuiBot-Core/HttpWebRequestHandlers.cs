@@ -112,7 +112,7 @@ namespace SuiBot_Core
 			}
 		}
 
-		public static bool PerformPost(Uri address, Dictionary<string, string> headers, string postData, out string result)
+		public static bool PerformTwitchPost(Uri address, Dictionary<string, string> headers, string postData, out string result)
 		{
 			try
 			{
@@ -153,6 +153,47 @@ namespace SuiBot_Core
 				return false;
 			}
 		}
+
+		public static async System.Threading.Tasks.Task<string> PerformPost(Uri address, Dictionary<string, string> headers, string postData)
+		{
+			try
+			{
+				HttpWebRequest wRequest = (HttpWebRequest)HttpWebRequest.Create(address);
+
+				//Headers
+				if (headers != null)
+				{
+					foreach (var header in headers)
+					{
+						wRequest.Headers[header.Key] = header.Value;
+					}
+				}
+
+				byte[] encodedPostData = Encoding.UTF8.GetBytes(postData);
+				wRequest.ContentType = "application/json";
+				wRequest.Method = "POST";
+				wRequest.ContentLength = encodedPostData.LongLength;
+
+				Stream requestStream = wRequest.GetRequestStream();
+				await requestStream.WriteAsync(encodedPostData, 0, encodedPostData.Length);
+				requestStream.Close();
+
+				dynamic wResponse = wRequest.GetResponse().GetResponseStream();
+				StreamReader reader = new StreamReader(wResponse);
+				var result = await reader.ReadToEndAsync();
+				reader.Close();
+				wResponse.Close();
+				return result;
+			}
+			catch (Exception ex)
+			{
+#if DEBUG
+				System.Diagnostics.Debug.WriteLine("Error doing Post: " + ex.ToString());
+#endif
+				return null;
+			}
+		}
+
 
 		/// <summary>
 		/// A wrapper function for building a URL requests

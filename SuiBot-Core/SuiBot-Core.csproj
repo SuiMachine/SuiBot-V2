@@ -130,15 +130,9 @@
     <Compile Include="Components\IntervalMessages.cs" />
     <Compile Include="Components\Leaderboards.cs" />
     <Compile Include="Components\LeaderboardsProxyNames.cs" />
-    <Compile Include="Components\Other\CharacterAI.cs" />
-    <Compile Include="Components\Other\CharacterAI\CharacterAiClient.cs" />
-    <Compile Include="Components\Other\CharacterAI\Exceptions.cs" />
-    <Compile Include="Components\Other\CharacterAI\Models\Common.cs" />
-    <Compile Include="Components\Other\CharacterAI\Models\Input.cs" />
-    <Compile Include="Components\Other\CharacterAI\Models\WsRequestMessage.cs" />
-    <Compile Include="Components\Other\CharacterAI\Models\WsResponseMessage.cs" />
-    <Compile Include="Components\Other\CharacterAI\Models\WS_Data.cs" />
-    <Compile Include="Components\Other\CharacterAI\WsConnection.cs" />
+    <Compile Include="Components\Other\GeminiAI.cs" />
+    <Compile Include="Components\Other\Gemini\GeminiContent.cs" />
+    <Compile Include="Components\Other\Gemini\GeminiMessage.cs" />
     <Compile Include="Components\Other\Hug.cs" />
     <Compile Include="Components\Other\MemeComponent.cs" />
     <Compile Include="Components\Other\Lurk.cs" />
@@ -180,5 +174,6 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

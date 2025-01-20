@@ -44,9 +44,9 @@ namespace SuiBot_Core.Components.Other
 
 				if (memeConfig.AskAI)
 				{
-					var characterAI = new CharacterAI();
-					if (characterAI.IsConfigured(channelInstance))
-						memeComponents.Add("ai", characterAI);
+					var geminiAI = new GeminiAI();
+					if (geminiAI.IsConfigured(channelInstance))
+						memeComponents.Add("ai", geminiAI);
 					else
 						memeConfig.AskAI = false;
 				}

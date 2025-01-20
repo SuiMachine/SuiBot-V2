@@ -206,7 +206,7 @@ namespace SuiBot_Core
 
 			string dataStr = JsonConvert.SerializeObject(data);
 
-			if (HttpWebRequestHandlers.PerformPost(new Uri($"https://api.twitch.tv/helix/moderation/bans?broadcaster_id={channelID}&moderator_id={botId}"), RequestHeaders, dataStr, out string _))
+			if (HttpWebRequestHandlers.PerformTwitchPost(new Uri($"https://api.twitch.tv/helix/moderation/bans?broadcaster_id={channelID}&moderator_id={botId}"), RequestHeaders, dataStr, out string _))
 			{
 
 			}
@@ -240,7 +240,7 @@ namespace SuiBot_Core
 
 			string dataStr = JsonConvert.SerializeObject(data);
 
-			if (HttpWebRequestHandlers.PerformPost(new Uri($"https://api.twitch.tv/helix/moderation/bans?broadcaster_id={channelID}&moderator_id={botId}"), RequestHeaders, dataStr, out string _))
+			if (HttpWebRequestHandlers.PerformTwitchPost(new Uri($"https://api.twitch.tv/helix/moderation/bans?broadcaster_id={channelID}&moderator_id={botId}"), RequestHeaders, dataStr, out string _))
 			{
 
 			}
