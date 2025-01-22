@@ -25,6 +25,7 @@ namespace SuiBot_Core.Components.Other
 		public string StreamerPath;
 		public Gemini.GeminiContent StreamerContent = new Gemini.GeminiContent();
 		public Dictionary<string, Gemini.GeminiContent> UserContents = new Dictionary<string, Gemini.GeminiContent>();
+		public Dictionary<string, DateTime> Cooldowns = new Dictionary<string, DateTime>();
 
 		internal bool IsConfigured(SuiBot_ChannelInstance channelInstance)
 		{
@@ -66,9 +67,28 @@ namespace SuiBot_Core.Components.Other
 		{
 			if (lastMessage.UserRole == Role.SuperMod || lastMessage.UserRole == Role.Mod)
 			{
+				if (lastMessage.Username != channelInstance.Channel)
+				{
+					if (Cooldowns.TryGetValue(lastMessage.Username, out var cooldown))
+					{
+						if (cooldown + TimeSpan.FromMinutes(1) > DateTime.UtcNow)
+						{
+							channelInstance.SendChatMessageResponse(lastMessage, "Chill there - we have request limits!");
+							return true;
+						}
+						else
+						{
+							Cooldowns[lastMessage.Username] = DateTime.UtcNow;
+						}
+					}
+					else
+					{
+						Cooldowns.Add(lastMessage.Username, DateTime.UtcNow);
+					}
+				}
+
 				Task.Run(async () =>
 				{
-					//TODO: Add throttling!
 					await GetResponse(channelInstance, lastMessage);
 				});
 			}
@@ -171,19 +191,20 @@ namespace SuiBot_Core.Components.Other
 							{
 								var count = line.Count(x => x == '*');
 								if (count == 2)
+								{
 									splitText.RemoveAt(i);
+									continue;
+								}
+							}
+
+							if (line.Contains("*"))
+							{
+								line = CleanDescriptors(line);
+								splitText[i] = line;
 							}
 						}
 
 						text = string.Join(" ", splitText);
-
-						if(text.Contains('*'))
-						{
-							var regex = new Regex("\\*.+?\\*");
-							var matches = regex.Matches(text);
-						}
-
-						text = CleanDescriptors(text);
 
 						channelInstance.SendChatMessageResponse(lastMessage, text);
 
