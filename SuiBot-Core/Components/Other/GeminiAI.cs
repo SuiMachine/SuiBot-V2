@@ -71,9 +71,10 @@ namespace SuiBot_Core.Components.Other
 				{
 					if (Cooldowns.TryGetValue(lastMessage.Username, out var cooldown))
 					{
-						if (cooldown + TimeSpan.FromMinutes(1) > DateTime.UtcNow)
+						if (cooldown + TimeSpan.FromMinutes(45) > DateTime.UtcNow)
 						{
-							channelInstance.SendChatMessageResponse(lastMessage, "Chill there - we have request limits!");
+							TimeSpan timespan = cooldown + TimeSpan.FromMinutes(45) - DateTime.UtcNow;
+							channelInstance.SendChatMessageResponse(lastMessage, $"Chill there for {Math.Round(Math.Abs(timespan.TotalMinutes))}. We have request limits!");
 							return true;
 						}
 						else
