@@ -29,7 +29,6 @@ namespace SuiBot_Core
 		}
 		#endregion
 
-		private ChatMessage LastMessage;
 		public string BotName { get; set; }
 		public System.Timers.Timer IntervalTimer;
 		public System.Timers.Timer StatusUpdateTimer;
@@ -116,7 +115,6 @@ namespace SuiBot_Core
 			this.IntervalTimer = new System.Timers.Timer(1000 * 60) { AutoReset = true };
 			this.StatusUpdateTimer = new System.Timers.Timer(5 * 1000 * 60) { AutoReset = true };
 			this.ActiveChannels = new Dictionary<string, SuiBot_ChannelInstance>();
-			this.LastMessage = new ChatMessage() { UserRole = Role.User, Message = "", Username = "" };
 			this.ImageUplaoder = new ImgUploader(this);
 		}
 
@@ -131,14 +129,18 @@ namespace SuiBot_Core
 
 					Role role = GetRoleFromTags(e);
 					string userName = e.Data.Nick;
+					if (!e.Data.Tags.TryGetValue("display-name", out string displayName))
+						displayName = e.Data.Nick;
+
 					string userID = e.Data.Tags["user-id"];
 					string messageContent = e.Data.Message;
 					bool messageHighlighted = e.Data.Tags.ContainsKey("msg-id") ? e.Data.Tags["msg-id"] == "highlighted-message" : false;
 					string customReward = e.Data.Tags.ContainsKey("custom-reward-id") ? e.Data.Tags["custom-reward-id"] : null;
 					bool isFirstMessage = e.Data.Tags["first-msg"] == "1";
 
-					LastMessage.Update(messageId,
+					ChatMessage LastMessage = new ChatMessage(messageId,
 						role,
+						displayName,
 						userName,
 						userID,
 						messageContent,
@@ -206,11 +208,11 @@ namespace SuiBot_Core
 			}
 		}
 
-		public void ConnectToChannel(string channelToJoin, Storage.ChannelConfig channelcfg)
+		public void ConnectToChannel(string channelToJoin, Storage.ChannelConfig channelCfg)
 		{
 			MeebyIrcClient.RfcJoin("#" + channelToJoin);
 			this.OnChannelJoining?.Invoke(channelToJoin);
-			ActiveChannels.Add("#" + channelToJoin, new SuiBot_ChannelInstance(channelToJoin, BotConnectionConfig.Password, this, channelcfg));
+			ActiveChannels.Add("#" + channelToJoin, new SuiBot_ChannelInstance(channelToJoin, BotConnectionConfig.Password, this, channelCfg));
 		}
 
 

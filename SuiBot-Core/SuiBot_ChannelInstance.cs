@@ -105,7 +105,7 @@ namespace SuiBot_Core
 			SetUserCooldown(messageToRespondTo, DefaultCooldown);
 			if (!noPersonMention)
 			{
-				var msgResponse = string.Format("@{0}: {1}", messageToRespondTo.Username, message);
+				string msgResponse = $"@{messageToRespondTo.DisplayName}: {message}";
 				SendChatMessage(msgResponse);
 
 			}
