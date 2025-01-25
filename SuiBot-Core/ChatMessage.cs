@@ -40,7 +40,7 @@
 	{
 		SuperMod,
 		Mod,
-		VIP,    //previously trusted
+		VIP,
 		Subscriber,
 		User
 	}

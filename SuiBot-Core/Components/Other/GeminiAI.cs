@@ -65,7 +65,7 @@ namespace SuiBot_Core.Components.Other
 
 		public override bool DoWork(SuiBot_ChannelInstance channelInstance, ChatMessage lastMessage)
 		{
-			if (lastMessage.UserRole == Role.SuperMod || lastMessage.UserRole == Role.Mod)
+			if (lastMessage.UserRole == Role.SuperMod)
 			{
 				if (lastMessage.Username != channelInstance.Channel)
 				{
@@ -74,7 +74,7 @@ namespace SuiBot_Core.Components.Other
 						if (cooldown + TimeSpan.FromMinutes(45) > DateTime.UtcNow)
 						{
 							TimeSpan timespan = cooldown + TimeSpan.FromMinutes(45) - DateTime.UtcNow;
-							channelInstance.SendChatMessageResponse(lastMessage, $"Chill there for {Math.Round(Math.Abs(timespan.TotalMinutes))}. We have request limits!");
+							channelInstance.SendChatMessageResponse(lastMessage, $"Chill there for {Math.Ceiling(Math.Abs(timespan.TotalMinutes))} min. We have request limits!");
 							return true;
 						}
 						else
@@ -101,7 +101,8 @@ namespace SuiBot_Core.Components.Other
 		{
 			try
 			{
-				bool isStreamer = channelInstance.Channel == lastMessage.Username; //Streamer responses are stored
+				bool isStreamer = channelInstance.Channel == lastMessage.Username; //Streamer responses are stored permanently
+
 
 				Gemini.GeminiContent content = null;
 				if (channelInstance.Channel == lastMessage.Username)
@@ -209,9 +210,25 @@ namespace SuiBot_Core.Components.Other
 
 						channelInstance.SendChatMessageResponse(lastMessage, text);
 
+						while (content.generationConfig.TokenCount > InstanceConfig.TokenLimit)
+						{
+							if (content.contents.Count > 2)
+							{
+								//This isn't weird - we want to make sure we start from user message
+								if (content.contents[0].role == Gemini.Role.user)
+								{
+									content.contents.RemoveAt(0);
+								}
+
+								if (content.contents[0].role == Gemini.Role.model)
+								{
+									content.contents.RemoveAt(0);
+								}
+							}
+						}
+
 						if (isStreamer)
 						{
-							//TODO: Make sure we reduce the amount of tokens with time!
 							XML_Utils.Save(StreamerPath, content);
 						}
 						else
