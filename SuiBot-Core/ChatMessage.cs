@@ -7,6 +7,7 @@
 	{
 		public Role UserRole;
 		public string MessageID;
+		public string DisplayName;
 		public string Username;
 		public string UserID;
 		public string Message;
@@ -14,16 +15,11 @@
 		public bool IsFirstMessage;
 		public string RewardID;
 
-		/// <summary>
-		/// Updates the ChatMessage object with new set of data. Can be done manually instead.
-		/// </summary>
-		/// <param name="UserRole">Role of a user.</param>
-		/// <param name="Username">Name of a user.</param>
-		/// <param name="Message">Message posted by a user.</param>
-		public void Update(string MessageID, Role UserRole, string Username, string UserID, string Message, bool IsFirstMessage, bool HighlightedMessage = false, string RewardID = null)
+		public ChatMessage(string MessageID, Role UserRole, string DisplayName, string Username, string UserID, string Message, bool IsFirstMessage, bool HighlightedMessage = false, string RewardID = null)
 		{
 			this.MessageID = MessageID;
 			this.UserRole = UserRole;
+			this.DisplayName = DisplayName;
 			this.Username = Username;
 			this.UserID = UserID;
 			this.Message = Message;
@@ -40,7 +36,7 @@
 	{
 		SuperMod,
 		Mod,
-		VIP,    //previously trusted
+		VIP,
 		Subscriber,
 		User
 	}

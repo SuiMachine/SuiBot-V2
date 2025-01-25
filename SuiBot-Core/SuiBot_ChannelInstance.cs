@@ -105,15 +105,13 @@ namespace SuiBot_Core
 			SetUserCooldown(messageToRespondTo, DefaultCooldown);
 			if (!noPersonMention)
 			{
-				var msgResponse = string.Format("@{0}: {1}", messageToRespondTo.Username, message);
-				SuiBotInstance.SendChatMessageFeedback("#" + Channel, msgResponse);
-				SuiBotInstance.MeebyIrcClient.SendMessage(Meebey.SmartIrc4net.SendType.Message, "#" + Channel, msgResponse);
+				string msgResponse = $"@{messageToRespondTo.DisplayName}: {message}";
+				SendChatMessage(msgResponse);
 
 			}
 			else
 			{
-				SuiBotInstance.SendChatMessageFeedback("#" + Channel, message);
-				SuiBotInstance.MeebyIrcClient.SendMessage(Meebey.SmartIrc4net.SendType.Message, "#" + Channel, message);
+				SendChatMessage(message);
 			}
 		}
 
