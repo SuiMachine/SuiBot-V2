@@ -57,7 +57,7 @@ namespace SuiBot_Core
 
 		internal void TimerTick()
 		{
-			if (ConfigInstance.IntervalMessageEnabled && API.isOnline)
+			if (ConfigInstance.IntervalMessageEnabled && API.IsOnline)
 				IntervalMessagesInstance.DoTickWork();
 		}
 
@@ -66,9 +66,9 @@ namespace SuiBot_Core
 			API.GetStatus();
 
 			if (ConfigInstance.LeaderboardsEnabled && !Leaderboards.GameOverride)
-				Leaderboards.CurrentGame = API.game;
+				Leaderboards.CurrentGame = API.Game;
 
-			if (ConfigInstance.LeaderboardsAutodetectCategory && API.isOnline)
+			if (ConfigInstance.LeaderboardsAutodetectCategory && API.IsOnline)
 			{
 				if (API.TitleHasChanged || !Leaderboards.LastUpdateSuccessful || vocal)
 					Leaderboards.SetPreferedCategory(API.OldTitle, SuiBotInstance.IsAfterFirstStatusUpdate, vocal);
@@ -77,8 +77,8 @@ namespace SuiBot_Core
 
 			if (vocal)
 				SendChatMessage(string.Format("New obtained stream status is {0}{1}.",
-					API.isOnline == false ? "offline" : "online",
-					API.game == "" ? "" : " and game is " + API.game
+					API.IsOnline == false ? "offline" : "online",
+					API.Game == "" ? "" : " and game is " + API.Game
 					));
 		}
 

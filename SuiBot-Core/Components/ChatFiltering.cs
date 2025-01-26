@@ -273,7 +273,7 @@ namespace SuiBot_Core.Components
 						var newFilter = lastMassage.Message;
 						Filters.TimeOutFilter.Add(new ChatFilter(newFilter, "", 1));
 						Filters.Save();
-						ChannelInstance.SendChatMessageResponse(lastMassage, "Added! You can update it further using command: !chatfilter update timeout last Response:\"Custom response\", Duration:\"Lenght\"");
+						ChannelInstance.SendChatMessageResponse(lastMassage, "Added! You can update it further using command: !chatfilter update timeout last Response:\"Custom response\", Duration:\"Length\"");
 					}
 					break;
 				case ChatFilters.FilterType.Ban:

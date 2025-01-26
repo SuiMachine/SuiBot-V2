@@ -140,7 +140,6 @@
     <Compile Include="Components\Quotes.cs" />
     <Compile Include="Components\SRL.cs" />
     <Compile Include="Components\Timezones.cs" />
-    <Compile Include="Components\ViewerPB.cs" />
     <Compile Include="ErrorLogging.cs" />
     <Compile Include="Events\BotEvents.cs" />
     <Compile Include="Extensions\SuiStringExtansions.cs" />

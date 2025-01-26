@@ -26,14 +26,14 @@ namespace SuiBot_Core.Components
 
 			if (lastMessage.Message == "")
 			{
-				if (TwitchUpdateInstance.game == "")
+				if (TwitchUpdateInstance.Game == "")
 				{
 					ChannelInstance.SendChatMessageResponse(lastMessage, "Current game is empty. You can try providing the game manually by using command \"!pcgw Game Name\"");
 					return;
 				}
 				else
 				{
-					ChannelInstance.SendChatMessageResponse(lastMessage, GetPCGWUrl(TwitchUpdateInstance.game));
+					ChannelInstance.SendChatMessageResponse(lastMessage, GetPCGWUrl(TwitchUpdateInstance.Game));
 					return;
 				}
 

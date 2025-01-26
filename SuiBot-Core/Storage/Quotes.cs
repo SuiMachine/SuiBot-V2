@@ -53,13 +53,9 @@ namespace SuiBot_Core.Storage
 		public override string ToString()
 		{
 			if (Author == "")
-			{
-				return string.Format("\"{0}\"", Text);
-			}
+				return $"\"{Text}\"";
 			else
-			{
-				return string.Format("\"{0}\" - {1}", Text, Author);
-			}
+				return $"\"{Text}\" - {Author}";
 		}
 	}
 }
