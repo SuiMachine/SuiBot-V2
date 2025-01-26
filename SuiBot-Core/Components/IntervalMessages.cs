@@ -104,7 +104,7 @@ namespace SuiBot_Core.Components
 				var msg = IntervalMessagesStorage.Messages.Last();
 				IntervalMessagesStorage.Messages.Remove(msg);
 				IntervalMessagesStorage.Save();
-				ChannelInstance.SendChatMessageResponse(lastMessage, string.Format("Removed: {0}", msg.Message));
+				ChannelInstance.SendChatMessageResponse(lastMessage, $"Removed: {msg.Message}");
 
 			}
 			else
@@ -112,13 +112,13 @@ namespace SuiBot_Core.Components
 				if (int.TryParse(lastMessage.Message, out int id))
 				{
 					if (id >= IntervalMessagesStorage.Messages.Count)
-						ChannelInstance.SendChatMessageResponse(lastMessage, string.Format("Interval message ID was outside the list bounds ({0})", IntervalMessagesStorage.Messages.Count));
+						ChannelInstance.SendChatMessageResponse(lastMessage, $"Interval message ID was outside the list bounds ({IntervalMessagesStorage.Messages.Count})");
 					else
 					{
 						var msg = IntervalMessagesStorage.Messages[id];
 						IntervalMessagesStorage.Messages.RemoveAt(id);
 						IntervalMessagesStorage.Save();
-						ChannelInstance.SendChatMessageResponse(lastMessage, string.Format("Removed: {0}", msg.Message));
+						ChannelInstance.SendChatMessageResponse(lastMessage, $"Removed: {msg.Message}");
 					}
 				}
 				else

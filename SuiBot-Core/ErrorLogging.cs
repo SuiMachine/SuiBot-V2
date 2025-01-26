@@ -11,7 +11,7 @@ namespace SuiBot_Core
 		public static void WriteLine(string Error)
 		{
 
-			string errorToSave = string.Format("{0}: {1}", DateTime.Now.ToString(), Error);
+			string errorToSave = $"{DateTime.Now}: {Error}";
 #if DEBUG
             Debug.WriteLine(errorToSave);
 #endif

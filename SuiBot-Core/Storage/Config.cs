@@ -268,7 +268,7 @@ namespace SuiBot_Core.Storage
 							{
 								var old = foundProperty.GetValue(target, null);
 								foundProperty.SetValue(target, res, null);
-								channelInstance.SendChatMessageResponse(lastMessage, string.Format("Set {0} to {1} (was {2}).", foundProperty.Name, res.ToString(), old.ToString()));
+								channelInstance.SendChatMessageResponse(lastMessage, $"Set {foundProperty.Name} to {res} (was {old}).");
 								Save();
 							}
 							else
@@ -282,7 +282,7 @@ namespace SuiBot_Core.Storage
 							{
 								var old = foundProperty.GetValue(target, null);
 								foundProperty.SetValue(target, res, null);
-								channelInstance.SendChatMessageResponse(lastMessage, string.Format("Set {0} to {1} (was {2}).", foundProperty.Name, res.ToString(), old.ToString()));
+								channelInstance.SendChatMessageResponse(lastMessage, $"Set {foundProperty.Name} to {res} (was {old}).");
 								Save();
 							}
 							else
@@ -296,7 +296,7 @@ namespace SuiBot_Core.Storage
 							{
 								var old = foundProperty.GetValue(target, null);
 								foundProperty.SetValue(target, res, null);
-								channelInstance.SendChatMessageResponse(lastMessage, string.Format("Set {0} to {1} (was {2}).", foundProperty.Name, res.ToString(), old.ToString()));
+								channelInstance.SendChatMessageResponse(lastMessage, $"Set {foundProperty.Name} to {res} (was {old}).");
 								Save();
 							}
 							else
@@ -310,7 +310,7 @@ namespace SuiBot_Core.Storage
 							{
 								var old = foundProperty.GetValue(target, null);
 								foundProperty.SetValue(target, res, null);
-								channelInstance.SendChatMessageResponse(lastMessage, string.Format("Set {0} to {1} (was {2}).", foundProperty.Name, res.ToString(), old.ToString()));
+								channelInstance.SendChatMessageResponse(lastMessage, $"Set {foundProperty.Name} to {res} (was {old}).");
 								Save();
 							}
 							else
@@ -324,7 +324,7 @@ namespace SuiBot_Core.Storage
 							{
 								var old = foundProperty.GetValue(target, null);
 								foundProperty.SetValue(target, res, null);
-								channelInstance.SendChatMessageResponse(lastMessage, string.Format("Set {0} to {1} (was {2}).", foundProperty.Name, res.ToString(), old.ToString()));
+								channelInstance.SendChatMessageResponse(lastMessage, $"Set {foundProperty.Name} to {res} (was {old}).");
 								Save();
 							}
 							else
@@ -338,7 +338,7 @@ namespace SuiBot_Core.Storage
 							{
 								var old = foundProperty.GetValue(target, null);
 								foundProperty.SetValue(target, res, null);
-								channelInstance.SendChatMessageResponse(lastMessage, string.Format("Set {0} to {1} (was {2}).", foundProperty.Name, res.ToString(), old.ToString()));
+								channelInstance.SendChatMessageResponse(lastMessage, $"Set {foundProperty.Name} to {res} (was {old}).");
 								Save();
 							}
 							else
@@ -352,7 +352,7 @@ namespace SuiBot_Core.Storage
 							{
 								var old = foundProperty.GetValue(target, null);
 								foundProperty.SetValue(target, res, null);
-								channelInstance.SendChatMessageResponse(lastMessage, string.Format("Set {0} to {1} (was {2}).", foundProperty.Name, res.ToString(), old.ToString()));
+								channelInstance.SendChatMessageResponse(lastMessage, $"Set {foundProperty.Name} to {res} (was {old}).");
 								Save();
 							}
 							else
@@ -364,13 +364,13 @@ namespace SuiBot_Core.Storage
 						{
 							var old = foundProperty.GetValue(target, null);
 							foundProperty.SetValue(target, msg, null);
-							channelInstance.SendChatMessageResponse(lastMessage, string.Format("Set \"{0}\" to \"{1}\" (was \"{2}\").", foundProperty.Name, msg, old.ToString()));
+							channelInstance.SendChatMessageResponse(lastMessage, $"Set \"{foundProperty.Name}\" to \"{msg}\" (was \"{old}\").");
 							Save();
 						}
 					}
 					else
 					{
-						channelInstance.SendChatMessageResponse(lastMessage, "No proparty was found");
+						channelInstance.SendChatMessageResponse(lastMessage, "No property was found");
 					}
 				}
 				catch (Exception ex)

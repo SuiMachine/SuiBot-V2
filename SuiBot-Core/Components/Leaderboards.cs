@@ -164,7 +164,7 @@ namespace SuiBot_Core.Components
 								PreferedCategory = category.Name;
 								LastUpdateSuccessful = true;
 								if (vocal || isAfterFirstUpdate)
-									channelInstance.SendChatMessage(string.Format("Set leaderboards category to: \"{0}\" based on stream title", PreferedCategory));
+									channelInstance.SendChatMessage($"Set leaderboards category to: \"{PreferedCategory}\" based on stream title");
 							}
 							return;
 						}
@@ -181,7 +181,7 @@ namespace SuiBot_Core.Components
 			}
 			catch (Exception e)
 			{
-				ErrorLogging.WriteLine("Error setting prefered category: " + e.Message);
+				ErrorLogging.WriteLine("Error setting preferred category: " + e.Message);
 				LastUpdateSuccessful = false;
 			}
 		}
@@ -203,7 +203,7 @@ namespace SuiBot_Core.Components
 				{
 					channelInstance.ConfigInstance.LeaderboardsUsername = lastMessage.Message;
 					channelInstance.ConfigInstance.Save();
-					channelInstance.SendChatMessageResponse(lastMessage, "Nulled out speedrun username");
+					channelInstance.SendChatMessageResponse(lastMessage, "Nulled out Speedrun username");
 				}
 			}
 			else if (lastMessage.Message.StartsWithLazy("game"))
@@ -475,7 +475,7 @@ namespace SuiBot_Core.Components
 								);
 						}
 						else
-							return string.Format("No records were found! - {0}", leaderboard.WebLink);
+							return $"No records were found! - {leaderboard.WebLink}";
 					}
 					//Full-game run
 					else
@@ -508,13 +508,7 @@ namespace SuiBot_Core.Components
 							else
 								runners = record.Player.Name;
 
-							return string.Format("{0} ({1}) record is {2} by {3} - {4}",
-								srGame.Name,
-								srCategory.Name,
-								record.Times.Primary.ToString(),
-								runners,
-								record.WebLink
-								);
+							return $"{srGame.Name} ({srCategory.Name}) record is {record.Times.Primary} by {runners} - {record.WebLink}";
 						}
 						else
 							return "Leaderboard doesn't have any records! " + leaderboard.WebLink;
@@ -619,9 +613,9 @@ namespace SuiBot_Core.Components
 							var bestPBInCategory = bestPBsInCategory.FirstOrDefault();
 
 							if (bestPBInCategory != null)
-								return string.Format("Streamer\'s PB for {0} ({1}) in level \"{2}\" is {3} - {4}", srGame.Name, srCategory.Name, srLevel.Name, bestPBInCategory.Times.Primary.ToString(), bestPBInCategory.WebLink);
+								return $"Streamer\'s PB for {srGame.Name} ({srCategory.Name}) in level \"{srLevel.Name}\" is {bestPBInCategory.Times.Primary.ToString()} - {bestPBInCategory.WebLink}";
 							else
-								return string.Format("No PB in category {0} for level {1} was found.", srCategory.Name, srLevel.Name);
+								return $"No PB in category {srCategory.Name} for level {srLevel.Name} was found.";
 						}
 						else
 							return "No PBs found for this level";
@@ -653,13 +647,7 @@ namespace SuiBot_Core.Components
 							}
 
 							if (bestPBsInCategory.Count() > 0)
-							{
-								return string.Format("Streamer\'s PB for {0} ({1}) is {2} - {3}",
-									srGame.Name,
-									srCategory.Name,
-									bestPBsInCategory.ElementAt(0).Times.Primary.ToString(),
-									bestPBsInCategory.ElementAt(0).WebLink);
-							}
+								return $"Streamer\'s PB for {srGame.Name} ({srCategory.Name}) is {bestPBsInCategory.ElementAt(0).Times.Primary} - {bestPBsInCategory.ElementAt(0).WebLink}";
 							else
 								return "Stremer doesn\'t seem to have any PBs in category " + srCategory.Name;
 						}

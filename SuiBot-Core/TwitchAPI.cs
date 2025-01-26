@@ -9,15 +9,14 @@ namespace SuiBot_Core
 	public class TwitchAPI
 	{
 		public Dictionary<string, string> UserNameToId = new Dictionary<string, string>();
-		readonly string channelName;
-		private string botName;
-		public bool isOnline = true;
-		public string game = "";
-		public DateTime StartTime;
-		private string oldId = "x";
-		public uint LastViewers = 0;
-		readonly Uri sUrlTwitchStatus = null;
-		readonly Dictionary<string, string> RequestHeaders;
+		private readonly string m_ChannelName;
+		private string m_BotName;
+		public bool IsOnline { get; private set; } = true;
+		public string Game { get; private set; } = "";
+		public DateTime StartTime { get; private set; }
+		private string m_OldId = "x";
+		private readonly Uri sUrlTwitchStatus = null;
+		private readonly Dictionary<string, string> RequestHeaders;
 
 		//Used by Leaderboards
 		public bool TitleHasChanged = false;
@@ -28,7 +27,7 @@ namespace SuiBot_Core
 		{
 			RequestHeaders = new Dictionary<string, string>();
 			sUrlTwitchStatus = new Uri("https://api.twitch.tv/helix/streams?user_login=" + channelName);
-			this.channelName = channelName;
+			this.m_ChannelName = channelName;
 			RequestHeaders.Add("Client-ID", "rmi9m0sheo4pp5882o8s24zu7h09md");
 			RequestHeaders.Add("Authorization", "Bearer " + oauth);
 		}
@@ -36,8 +35,8 @@ namespace SuiBot_Core
 		public TwitchAPI(SuiBot_ChannelInstance suiBot_ChannelInstance, string oauth)
 		{
 			RequestHeaders = new Dictionary<string, string>();
-			this.botName = suiBot_ChannelInstance.BotName;
-			this.channelName = suiBot_ChannelInstance.Channel;
+			this.m_BotName = suiBot_ChannelInstance.BotName;
+			this.m_ChannelName = suiBot_ChannelInstance.Channel;
 			sUrlTwitchStatus = new Uri("https://api.twitch.tv/helix/streams?user_login=" + suiBot_ChannelInstance.Channel);
 
 #if DEBUG && false  //testing
@@ -61,7 +60,7 @@ namespace SuiBot_Core
 						var dataNode = response["data"].First;
 						if (dataNode["title"] != null)
 						{
-							isOnline = true;
+							IsOnline = true;
 							var title = dataNode["title"].ToString();
 							TitleHasChanged = OldTitle != title;
 							OldTitle = title;
@@ -70,16 +69,15 @@ namespace SuiBot_Core
 							{
 								var streamType = dataNode["type"].ToString();
 								if (streamType == "live")
-									isOnline = true;
+									IsOnline = true;
 								else
-									isOnline = false;
+									IsOnline = false;
 							}
 
 							if (dataNode["started_at"] != null)
 							{
-								var dateTimeStartAsstring = dataNode["started_at"].ToString();
-								//"2020-02-25t13:42:32z"
-								if (DateTime.TryParse(dateTimeStartAsstring, out DateTime ParsedTime))
+								string dateTimeStartAsString = dataNode["started_at"].ToString();
+								if (DateTime.TryParse(dateTimeStartAsString, out DateTime ParsedTime))
 								{
 									StartTime = ParsedTime.ToUniversalTime();
 								}
@@ -90,44 +88,34 @@ namespace SuiBot_Core
 							if (dataNode["game_id"] != null)
 							{
 								var gameIdAsString = dataNode["game_id"].ToString();
-								game = ResolveNameFromId(gameIdAsString);
-								if (game == "ul")
+								Game = ResolveNameFromId(gameIdAsString);
+								if (Game == "ul")
 								{
-									game = String.Empty;
+									Game = String.Empty;
 								}
-								Console.WriteLine(string.Format("{0} - Checked stream status. Is online, playing {1}", channelName, game));
+								Console.WriteLine($"{m_ChannelName} - Checked stream status. Is online, playing {Game}");
 							}
 							else
 							{
-								Console.WriteLine(string.Format("{0} - Checked stream status. Is online (no game?)", channelName));
+								Console.WriteLine($"{m_ChannelName} - Checked stream status. Is online (no game?)");
 							}
-
-							if (dataNode["viewer_count"] != null)
-							{
-								var viewers = dataNode["viewer_count"].ToString();
-								if (uint.TryParse(viewers, out uint Value))
-								{
-									this.LastViewers = Value;
-								}
-							}
-
 						}
 						else
 						{
-							isOnline = false;
-							Console.WriteLine(string.Format("{0} - Checked stream status. Is offline.", channelName));
+							IsOnline = false;
+							Console.WriteLine($"{m_ChannelName} - Checked stream status. Is offline.");
 						}
 					}
 					else
 					{
-						isOnline = false;
-						Console.WriteLine(string.Format("{0} - Checked stream status. Is offline.", channelName));
+						IsOnline = false;
+						Console.WriteLine($"{m_ChannelName} - Checked stream status. Is offline.");
 					}
 				}
 				catch (Exception e)
 				{
 					ErrorLogging.WriteLine("Error trying to parse Json when doing stream update request: " + e.Message);
-					isOnline = false;
+					IsOnline = false;
 				}
 			}
 			else
@@ -138,15 +126,15 @@ namespace SuiBot_Core
 
 		public string ResolveNameFromId(string id)
 		{
-			if (oldId == id)
+			if (m_OldId == id)
 			{
-				return game;
+				return Game;
 			}
 			else
 			{
 				if (HttpWebRequestHandlers.PerformGetRequest(new Uri("https://api.twitch.tv/helix/games?id=" + id), RequestHeaders, out string res))
 				{
-					oldId = id;
+					m_OldId = id;
 					JObject jObjectNode = JObject.Parse(res);
 					JToken dataNode = jObjectNode["data"].First;
 					if (dataNode["name"] != null)
@@ -161,7 +149,7 @@ namespace SuiBot_Core
 
 		public void RequestRemoveMessage(string channel, string messageID)
 		{
-			string botId = GetUserId(botName);
+			string botId = GetUserId(m_BotName);
 			if (botId == "")
 			{
 				ErrorLogging.WriteLine($"Can't obtain bot user id!");
@@ -180,7 +168,7 @@ namespace SuiBot_Core
 
 		public void RequestTimeout(string channel, string userId, uint length, string reason)
 		{
-			var botId = GetUserId(botName);
+			var botId = GetUserId(m_BotName);
 			if (botId == "")
 			{
 				ErrorLogging.WriteLine($"Can't obtain bot user id!");
@@ -214,7 +202,7 @@ namespace SuiBot_Core
 
 		public void RequestBan(string channel, string userId, string reason)
 		{
-			var botId = GetUserId(botName);
+			var botId = GetUserId(m_BotName);
 			if (botId == "")
 			{
 				ErrorLogging.WriteLine($"Can't obtain bot user id!");
@@ -277,13 +265,13 @@ namespace SuiBot_Core
 		public void RequestUpdate(SuiBot_ChannelInstance instance)
 		{
 			GetStatus();
-			if (game != string.Empty)
+			if (Game != string.Empty)
 			{
-				instance.SendChatMessage("New isOnline status is - \'" + isOnline.ToString() + "\' and the game is: " + game);
+				instance.SendChatMessage($"New isOnline status is - {IsOnline} and the game is: {Game}");
 			}
 			else
 			{
-				instance.SendChatMessage("New isOnline status is - " + isOnline.ToString());
+				instance.SendChatMessage($"New isOnline status is - {IsOnline}");
 			}
 		}
 	}
