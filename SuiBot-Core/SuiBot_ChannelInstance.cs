@@ -27,7 +27,7 @@ namespace SuiBot_Core
 		Components.Other._MemeComponents MemeComponents { get; set; }
 		#endregion
 		#endregion
-		TwitchAPI API { get; set; }
+		public TwitchAPI API { get; private set; }
 		Dictionary<string, DateTime> UserCooldowns { get; set; }
 		Dictionary<string, DateTime> LastUserActivity { get; set; }
 

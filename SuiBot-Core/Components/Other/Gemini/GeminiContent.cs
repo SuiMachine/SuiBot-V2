@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Xml.Serialization;
 
 namespace SuiBot_Core.Components.Other.Gemini
 {
@@ -20,7 +21,7 @@ namespace SuiBot_Core.Components.Other.Gemini
 		}
 
 		public List<GeminiMessage> contents;
-		public GeminiMessage systemInstruction;
+		[XmlIgnore]	public GeminiMessage systemInstruction;
 		public GenerationConfig generationConfig;
 	}
 

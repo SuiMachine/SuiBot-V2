@@ -1,12 +1,11 @@
 ﻿using Newtonsoft.Json;
+using SuiBot_Core.Components.Other.Gemini;
 using SuiBot_Core.Extensions.SuiStringExtension;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
+using System.Text;
 using System.Threading.Tasks;
-using System.Web.UI.WebControls;
 
 namespace SuiBot_Core.Components.Other
 {
@@ -16,16 +15,43 @@ namespace SuiBot_Core.Components.Other
 		{
 			public string API_Key { get; set; } = "";
 			public string Instruction_Streamer { get; set; } = "";
-			public string Instruction_Generic { get; set; } = "";
 			public string Model { get; set; } = "models/gemini-2.0-flash-exp";
 			public int TokenLimit { get; set; } = 1_048_576 - 8096 - 512;
+
+			public GeminiMessage GetSystemInstruction(string userName, bool isLive, string category)
+			{
+				var sb = new StringBuilder();
+				sb.AppendLine(Instruction_Streamer);
+				sb.AppendLine("");
+				sb.AppendLine($"The current date is {DateTime.Now.ToShortDateString()}.");
+				sb.AppendLine($"The current local time is {DateTime.Now.ToShortTimeString()}.");
+				sb.AppendLine($"The current UTC time {DateTime.UtcNow.ToShortTimeString()}.");
+				if (isLive)
+				{
+					sb.AppendLine($"{userName} is now streaming {category}.");
+				}
+				else
+				{
+					sb.AppendLine($"{userName} is currently not streaming any game.");
+				}
+
+				return new GeminiMessage()
+				{
+					role = Gemini.Role.user,
+					parts = new GeminiMessagePart[]
+					{
+						new GeminiMessagePart()
+						{
+							text = sb.ToString()
+						}
+					}
+				};
+			}
 		}
 
 		public Config InstanceConfig;
 		public string StreamerPath;
 		public Gemini.GeminiContent StreamerContent = new Gemini.GeminiContent();
-		public Dictionary<string, Gemini.GeminiContent> UserContents = new Dictionary<string, Gemini.GeminiContent>();
-		public Dictionary<string, DateTime> Cooldowns = new Dictionary<string, DateTime>();
 
 		internal bool IsConfigured(SuiBot_ChannelInstance channelInstance)
 		{
@@ -65,33 +91,16 @@ namespace SuiBot_Core.Components.Other
 
 		public override bool DoWork(SuiBot_ChannelInstance channelInstance, ChatMessage lastMessage)
 		{
-			if (lastMessage.UserRole == Role.SuperMod)
+			if (lastMessage.UserRole == Role.SuperMod || lastMessage.Username == channelInstance.Channel)
 			{
-				if (lastMessage.Username != channelInstance.Channel)
-				{
-					if (Cooldowns.TryGetValue(lastMessage.Username, out var cooldown))
-					{
-						if (cooldown + TimeSpan.FromMinutes(45) > DateTime.UtcNow)
-						{
-							TimeSpan timespan = cooldown + TimeSpan.FromMinutes(45) - DateTime.UtcNow;
-							channelInstance.SendChatMessageResponse(lastMessage, $"Chill there for {Math.Ceiling(Math.Abs(timespan.TotalMinutes))} min. We have request limits!");
-							return true;
-						}
-						else
-						{
-							Cooldowns[lastMessage.Username] = DateTime.UtcNow;
-						}
-					}
-					else
-					{
-						Cooldowns.Add(lastMessage.Username, DateTime.UtcNow);
-					}
-				}
-
 				Task.Run(async () =>
 				{
 					await GetResponse(channelInstance, lastMessage);
 				});
+			}
+			else
+			{
+				channelInstance.SendChatMessageResponse(lastMessage, "Sorry, this command is available to streamer only!");
 			}
 
 			return true;
@@ -101,59 +110,9 @@ namespace SuiBot_Core.Components.Other
 		{
 			try
 			{
-				bool isStreamer = channelInstance.Channel == lastMessage.Username; //Streamer responses are stored permanently
-
-
 				Gemini.GeminiContent content = null;
-				if (channelInstance.Channel == lastMessage.Username)
-				{
-					content = StreamerContent;
-				}
-				else if (!UserContents.TryGetValue(lastMessage.Username, out content))
-				{
-					string instruction = null;
-					if (channelInstance.Channel == lastMessage.Username)
-					{
-						instruction = InstanceConfig.Instruction_Streamer;
-						isStreamer = true;
-					}
-					else
-					{
-						var path = $"Bot/Channels/{channelInstance.Channel}/MemeComponents/AI_UserInstructions/{lastMessage.Username}.txt";
-						if (File.Exists(path))
-						{
-							instruction = File.ReadAllText(path);
-						}
-
-						if (instruction == null)
-						{
-							instruction = string.Format(InstanceConfig.Instruction_Generic, lastMessage.Username);
-						}
-					}
-
-					if (instruction == null)
-					{
-						channelInstance.SendChatMessageResponse(lastMessage, "Sorry, there is no response configured for non-streamer or you specifically");
-					}
-
-					content = new Gemini.GeminiContent()
-					{
-						contents = new List<Gemini.GeminiMessage>(),
-						generationConfig = new Gemini.GeminiContent.GenerationConfig(),
-						systemInstruction = new Gemini.GeminiMessage()
-						{
-							role = Gemini.Role.user,
-							parts = new Gemini.GeminiMessagePart[]
-							{
-								new Gemini.GeminiMessagePart()
-								{
-									text = instruction
-								}
-							}
-						}
-					};
-					UserContents.Add(lastMessage.Username, content);
-				}
+				content = StreamerContent;
+				content.systemInstruction = InstanceConfig.GetSystemInstruction(channelInstance.Channel, channelInstance.API.IsOnline, channelInstance.API.Game);
 
 				if (content == null)
 				{
@@ -227,17 +186,7 @@ namespace SuiBot_Core.Components.Other
 							}
 						}
 
-						if (isStreamer)
-						{
-							XML_Utils.Save(StreamerPath, content);
-						}
-						else
-						{
-							while (content.contents.Count > 10)
-							{
-								content.contents.RemoveAt(0);
-							}
-						}
+						XML_Utils.Save(StreamerPath, content);
 					}
 					else
 					{
