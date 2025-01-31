@@ -71,7 +71,7 @@ namespace SuiBot_Core
 			if (ConfigInstance.LeaderboardsAutodetectCategory && API.IsOnline)
 			{
 				if (API.TitleHasChanged || !Leaderboards.LastUpdateSuccessful || vocal)
-					Leaderboards.SetPreferedCategory(API.OldTitle, SuiBotInstance.IsAfterFirstStatusUpdate, vocal);
+					Leaderboards.SetPreferedCategory(API.StoredTitle, SuiBotInstance.IsAfterFirstStatusUpdate, vocal);
 			}
 
 

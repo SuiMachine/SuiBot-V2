@@ -20,7 +20,7 @@ namespace SuiBot_Core
 
 		//Used by Leaderboards
 		public bool TitleHasChanged = false;
-		public string OldTitle = "";
+		public string StoredTitle { get; private set; } = "";
 
 		//For testing
 		public TwitchAPI(string channelName, string oauth)
@@ -62,8 +62,8 @@ namespace SuiBot_Core
 						{
 							IsOnline = true;
 							var title = dataNode["title"].ToString();
-							TitleHasChanged = OldTitle != title;
-							OldTitle = title;
+							TitleHasChanged = StoredTitle != title;
+							StoredTitle = title;
 
 							if (dataNode["type"] != null)
 							{

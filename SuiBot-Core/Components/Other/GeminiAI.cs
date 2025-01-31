@@ -18,7 +18,7 @@ namespace SuiBot_Core.Components.Other
 			public string Model { get; set; } = "models/gemini-2.0-flash-exp";
 			public int TokenLimit { get; set; } = 1_048_576 - 8096 - 512;
 
-			public GeminiMessage GetSystemInstruction(string userName, bool isLive, string category)
+			public GeminiMessage GetSystemInstruction(string userName, bool isLive, string category, string stream_title)
 			{
 				var sb = new StringBuilder();
 				sb.AppendLine(Instruction_Streamer);
@@ -29,6 +29,7 @@ namespace SuiBot_Core.Components.Other
 				if (isLive)
 				{
 					sb.AppendLine($"{userName} is now streaming {category}.");
+					sb.AppendLine($"The stream title is: {stream_title}.");
 				}
 				else
 				{
@@ -112,7 +113,7 @@ namespace SuiBot_Core.Components.Other
 			{
 				Gemini.GeminiContent content = null;
 				content = StreamerContent;
-				content.systemInstruction = InstanceConfig.GetSystemInstruction(channelInstance.Channel, channelInstance.API.IsOnline, channelInstance.API.Game);
+				content.systemInstruction = InstanceConfig.GetSystemInstruction(channelInstance.Channel, channelInstance.API.IsOnline, channelInstance.API.Game, channelInstance.API.StoredTitle);
 
 				if (content == null)
 				{
