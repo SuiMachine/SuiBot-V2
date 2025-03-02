@@ -46,7 +46,10 @@ namespace SuiBot_Core.Components.Other
 				{
 					var geminiAI = new GeminiAI();
 					if (geminiAI.IsConfigured(channelInstance))
+					{
 						memeComponents.Add("ai", geminiAI);
+						memeComponents.Add("ask", geminiAI);
+					}
 					else
 						memeConfig.AskAI = false;
 				}
