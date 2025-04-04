@@ -151,7 +151,7 @@ namespace SuiBot_Core.Components.Other
 						for (int i = splitText.Count - 1; i >= 0; i--)
 						{
 							var line = splitText[i].Trim();
-							if (line.StartsWith("*") && line.StartsWith("*"))
+							if (line.StartsWith("*") && line.EndsWith("*"))
 							{
 								var count = line.Count(x => x == '*');
 								if (count == 2)
@@ -238,6 +238,109 @@ namespace SuiBot_Core.Components.Other
 
 			text = text.Trim();
 			return text;
+		}
+
+		internal void DoLurk(SuiBot_ChannelInstance channelInstance, ChatMessage lastMessage)
+		{
+			Task.Run(async () =>
+			{
+				await GetResponseLurk(channelInstance, lastMessage);
+			});
+		}
+
+		private async Task GetResponseLurk(SuiBot_ChannelInstance channelInstance, ChatMessage lastMessage)
+		{
+			try
+			{
+				Gemini.GeminiContent content = null;
+				content = StreamerContent;
+				content.systemInstruction = InstanceConfig.GetSystemInstruction(channelInstance.Channel, channelInstance.API.IsOnline, channelInstance.API.Game, channelInstance.API.StoredTitle);
+
+				if (content == null)
+				{
+					channelInstance.SendChatMessageResponse(lastMessage, "Sorry, no history for the user is setup");
+					return;
+				}
+
+				content.contents.Add(Gemini.GeminiMessage.CreateUserResponse(lastMessage.Message.StripSingleWord()));
+
+				string json = JsonConvert.SerializeObject(content);
+
+				string result = await HttpWebRequestHandlers.PerformPost(
+					new Uri($"https://generativelanguage.googleapis.com/v1beta/{InstanceConfig.Model}:generateContent?key={InstanceConfig.API_Key}"),
+					new Dictionary<string, string>(),
+					json
+					);
+
+				if (string.IsNullOrEmpty(result))
+				{
+					channelInstance.SendChatMessageResponse(lastMessage, "Failed to get a response. Please debug me, Sui :(");
+				}
+				else
+				{
+					Gemini.GeminiResponse response = JsonConvert.DeserializeObject<Gemini.GeminiResponse>(result);
+					content.generationConfig.TokenCount = response.usageMetadata.totalTokenCount;
+
+					if (response.candidates.Length > 0 && response.candidates.Last().content.parts.Length > 0)
+					{
+						var lastResponse = response.candidates.Last().content;
+						content.contents.Add(lastResponse);
+						var text = lastResponse.parts.Last().text;
+						List<string> splitText = text.Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+						for (int i = splitText.Count - 1; i >= 0; i--)
+						{
+							var line = splitText[i].Trim();
+							if (line.StartsWith("*") && line.StartsWith("*"))
+							{
+								var count = line.Count(x => x == '*');
+								if (count == 2)
+								{
+									splitText.RemoveAt(i);
+									continue;
+								}
+							}
+
+							if (line.Contains("*"))
+							{
+								line = CleanDescriptors(line);
+								splitText[i] = line;
+							}
+						}
+
+						text = string.Join(" ", splitText);
+
+						channelInstance.SendChatMessageResponse(lastMessage, text);
+
+						while (content.generationConfig.TokenCount > InstanceConfig.TokenLimit)
+						{
+							if (content.contents.Count > 2)
+							{
+								//This isn't weird - we want to make sure we start from user message
+								if (content.contents[0].role == Gemini.Role.user)
+								{
+									content.contents.RemoveAt(0);
+								}
+
+								if (content.contents[0].role == Gemini.Role.model)
+								{
+									content.contents.RemoveAt(0);
+								}
+							}
+						}
+
+						XML_Utils.Save(StreamerPath, content);
+					}
+					else
+					{
+						channelInstance.SendChatMessageResponse(lastMessage, "Failed to get a response. Please debug me, Sui :(");
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				channelInstance.SendChatMessageResponse(lastMessage, "Failed to get a response. Something was written in log. Sui help! :(");
+				ErrorLogging.WriteLine($"There was an error trying to do AI: {ex}");
+			}
 		}
 	}
 }

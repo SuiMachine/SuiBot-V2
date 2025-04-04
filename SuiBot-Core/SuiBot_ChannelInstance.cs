@@ -24,7 +24,7 @@ namespace SuiBot_Core
 		Components.Timezones Timezones { get; set; }
 
 		#region Other
-		Components.Other._MemeComponents MemeComponents { get; set; }
+		internal Components.Other._MemeComponents MemeComponents { get; set; }
 		#endregion
 		#endregion
 		public TwitchAPI API { get; private set; }

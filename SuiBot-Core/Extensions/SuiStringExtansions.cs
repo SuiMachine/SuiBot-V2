@@ -83,6 +83,21 @@ namespace SuiBot_Core.Extensions.SuiStringExtension
 		}
 
 		/// <summary>
+		/// Picks a first word from a sentences and trims it
+		/// </summary>
+		/// <param name="v">Sentence from which to pick first word</param>
+		/// <returns>First word or empty string</returns>
+		public static string FirstWord(this string v)
+		{
+			if (v.Contains(' '))
+			{
+				return v.Split(new char[] { ' ' }, 2)[0].Trim();
+			}
+			else
+				return "";
+		}
+
+		/// <summary>
 		/// Splits string into chunks similiar as split, except gets chunks in between seperator
 		/// </summary>
 		/// <param name="v">String to perform it on.</param>

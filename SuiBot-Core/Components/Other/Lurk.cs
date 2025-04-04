@@ -15,61 +15,89 @@ namespace SuiBot_Core.Components.Other
 			if (Responses == null)
 				LoadResponses(channelInstance);
 
-			if (lastMessage.UserRole <= Role.Mod && lastMessage.Message.Contains(" "))
+			if (lastMessage.Message.Contains(" "))
 			{
-				var split = lastMessage.Message.StripSingleWord();
-				if (split != "")
+				if (lastMessage.UserRole <= Role.Mod)
 				{
-					if (split.StartsWithWordLazy("add"))
+					var split = lastMessage.Message.StripSingleWord();
+					if (split != "")
 					{
-						split = split.StripSingleWord();
-						if (split.Contains("{0}"))
+						if (split.StartsWithWordLazy("add"))
 						{
-							Responses.Add(split);
-							SaveResponses(channelInstance);
-							channelInstance.SendChatMessage($"Added a new response. e.g.: {string.Format(split, lastMessage.Username)}");
-						}
-						else
-							channelInstance.SendChatMessage("Added response must contain {0}");
-						return false;
-					}
-					else if (split.StartsWithWordLazy("get"))
-					{
-						split = split.StripSingleWord();
-						int id = GetIdFromMessage(split);
-						if(id >= 0)
-							channelInstance.SendChatMessage($"Response at {id} is: {Responses[id]}");
-						else
-							channelInstance.SendChatMessage("Incorrect id!");
-						return false;
-					}
-					else if (split.StartsWithWordLazy("remove"))
-					{
-						split = split.StripSingleWord();
-
-						int id = GetIdFromMessage(split);
-						if (id >= 0)
-						{
-							if(Responses.Count > 1)
+							split = split.StripSingleWord();
+							if (split.Contains("{0}"))
 							{
-								var response = Responses[id];
-								Responses.RemoveAt(id);
-								channelInstance.SendChatMessage($"Removed response: {response}");
+								Responses.Add(split);
 								SaveResponses(channelInstance);
+								channelInstance.SendChatMessage($"Added a new response. e.g.: {string.Format(split, lastMessage.Username)}");
 							}
 							else
-								channelInstance.SendChatMessage("There has to be at least one response. Add one response with !lurk add RESPONSE_TEXT and then remove other one using !lurk remove 0");
+								channelInstance.SendChatMessage("Added response must contain {0}");
+							return false;
 						}
-						else
-							channelInstance.SendChatMessage("Incorrect id!");
-						return false;
+						else if (split.StartsWithWordLazy("get"))
+						{
+							split = split.StripSingleWord();
+							int id = GetIdFromMessage(split);
+							if (id >= 0)
+								channelInstance.SendChatMessage($"Response at {id} is: {Responses[id]}");
+							else
+								channelInstance.SendChatMessage("Incorrect id!");
+							return false;
+						}
+						else if (split.StartsWithWordLazy("remove"))
+						{
+							split = split.StripSingleWord();
+
+							int id = GetIdFromMessage(split);
+							if (id >= 0)
+							{
+								if (Responses.Count > 1)
+								{
+									var response = Responses[id];
+									Responses.RemoveAt(id);
+									channelInstance.SendChatMessage($"Removed response: {response}");
+									SaveResponses(channelInstance);
+								}
+								else
+									channelInstance.SendChatMessage("There has to be at least one response. Add one response with !lurk add RESPONSE_TEXT and then remove other one using !lurk remove 0");
+							}
+							else
+								channelInstance.SendChatMessage("Incorrect id!");
+							return false;
+						}
 					}
 				}
-			}
 
-			var randomResponse = Responses[rng.Next(Responses.Count)];
-			channelInstance.SendChatMessage(string.Format(randomResponse, lastMessage.Username));
-			return true;
+				string dropWord = lastMessage.Message.StripSingleWord();
+				if (channelInstance.ConfigInstance.MemeComponents.AskAILurk && dropWord != "")
+				{
+					var aiComponent = channelInstance.MemeComponents.GetComponentOfType<GeminiAI>();
+					if (aiComponent == null)
+					{
+						var randomResponse = Responses[rng.Next(Responses.Count)];
+						channelInstance.SendChatMessage(string.Format(randomResponse, lastMessage.Username));
+						return true;
+					}
+					else
+					{
+						aiComponent.DoLurk(channelInstance, lastMessage);
+						return true;
+					}
+				}
+				else
+				{
+					var randomResponse = Responses[rng.Next(Responses.Count)];
+					channelInstance.SendChatMessage(string.Format(randomResponse, lastMessage.Username));
+					return true;
+				}
+			}
+			else
+			{
+				var randomResponse = Responses[rng.Next(Responses.Count)];
+				channelInstance.SendChatMessage(string.Format(randomResponse, lastMessage.Username));
+				return true;
+			}
 		}
 
 		private int GetIdFromMessage(string split)
@@ -81,7 +109,7 @@ namespace SuiBot_Core.Components.Other
 				else
 					return -1;
 			}
-			else if(split.StartsWithLazy("last"))
+			else if (split.StartsWithLazy("last"))
 				return Responses.Count - 1;
 			else
 				return -1;
