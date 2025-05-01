@@ -81,7 +81,9 @@ namespace SuiBot_Core.Components.Other
 					}
 					else
 					{
-						aiComponent.DoLurk(channelInstance, lastMessage);
+						var copy = new ChatMessage(lastMessage);
+						copy.Message = dropWord;
+						aiComponent.DoLurk(channelInstance, copy);
 						return true;
 					}
 				}

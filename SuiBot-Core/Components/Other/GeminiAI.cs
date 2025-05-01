@@ -1,11 +1,14 @@
 ﻿using Newtonsoft.Json;
+using SpeedrunComSharp;
 using SuiBot_Core.Components.Other.Gemini;
 using SuiBot_Core.Extensions.SuiStringExtension;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static SuiBot_Core.Components.Other.Gemini.GeminiContent;
 
 namespace SuiBot_Core.Components.Other
 {
@@ -15,10 +18,11 @@ namespace SuiBot_Core.Components.Other
 		{
 			public string API_Key { get; set; } = "";
 			public string Instruction_Streamer { get; set; } = "";
-			public string Model { get; set; } = "models/gemini-2.0-flash-exp";
+			public string Lurk_Instruction { get; set; } = "";
+			public string Model { get; set; } = "models/gemini-2.5-flash-preview-04-17";
 			public int TokenLimit { get; set; } = 1_048_576 - 8096 - 512;
 
-			public GeminiMessage GetSystemInstruction(string userName, bool isLive, string category, string stream_title)
+			public GeminiMessage GetSystemInstruction(string streamerName, bool isLive, string category, string stream_title)
 			{
 				var sb = new StringBuilder();
 				sb.AppendLine(Instruction_Streamer);
@@ -30,13 +34,49 @@ namespace SuiBot_Core.Components.Other
 
 				if (isLive)
 				{
-					sb.AppendLine($"{userName} is now streaming {category}.");
+					sb.AppendLine($"{streamerName} is now streaming {category}.");
 					sb.AppendLine($"The stream title is: {stream_title}.");
 				}
 				else
 				{
-					sb.AppendLine($"{userName} is currently not streaming any game.");
+					sb.AppendLine($"{streamerName} is currently not streaming any game.");
 				}
+
+				return new GeminiMessage()
+				{
+					role = Gemini.Role.user,
+					parts = new GeminiMessagePart[]
+					{
+						new GeminiMessagePart()
+						{
+							text = sb.ToString()
+						}
+					}
+				};
+			}
+
+			public GeminiMessage GetLurkSystemInstruction(string streamerName, string userName, bool isLive, string category, string stream_title)
+			{
+				var sb = new StringBuilder();
+				sb.AppendLine(Lurk_Instruction);
+				sb.AppendLine("");
+
+				System.Globalization.CultureInfo globalizationOverride = new System.Globalization.CultureInfo("en-US");
+				sb.AppendLine($"The current local time is {DateTime.Now:H:mm}. The local date is {DateTime.Now.ToString("MMMM dd, yyy", globalizationOverride)}.");
+				sb.AppendLine($"The current UTC time {DateTime.UtcNow:H:mm}. The UTC date is {DateTime.Now.ToString("MMMM dd, yyy", globalizationOverride)}.");
+
+				if (isLive)
+				{
+					sb.AppendLine($"{streamerName} is now streaming {category}.");
+					sb.AppendLine($"The stream title is: {stream_title}.");
+				}
+				else
+				{
+					sb.AppendLine($"{streamerName} is currently not streaming any game.");
+				}
+
+				sb.AppendLine();
+				sb.AppendLine($"The user is {userName}");
 
 				return new GeminiMessage()
 				{
@@ -54,7 +94,7 @@ namespace SuiBot_Core.Components.Other
 
 		public Config InstanceConfig;
 		public string StreamerPath;
-		public Gemini.GeminiContent StreamerContent = new Gemini.GeminiContent();
+		public GeminiContent StreamerContent = new GeminiContent();
 
 		internal bool IsConfigured(SuiBot_ChannelInstance channelInstance)
 		{
@@ -74,14 +114,14 @@ namespace SuiBot_Core.Components.Other
 			StreamerPath = $"Bot/Channels/{channelInstance.Channel}/MemeComponents/AI_History.xml";
 			StreamerContent = XML_Utils.Load(StreamerPath, new Gemini.GeminiContent()
 			{
-				contents = new List<Gemini.GeminiMessage>(),
-				generationConfig = new Gemini.GeminiContent.GenerationConfig(),
-				systemInstruction = new Gemini.GeminiMessage()
+				contents = new List<GeminiMessage>(),
+				generationConfig = new GeminiContent.GenerationConfig(),
+				systemInstruction = new GeminiMessage()
 				{
 					role = Gemini.Role.user,
 					parts = new Gemini.GeminiMessagePart[]
 					{
-						new Gemini.GeminiMessagePart()
+						new GeminiMessagePart()
 						{
 							text = ""
 						}
@@ -253,18 +293,17 @@ namespace SuiBot_Core.Components.Other
 			try
 			{
 				Gemini.GeminiContent content = null;
-				content = StreamerContent;
-				content.systemInstruction = InstanceConfig.GetSystemInstruction(channelInstance.Channel, channelInstance.API.IsOnline, channelInstance.API.Game, channelInstance.API.StoredTitle);
-
-				if (content == null)
+				content = new GeminiContent()
 				{
-					channelInstance.SendChatMessageResponse(lastMessage, "Sorry, no history for the user is setup");
-					return;
-				}
+					contents = new List<GeminiMessage>(),
+					tools = GeminiContent.GetTools(),
+					generationConfig = new GeminiContent.GenerationConfig(),
+					systemInstruction = InstanceConfig.GetLurkSystemInstruction(channelInstance.Channel, lastMessage.Username, channelInstance.API.IsOnline, channelInstance.API.Game, channelInstance.API.StoredTitle)
+				};
 
-				content.contents.Add(Gemini.GeminiMessage.CreateUserResponse(lastMessage.Message.StripSingleWord()));
+				content.contents.Add(GeminiMessage.CreateUserResponse(lastMessage.Message));
 
-				string json = JsonConvert.SerializeObject(content);
+				string json = JsonConvert.SerializeObject(content, Formatting.Indented);
 
 				string result = await HttpWebRequestHandlers.PerformPost(
 					new Uri($"https://generativelanguage.googleapis.com/v1beta/{InstanceConfig.Model}:generateContent?key={InstanceConfig.API_Key}"),
