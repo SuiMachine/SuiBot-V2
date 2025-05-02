@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 
 namespace SuiBot_Core.Components.Other.Gemini.FunctionTypes
@@ -16,6 +17,8 @@ namespace SuiBot_Core.Components.Other.Gemini.FunctionTypes
 	[Serializable]
 	public abstract class GeminiProperty
 	{
+		public abstract List<string> GetRequiredFieldsNames();
+
 		public class Parameter_String
 		{
 			public string type = "string";
@@ -28,16 +31,33 @@ namespace SuiBot_Core.Components.Other.Gemini.FunctionTypes
 	}
 
 	[Serializable]
+	public class PurgeMessage : GeminiProperty
+	{
+		public Parameter_String username;
+
+		public PurgeMessage()
+		{
+			username = new Parameter_String();
+		}
+
+		public override List<string> GetRequiredFieldsNames() => new List<string>() { };
+	}
+
+	[Serializable]
 	public class TimeOutParameters : GeminiProperty
 	{
 		public Parameter_String username;
 		public Parameter_Number duration_in_seconds;
+		public Parameter_String text_response;
 
 		public TimeOutParameters()
 		{
 			this.username = new Parameter_String();
 			this.duration_in_seconds = new Parameter_Number();
+			this.text_response = new Parameter_String();
 		}
+
+		public override List<string> GetRequiredFieldsNames() => new List<string>() { nameof(duration_in_seconds), nameof(text_response) };
 	}
 
 	[Serializable]
@@ -49,5 +69,7 @@ namespace SuiBot_Core.Components.Other.Gemini.FunctionTypes
 		{
 			this.username = new Parameter_String();
 		}
+
+		public override List<string> GetRequiredFieldsNames() => new List<string>() { };
 	}
 }

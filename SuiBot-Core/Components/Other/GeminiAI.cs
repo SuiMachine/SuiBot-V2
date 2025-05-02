@@ -1,14 +1,11 @@
 ﻿using Newtonsoft.Json;
-using SpeedrunComSharp;
 using SuiBot_Core.Components.Other.Gemini;
 using SuiBot_Core.Extensions.SuiStringExtension;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static SuiBot_Core.Components.Other.Gemini.GeminiContent;
 
 namespace SuiBot_Core.Components.Other
 {
@@ -45,9 +42,9 @@ namespace SuiBot_Core.Components.Other
 				return new GeminiMessage()
 				{
 					role = Gemini.Role.user,
-					parts = new GeminiMessagePart[]
+					parts = new GeminiResponseMessagePart[]
 					{
-						new GeminiMessagePart()
+						new GeminiResponseMessagePart()
 						{
 							text = sb.ToString()
 						}
@@ -76,14 +73,14 @@ namespace SuiBot_Core.Components.Other
 				}
 
 				sb.AppendLine();
-				sb.AppendLine($"The user is {userName}");
+				sb.AppendLine($"The username is {userName}.");
 
 				return new GeminiMessage()
 				{
 					role = Gemini.Role.user,
-					parts = new GeminiMessagePart[]
+					parts = new GeminiResponseMessagePart[]
 					{
-						new GeminiMessagePart()
+						new GeminiResponseMessagePart()
 						{
 							text = sb.ToString()
 						}
@@ -119,9 +116,9 @@ namespace SuiBot_Core.Components.Other
 				systemInstruction = new GeminiMessage()
 				{
 					role = Gemini.Role.user,
-					parts = new Gemini.GeminiMessagePart[]
+					parts = new Gemini.GeminiResponseMessagePart[]
 					{
-						new GeminiMessagePart()
+						new GeminiResponseMessagePart()
 						{
 							text = ""
 						}
@@ -187,49 +184,31 @@ namespace SuiBot_Core.Components.Other
 						var lastResponse = response.candidates.Last().content;
 						content.contents.Add(lastResponse);
 						var text = lastResponse.parts.Last().text;
-						List<string> splitText = text.Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries).ToList();
-						for (int i = splitText.Count - 1; i >= 0; i--)
+						if (text != null)
 						{
-							var line = splitText[i].Trim();
-							if (line.StartsWith("*") && line.EndsWith("*"))
+							CleanupResponse(ref text);
+
+							channelInstance.SendChatMessageResponse(lastMessage, text);
+
+							while (content.generationConfig.TokenCount > InstanceConfig.TokenLimit)
 							{
-								var count = line.Count(x => x == '*');
-								if (count == 2)
+								if (content.contents.Count > 2)
 								{
-									splitText.RemoveAt(i);
-									continue;
+									//This isn't weird - we want to make sure we start from user message
+									if (content.contents[0].role == Gemini.Role.user)
+									{
+										content.contents.RemoveAt(0);
+									}
+
+									if (content.contents[0].role == Gemini.Role.model)
+									{
+										content.contents.RemoveAt(0);
+									}
 								}
 							}
 
-							if (line.Contains("*"))
-							{
-								line = CleanDescriptors(line);
-								splitText[i] = line;
-							}
+							XML_Utils.Save(StreamerPath, content);
 						}
-
-						text = string.Join(" ", splitText);
-
-						channelInstance.SendChatMessageResponse(lastMessage, text);
-
-						while (content.generationConfig.TokenCount > InstanceConfig.TokenLimit)
-						{
-							if (content.contents.Count > 2)
-							{
-								//This isn't weird - we want to make sure we start from user message
-								if (content.contents[0].role == Gemini.Role.user)
-								{
-									content.contents.RemoveAt(0);
-								}
-
-								if (content.contents[0].role == Gemini.Role.model)
-								{
-									content.contents.RemoveAt(0);
-								}
-							}
-						}
-
-						XML_Utils.Save(StreamerPath, content);
 					}
 					else
 					{
@@ -242,42 +221,6 @@ namespace SuiBot_Core.Components.Other
 				channelInstance.SendChatMessageResponse(lastMessage, "Failed to get a response. Something was written in log. Sui help! :(");
 				ErrorLogging.WriteLine($"There was an error trying to do AI: {ex}");
 			}
-		}
-
-		private string CleanDescriptors(string text)
-		{
-			int endIndex = text.Length;
-			bool isDescription = false;
-
-			for (int i = text.Length - 1; i >= 0; i--)
-			{
-				if (text[i] == '*')
-				{
-					if (!isDescription)
-					{
-						endIndex = i;
-						isDescription = true;
-					}
-					else
-					{
-						var length = i - endIndex;
-						var substring = text.Substring(i + 1, endIndex - i - 1);
-						if (substring.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).Length > 5)
-						{
-							text = text.Remove(i, endIndex - i + 1);
-						}
-						isDescription = false;
-					}
-				}
-			}
-
-			while (text.Contains("  "))
-			{
-				text = text.Replace("  ", " ");
-			}
-
-			text = text.Trim();
-			return text;
 		}
 
 		internal void DoLurk(SuiBot_ChannelInstance channelInstance, ChatMessage lastMessage)
@@ -317,7 +260,7 @@ namespace SuiBot_Core.Components.Other
 				}
 				else
 				{
-					Gemini.GeminiResponse response = JsonConvert.DeserializeObject<Gemini.GeminiResponse>(result);
+					Gemini.GeminiResponse response = JsonConvert.DeserializeObject<GeminiResponse>(result);
 					content.generationConfig.TokenCount = response.usageMetadata.totalTokenCount;
 
 					if (response.candidates.Length > 0 && response.candidates.Last().content.parts.Length > 0)
@@ -325,49 +268,16 @@ namespace SuiBot_Core.Components.Other
 						var lastResponse = response.candidates.Last().content;
 						content.contents.Add(lastResponse);
 						var text = lastResponse.parts.Last().text;
-						List<string> splitText = text.Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries).ToList();
-						for (int i = splitText.Count - 1; i >= 0; i--)
+						if (text != null)
 						{
-							var line = splitText[i].Trim();
-							if (line.StartsWith("*") && line.StartsWith("*"))
-							{
-								var count = line.Count(x => x == '*');
-								if (count == 2)
-								{
-									splitText.RemoveAt(i);
-									continue;
-								}
-							}
-
-							if (line.Contains("*"))
-							{
-								line = CleanDescriptors(line);
-								splitText[i] = line;
-							}
+							CleanupResponse(ref text);
+							channelInstance.SendChatMessageResponse(lastMessage, text);
 						}
-
-						text = string.Join(" ", splitText);
-
-						channelInstance.SendChatMessageResponse(lastMessage, text);
-
-						while (content.generationConfig.TokenCount > InstanceConfig.TokenLimit)
+						var func = lastResponse.parts.Last().functionCall;
+						if (func != null)
 						{
-							if (content.contents.Count > 2)
-							{
-								//This isn't weird - we want to make sure we start from user message
-								if (content.contents[0].role == Gemini.Role.user)
-								{
-									content.contents.RemoveAt(0);
-								}
-
-								if (content.contents[0].role == Gemini.Role.model)
-								{
-									content.contents.RemoveAt(0);
-								}
-							}
+							HandleFunctionCall(channelInstance, lastMessage, func);
 						}
-
-						XML_Utils.Save(StreamerPath, content);
 					}
 					else
 					{
@@ -380,6 +290,76 @@ namespace SuiBot_Core.Components.Other
 				channelInstance.SendChatMessageResponse(lastMessage, "Failed to get a response. Something was written in log. Sui help! :(");
 				ErrorLogging.WriteLine($"There was an error trying to do AI: {ex}");
 			}
+		}
+
+		private void HandleFunctionCall(SuiBot_ChannelInstance channelInstance, ChatMessage message, GeminiResponseFunctionCall func)
+		{
+			if (func.name == "timeout")
+				func.args.ToObject<Gemini.FunctionTypes.TimeOutUser>().Perform(channelInstance, message);
+			else if (func.name == "ban")
+				func.args.ToObject<Gemini.FunctionTypes.BanUser>().Perform(channelInstance, message);
+		}
+
+		private void CleanupResponse(ref string text)
+		{
+			List<string> splitText = text.Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+			for (int i = splitText.Count - 1; i >= 0; i--)
+			{
+				var line = splitText[i].Trim();
+				if (line.StartsWith("*") && line.StartsWith("*"))
+				{
+					var count = line.Count(x => x == '*');
+					if (count == 2)
+					{
+						splitText.RemoveAt(i);
+						continue;
+					}
+				}
+
+				if (line.Contains("*"))
+				{
+					line = CleanDescriptors(line);
+					splitText[i] = line;
+				}
+			}
+
+			text = string.Join(" ", splitText);
+		}
+
+		private string CleanDescriptors(string text)
+		{
+			int endIndex = text.Length;
+			bool isDescription = false;
+
+			for (int i = text.Length - 1; i >= 0; i--)
+			{
+				if (text[i] == '*')
+				{
+					if (!isDescription)
+					{
+						endIndex = i;
+						isDescription = true;
+					}
+					else
+					{
+						var length = i - endIndex;
+						var substring = text.Substring(i + 1, endIndex - i - 1);
+						if (substring.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).Length > 5)
+						{
+							text = text.Remove(i, endIndex - i + 1);
+						}
+						isDescription = false;
+					}
+				}
+			}
+
+			while (text.Contains("  "))
+			{
+				text = text.Replace("  ", " ");
+			}
+
+			text = text.Trim();
+			return text;
 		}
 	}
 }

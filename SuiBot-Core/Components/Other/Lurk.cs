@@ -6,6 +6,7 @@ namespace SuiBot_Core.Components.Other
 {
 	class Lurk : MemeComponent
 	{
+		public Dictionary<string, DateTime> UsersLurking = new Dictionary<string, DateTime>();
 		readonly Random rng = new Random();
 
 		List<string> Responses;
@@ -14,6 +15,12 @@ namespace SuiBot_Core.Components.Other
 		{
 			if (Responses == null)
 				LoadResponses(channelInstance);
+
+			if (UsersLurking.TryGetValue(lastMessage.UserID, out var lurkedAt))
+			{
+				if (lurkedAt + TimeSpan.FromMinutes(10) > DateTime.UtcNow)
+					return true;
+			}
 
 			if (lastMessage.Message.Contains(" "))
 			{
@@ -83,6 +90,7 @@ namespace SuiBot_Core.Components.Other
 					{
 						var copy = new ChatMessage(lastMessage);
 						copy.Message = dropWord;
+						UsersLurking[lastMessage.UserID] = DateTime.UtcNow;
 						aiComponent.DoLurk(channelInstance, copy);
 						return true;
 					}
@@ -90,6 +98,7 @@ namespace SuiBot_Core.Components.Other
 				else
 				{
 					var randomResponse = Responses[rng.Next(Responses.Count)];
+					UsersLurking[lastMessage.UserID] = DateTime.UtcNow;
 					channelInstance.SendChatMessage(string.Format(randomResponse, lastMessage.Username));
 					return true;
 				}
@@ -97,6 +106,7 @@ namespace SuiBot_Core.Components.Other
 			else
 			{
 				var randomResponse = Responses[rng.Next(Responses.Count)];
+				UsersLurking[lastMessage.UserID] = DateTime.UtcNow;
 				channelInstance.SendChatMessage(string.Format(randomResponse, lastMessage.Username));
 				return true;
 			}

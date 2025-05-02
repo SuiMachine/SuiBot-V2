@@ -1,5 +1,6 @@
-﻿using Newtonsoft.Json.Converters;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Linq;
 using System;
 
 namespace SuiBot_Core.Components.Other.Gemini
@@ -9,16 +10,16 @@ namespace SuiBot_Core.Components.Other.Gemini
 	{
 		[JsonConverter(typeof(StringEnumConverter))]
 		public Role role;
-		public GeminiMessagePart[] parts;
+		public GeminiResponseMessagePart[] parts;
 
 		public static GeminiMessage CreateUserResponse(string contentToAsk)
 		{
 			return new GeminiMessage()
 			{
 				role = Role.user,
-				parts = new GeminiMessagePart[]
+				parts = new GeminiResponseMessagePart[]
 				{
-					new GeminiMessagePart()
+					new GeminiResponseMessagePart()
 					{
 						text = contentToAsk.Trim()
 					}
@@ -27,11 +28,22 @@ namespace SuiBot_Core.Components.Other.Gemini
 		}
 	}
 
+
+
 	[Serializable]
-	public class GeminiMessagePart
+	public class GeminiResponseMessagePart
 	{
-		public string text;
+		[JsonProperty(NullValueHandling = NullValueHandling.Ignore)] public string text = null;
+		[JsonProperty(NullValueHandling = NullValueHandling.Ignore)] public GeminiResponseFunctionCall functionCall = null;
 	}
+
+	[Serializable]
+	public class GeminiResponseFunctionCall
+	{
+		public string name = "";
+		public JToken args = null;
+	}
+
 
 	public enum Role
 	{

@@ -28,7 +28,7 @@ namespace SuiBot_Core.Components.Other.Gemini
 				{
 					type = "object",
 					properties = functionDefinition,
-					required = new List<string>(),
+					required = functionDefinition.GetRequiredFieldsNames()
 				};
 			}
 		}
@@ -42,6 +42,7 @@ namespace SuiBot_Core.Components.Other.Gemini
 				new GeminiFunction("timeout", "time outs a user in the chat", new TimeOutParameters()),
 				new GeminiFunction("ban", "bans a user", new BanParameters()),
 			};
+			
 		}
 	}
 }
