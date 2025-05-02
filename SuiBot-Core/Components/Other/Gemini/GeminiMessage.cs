@@ -2,6 +2,7 @@
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Xml.Serialization;
 
 namespace SuiBot_Core.Components.Other.Gemini
 {
@@ -34,14 +35,14 @@ namespace SuiBot_Core.Components.Other.Gemini
 	public class GeminiResponseMessagePart
 	{
 		[JsonProperty(NullValueHandling = NullValueHandling.Ignore)] public string text = null;
-		[JsonProperty(NullValueHandling = NullValueHandling.Ignore)] public GeminiResponseFunctionCall functionCall = null;
+		[XmlIgnore][JsonProperty(NullValueHandling = NullValueHandling.Ignore)] public GeminiResponseFunctionCall functionCall = null;
 	}
 
 	[Serializable]
 	public class GeminiResponseFunctionCall
 	{
 		public string name = "";
-		public JToken args = null;
+		[XmlIgnore] public JToken args = null;
 	}
 
 
