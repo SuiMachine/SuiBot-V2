@@ -120,6 +120,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="API_Structs\API_ChatMessages.cs" />
     <Compile Include="API_Structs\API_Timeout.cs" />
     <Compile Include="Components\ChatFiltering.cs" />
     <Compile Include="Components\CustomCvars.cs" />

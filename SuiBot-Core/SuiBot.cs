@@ -53,10 +53,15 @@ namespace SuiBot_Core
 		public static string GetAuthenticationURL()
 		{
 			return new Uri(string.Format("https://id.twitch.tv/oauth2/authorize?client_id=rmi9m0sheo4pp5882o8s24zu7h09md&redirect_uri=https://suimachine.github.io/twitchauthy/&response_type=token&scope={0}",
-				string.Join(" ", new string[] {
+				string.Join(" ", new string[]
+				{
+					"bits:read",
 					"channel:bot",
-					"channel:read:editors",
+					"channel:manage:ads",
+					"channel:read:ads",
+					"channel:read:goals",
 					"channel:read:guest_star",
+					"channel:read:hype_train",
 					"channel:read:polls",
 					"channel:manage:polls",
 					"channel:read:predictions",
@@ -65,25 +70,26 @@ namespace SuiBot_Core
 					"channel:manage:redemptions",
 					"channel:read:subscriptions",
 					"channel:read:vips",
+					"channel:moderate",
 					"moderation:read",
 					"moderator:manage:announcements",
+					"moderator:manage:automod",
 					"moderator:read:banned_users",
-					"moderator:manage:banned_users",
 					"moderator:read:chat_messages",
-					"moderator:manage:blocked_terms",
 					"moderator:manage:chat_messages",
-					"moderator:read:chat_settings",
 					"moderator:manage:chat_settings",
 					"moderator:read:chatters",
 					"moderator:read:followers",
+					"moderator:read:guest_star",
 					"moderator:read:moderators",
-					"moderator:read:shoutouts",
 					"moderator:manage:shoutouts",
+					"moderator:read:suspicious_users",
 					"moderator:read:vips",
+					"moderator:manage:warnings",
 					"user:bot",
+					"user:read:chat",
+					"user:read:subscriptions",
 					"user:write:chat",
-					"chat:edit",
-					"chat:read",
 				}))).ToString();
 		}
 
