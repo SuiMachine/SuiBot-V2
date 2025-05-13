@@ -19,6 +19,18 @@ namespace SuiBot_Core.Components.Other
 			ReloadComponents(false);
 		}
 
+
+		public T GetComponentOfType<T>() where T : MemeComponent
+		{
+			foreach (MemeComponent component in memeComponents.Values)
+			{
+				if (component.GetType() == typeof(T))
+					return (T)component;
+			}
+			return default;
+		}
+
+
 		private void ReloadComponents(bool notify = true)
 		{
 			if (memeConfig.ENABLE)

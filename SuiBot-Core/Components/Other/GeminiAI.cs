@@ -15,10 +15,11 @@ namespace SuiBot_Core.Components.Other
 		{
 			public string API_Key { get; set; } = "";
 			public string Instruction_Streamer { get; set; } = "";
-			public string Model { get; set; } = "models/gemini-2.0-flash-exp";
+			public string Lurk_Instruction { get; set; } = "";
+			public string Model { get; set; } = "models/gemini-2.5-flash-preview-04-17";
 			public int TokenLimit { get; set; } = 1_048_576 - 8096 - 512;
 
-			public GeminiMessage GetSystemInstruction(string userName, bool isLive, string category, string stream_title)
+			public GeminiMessage GetSystemInstruction(string streamerName, bool isLive, string category, string stream_title)
 			{
 				var sb = new StringBuilder();
 				sb.AppendLine(Instruction_Streamer);
@@ -30,20 +31,56 @@ namespace SuiBot_Core.Components.Other
 
 				if (isLive)
 				{
-					sb.AppendLine($"{userName} is now streaming {category}.");
+					sb.AppendLine($"{streamerName} is now streaming {category}.");
 					sb.AppendLine($"The stream title is: {stream_title}.");
 				}
 				else
 				{
-					sb.AppendLine($"{userName} is currently not streaming any game.");
+					sb.AppendLine($"{streamerName} is currently not streaming any game.");
 				}
 
 				return new GeminiMessage()
 				{
 					role = Gemini.Role.user,
-					parts = new GeminiMessagePart[]
+					parts = new GeminiResponseMessagePart[]
 					{
-						new GeminiMessagePart()
+						new GeminiResponseMessagePart()
+						{
+							text = sb.ToString()
+						}
+					}
+				};
+			}
+
+			public GeminiMessage GetLurkSystemInstruction(string streamerName, string userName, bool isLive, string category, string stream_title)
+			{
+				var sb = new StringBuilder();
+				sb.AppendLine(Lurk_Instruction);
+				sb.AppendLine("");
+
+				System.Globalization.CultureInfo globalizationOverride = new System.Globalization.CultureInfo("en-US");
+				sb.AppendLine($"The current local time is {DateTime.Now:H:mm}. The local date is {DateTime.Now.ToString("MMMM dd, yyy", globalizationOverride)}.");
+				sb.AppendLine($"The current UTC time {DateTime.UtcNow:H:mm}. The UTC date is {DateTime.Now.ToString("MMMM dd, yyy", globalizationOverride)}.");
+
+				if (isLive)
+				{
+					sb.AppendLine($"{streamerName} is now streaming {category}.");
+					sb.AppendLine($"The stream title is: {stream_title}.");
+				}
+				else
+				{
+					sb.AppendLine($"{streamerName} is currently not streaming any game.");
+				}
+
+				sb.AppendLine();
+				sb.AppendLine($"The username is {userName}.");
+
+				return new GeminiMessage()
+				{
+					role = Gemini.Role.user,
+					parts = new GeminiResponseMessagePart[]
+					{
+						new GeminiResponseMessagePart()
 						{
 							text = sb.ToString()
 						}
@@ -54,7 +91,7 @@ namespace SuiBot_Core.Components.Other
 
 		public Config InstanceConfig;
 		public string StreamerPath;
-		public Gemini.GeminiContent StreamerContent = new Gemini.GeminiContent();
+		public GeminiContent StreamerContent = new GeminiContent();
 
 		internal bool IsConfigured(SuiBot_ChannelInstance channelInstance)
 		{
@@ -74,14 +111,14 @@ namespace SuiBot_Core.Components.Other
 			StreamerPath = $"Bot/Channels/{channelInstance.Channel}/MemeComponents/AI_History.xml";
 			StreamerContent = XML_Utils.Load(StreamerPath, new Gemini.GeminiContent()
 			{
-				contents = new List<Gemini.GeminiMessage>(),
-				generationConfig = new Gemini.GeminiContent.GenerationConfig(),
-				systemInstruction = new Gemini.GeminiMessage()
+				contents = new List<GeminiMessage>(),
+				generationConfig = new GeminiContent.GenerationConfig(),
+				systemInstruction = new GeminiMessage()
 				{
 					role = Gemini.Role.user,
-					parts = new Gemini.GeminiMessagePart[]
+					parts = new Gemini.GeminiResponseMessagePart[]
 					{
-						new Gemini.GeminiMessagePart()
+						new GeminiResponseMessagePart()
 						{
 							text = ""
 						}
@@ -147,49 +184,31 @@ namespace SuiBot_Core.Components.Other
 						var lastResponse = response.candidates.Last().content;
 						content.contents.Add(lastResponse);
 						var text = lastResponse.parts.Last().text;
-						List<string> splitText = text.Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries).ToList();
-						for (int i = splitText.Count - 1; i >= 0; i--)
+						if (text != null)
 						{
-							var line = splitText[i].Trim();
-							if (line.StartsWith("*") && line.StartsWith("*"))
+							CleanupResponse(ref text);
+
+							channelInstance.SendChatMessageResponse(lastMessage, text);
+
+							while (content.generationConfig.TokenCount > InstanceConfig.TokenLimit)
 							{
-								var count = line.Count(x => x == '*');
-								if (count == 2)
+								if (content.contents.Count > 2)
 								{
-									splitText.RemoveAt(i);
-									continue;
+									//This isn't weird - we want to make sure we start from user message
+									if (content.contents[0].role == Gemini.Role.user)
+									{
+										content.contents.RemoveAt(0);
+									}
+
+									if (content.contents[0].role == Gemini.Role.model)
+									{
+										content.contents.RemoveAt(0);
+									}
 								}
 							}
 
-							if (line.Contains("*"))
-							{
-								line = CleanDescriptors(line);
-								splitText[i] = line;
-							}
+							XML_Utils.Save(StreamerPath, content);
 						}
-
-						text = string.Join(" ", splitText);
-
-						channelInstance.SendChatMessageResponse(lastMessage, text);
-
-						while (content.generationConfig.TokenCount > InstanceConfig.TokenLimit)
-						{
-							if (content.contents.Count > 2)
-							{
-								//This isn't weird - we want to make sure we start from user message
-								if (content.contents[0].role == Gemini.Role.user)
-								{
-									content.contents.RemoveAt(0);
-								}
-
-								if (content.contents[0].role == Gemini.Role.model)
-								{
-									content.contents.RemoveAt(0);
-								}
-							}
-						}
-
-						XML_Utils.Save(StreamerPath, content);
 					}
 					else
 					{
@@ -202,6 +221,109 @@ namespace SuiBot_Core.Components.Other
 				channelInstance.SendChatMessageResponse(lastMessage, "Failed to get a response. Something was written in log. Sui help! :(");
 				ErrorLogging.WriteLine($"There was an error trying to do AI: {ex}");
 			}
+		}
+
+		internal void DoLurk(SuiBot_ChannelInstance channelInstance, ChatMessage lastMessage)
+		{
+			Task.Run(async () =>
+			{
+				await GetResponseLurk(channelInstance, lastMessage);
+			});
+		}
+
+		private async Task GetResponseLurk(SuiBot_ChannelInstance channelInstance, ChatMessage lastMessage)
+		{
+			try
+			{
+				Gemini.GeminiContent content = null;
+				content = new GeminiContent()
+				{
+					contents = new List<GeminiMessage>(),
+					tools = GeminiContent.GetTools(),
+					generationConfig = new GeminiContent.GenerationConfig(),
+					systemInstruction = InstanceConfig.GetLurkSystemInstruction(channelInstance.Channel, lastMessage.Username, channelInstance.API.IsOnline, channelInstance.API.Game, channelInstance.API.StoredTitle)
+				};
+
+				content.contents.Add(GeminiMessage.CreateUserResponse(lastMessage.Message));
+
+				string json = JsonConvert.SerializeObject(content, Formatting.Indented);
+
+				string result = await HttpWebRequestHandlers.PerformPost(
+					new Uri($"https://generativelanguage.googleapis.com/v1beta/{InstanceConfig.Model}:generateContent?key={InstanceConfig.API_Key}"),
+					new Dictionary<string, string>(),
+					json
+					);
+
+				if (string.IsNullOrEmpty(result))
+				{
+					channelInstance.SendChatMessageResponse(lastMessage, "Failed to get a response. Please debug me, Sui :(");
+				}
+				else
+				{
+					Gemini.GeminiResponse response = JsonConvert.DeserializeObject<GeminiResponse>(result);
+					content.generationConfig.TokenCount = response.usageMetadata.totalTokenCount;
+
+					if (response.candidates.Length > 0 && response.candidates.Last().content.parts.Length > 0)
+					{
+						var lastResponse = response.candidates.Last().content;
+						content.contents.Add(lastResponse);
+						var text = lastResponse.parts.Last().text;
+						if (text != null)
+						{
+							CleanupResponse(ref text);
+							channelInstance.SendChatMessageResponse(lastMessage, text);
+						}
+						var func = lastResponse.parts.Last().functionCall;
+						if (func != null)
+						{
+							HandleFunctionCall(channelInstance, lastMessage, func);
+						}
+					}
+					else
+					{
+						channelInstance.SendChatMessageResponse(lastMessage, "Failed to get a response. Please debug me, Sui :(");
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				channelInstance.SendChatMessageResponse(lastMessage, "Failed to get a response. Something was written in log. Sui help! :(");
+				ErrorLogging.WriteLine($"There was an error trying to do AI: {ex}");
+			}
+		}
+
+		private void HandleFunctionCall(SuiBot_ChannelInstance channelInstance, ChatMessage message, GeminiResponseFunctionCall func)
+		{
+			if (func.name == "timeout")
+				func.args.ToObject<Gemini.FunctionTypes.TimeOutUser>().Perform(channelInstance, message);
+			else if (func.name == "ban")
+				func.args.ToObject<Gemini.FunctionTypes.BanUser>().Perform(channelInstance, message);
+		}
+
+		private void CleanupResponse(ref string text)
+		{
+			List<string> splitText = text.Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+			for (int i = splitText.Count - 1; i >= 0; i--)
+			{
+				var line = splitText[i].Trim();
+				if (line.StartsWith("*") && line.StartsWith("*"))
+				{
+					var count = line.Count(x => x == '*');
+					if (count == 2)
+					{
+						splitText.RemoveAt(i);
+						continue;
+					}
+				}
+
+				if (line.Contains("*"))
+				{
+					line = CleanDescriptors(line);
+					splitText[i] = line;
+				}
+			}
+
+			text = string.Join(" ", splitText);
 		}
 
 		private string CleanDescriptors(string text)

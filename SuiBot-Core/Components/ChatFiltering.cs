@@ -625,7 +625,7 @@ namespace SuiBot_Core.Components
 				{
 					if (filter.CompiledSyntax.IsMatch(lastMassage.Message))
 					{
-						ChannelInstance.UserTimetout(lastMassage, filter.Duration, string.Format("{0} (filterID: {1})", filter.Response, id));
+						ChannelInstance.UserTimeout(lastMassage, filter.Duration, string.Format("{0} (filterID: {1})", filter.Response, id));
 						return true;
 					}
 				}

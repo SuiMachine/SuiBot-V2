@@ -6,6 +6,7 @@ namespace SuiBot_Core.Components.Other
 {
 	class Lurk : MemeComponent
 	{
+		public Dictionary<string, DateTime> UsersLurking = new Dictionary<string, DateTime>();
 		readonly Random rng = new Random();
 
 		List<string> Responses;
@@ -15,61 +16,100 @@ namespace SuiBot_Core.Components.Other
 			if (Responses == null)
 				LoadResponses(channelInstance);
 
-			if (lastMessage.UserRole <= Role.Mod && lastMessage.Message.Contains(" "))
+			if (UsersLurking.TryGetValue(lastMessage.UserID, out var lurkedAt))
 			{
-				var split = lastMessage.Message.StripSingleWord();
-				if (split != "")
-				{
-					if (split.StartsWithWordLazy("add"))
-					{
-						split = split.StripSingleWord();
-						if (split.Contains("{0}"))
-						{
-							Responses.Add(split);
-							SaveResponses(channelInstance);
-							channelInstance.SendChatMessage($"Added a new response. e.g.: {string.Format(split, lastMessage.Username)}");
-						}
-						else
-							channelInstance.SendChatMessage("Added response must contain {0}");
-						return false;
-					}
-					else if (split.StartsWithWordLazy("get"))
-					{
-						split = split.StripSingleWord();
-						int id = GetIdFromMessage(split);
-						if(id >= 0)
-							channelInstance.SendChatMessage($"Response at {id} is: {Responses[id]}");
-						else
-							channelInstance.SendChatMessage("Incorrect id!");
-						return false;
-					}
-					else if (split.StartsWithWordLazy("remove"))
-					{
-						split = split.StripSingleWord();
-
-						int id = GetIdFromMessage(split);
-						if (id >= 0)
-						{
-							if(Responses.Count > 1)
-							{
-								var response = Responses[id];
-								Responses.RemoveAt(id);
-								channelInstance.SendChatMessage($"Removed response: {response}");
-								SaveResponses(channelInstance);
-							}
-							else
-								channelInstance.SendChatMessage("There has to be at least one response. Add one response with !lurk add RESPONSE_TEXT and then remove other one using !lurk remove 0");
-						}
-						else
-							channelInstance.SendChatMessage("Incorrect id!");
-						return false;
-					}
-				}
+				if (lurkedAt + TimeSpan.FromMinutes(10) > DateTime.UtcNow)
+					return true;
 			}
 
-			var randomResponse = Responses[rng.Next(Responses.Count)];
-			channelInstance.SendChatMessage(string.Format(randomResponse, lastMessage.Username));
-			return true;
+			if (lastMessage.Message.Contains(" "))
+			{
+				if (lastMessage.UserRole <= Role.Mod)
+				{
+					var split = lastMessage.Message.StripSingleWord();
+					if (split != "")
+					{
+						if (split.StartsWithWordLazy("add"))
+						{
+							split = split.StripSingleWord();
+							if (split.Contains("{0}"))
+							{
+								Responses.Add(split);
+								SaveResponses(channelInstance);
+								channelInstance.SendChatMessage($"Added a new response. e.g.: {string.Format(split, lastMessage.Username)}");
+							}
+							else
+								channelInstance.SendChatMessage("Added response must contain {0}");
+							return false;
+						}
+						else if (split.StartsWithWordLazy("get"))
+						{
+							split = split.StripSingleWord();
+							int id = GetIdFromMessage(split);
+							if (id >= 0)
+								channelInstance.SendChatMessage($"Response at {id} is: {Responses[id]}");
+							else
+								channelInstance.SendChatMessage("Incorrect id!");
+							return false;
+						}
+						else if (split.StartsWithWordLazy("remove"))
+						{
+							split = split.StripSingleWord();
+
+							int id = GetIdFromMessage(split);
+							if (id >= 0)
+							{
+								if (Responses.Count > 1)
+								{
+									var response = Responses[id];
+									Responses.RemoveAt(id);
+									channelInstance.SendChatMessage($"Removed response: {response}");
+									SaveResponses(channelInstance);
+								}
+								else
+									channelInstance.SendChatMessage("There has to be at least one response. Add one response with !lurk add RESPONSE_TEXT and then remove other one using !lurk remove 0");
+							}
+							else
+								channelInstance.SendChatMessage("Incorrect id!");
+							return false;
+						}
+					}
+				}
+
+				string dropWord = lastMessage.Message.StripSingleWord();
+				if (channelInstance.ConfigInstance.MemeComponents.AskAILurk && dropWord != "")
+				{
+					var aiComponent = channelInstance.MemeComponents.GetComponentOfType<GeminiAI>();
+					if (aiComponent == null)
+					{
+						var randomResponse = Responses[rng.Next(Responses.Count)];
+						channelInstance.SendChatMessage(string.Format(randomResponse, lastMessage.Username));
+						return true;
+					}
+					else
+					{
+						var copy = new ChatMessage(lastMessage);
+						copy.Message = dropWord;
+						UsersLurking[lastMessage.UserID] = DateTime.UtcNow;
+						aiComponent.DoLurk(channelInstance, copy);
+						return true;
+					}
+				}
+				else
+				{
+					var randomResponse = Responses[rng.Next(Responses.Count)];
+					UsersLurking[lastMessage.UserID] = DateTime.UtcNow;
+					channelInstance.SendChatMessage(string.Format(randomResponse, lastMessage.Username));
+					return true;
+				}
+			}
+			else
+			{
+				var randomResponse = Responses[rng.Next(Responses.Count)];
+				UsersLurking[lastMessage.UserID] = DateTime.UtcNow;
+				channelInstance.SendChatMessage(string.Format(randomResponse, lastMessage.Username));
+				return true;
+			}
 		}
 
 		private int GetIdFromMessage(string split)
@@ -81,7 +121,7 @@ namespace SuiBot_Core.Components.Other
 				else
 					return -1;
 			}
-			else if(split.StartsWithLazy("last"))
+			else if (split.StartsWithLazy("last"))
 				return Responses.Count - 1;
 			else
 				return -1;

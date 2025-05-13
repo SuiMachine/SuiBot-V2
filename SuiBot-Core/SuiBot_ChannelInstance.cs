@@ -24,7 +24,7 @@ namespace SuiBot_Core
 		Components.Timezones Timezones { get; set; }
 
 		#region Other
-		Components.Other._MemeComponents MemeComponents { get; set; }
+		internal Components.Other._MemeComponents MemeComponents { get; set; }
 		#endregion
 		#endregion
 		public TwitchAPI API { get; private set; }
@@ -155,9 +155,10 @@ namespace SuiBot_Core
 
 		public void RemoveUserMessage(ChatMessage lastMassage) => API.RequestRemoveMessage(Channel, lastMassage.MessageID);
 
-		public void UserTimetout(ChatMessage lastMassage, uint length, string reason = null) => API.RequestTimeout(Channel, lastMassage.UserID, length, reason);
-
+		public void UserTimeout(ChatMessage lastMassage, uint length, string reason = null) => API.RequestTimeout(Channel, lastMassage.UserID, length, reason);
 		public void UserBan(ChatMessage lastMassage, string reason = null) => API.RequestBan(Channel, lastMassage.UserID, reason);
+		public void UserBan(string userID, string reason = null) => API.RequestBan(Channel, userID, reason);
+
 
 		internal void DoWork(ChatMessage lastMessage)
 		{

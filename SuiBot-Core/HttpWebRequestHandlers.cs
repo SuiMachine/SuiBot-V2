@@ -12,8 +12,8 @@ namespace SuiBot_Core
 		/// Does a request and gets a Json response.
 		/// </summary>
 		/// <param name="address">Url to perform a request on</param>
-		/// <param name="result">JSON recevied as response (or empty if failed)</param>
-		/// <returns>True if response was sucessful, false if failed.</returns>
+		/// <param name="result">JSON received as response (or empty if failed)</param>
+		/// <returns>True if response was successful, false if failed.</returns>
 		public static bool GrabJson(Uri address, out string result)
 		{
 			try
@@ -33,7 +33,6 @@ namespace SuiBot_Core
 				result = "";
 				return false;
 			}
-
 		}
 
 		/// <summary>

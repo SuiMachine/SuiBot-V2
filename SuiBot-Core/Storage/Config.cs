@@ -257,7 +257,7 @@ namespace SuiBot_Core.Storage
 					_type = target.GetType();
 					properties = _type.GetProperties();
 
-					foundProperty = properties.FirstOrDefault(x => msg.ToLower().StartsWithLazy(x.Name));
+					foundProperty = properties.FirstOrDefault(x => msg.ToLower().FirstWord() == x.Name.ToLower());
 
 					if (foundProperty != null)
 					{
@@ -413,6 +413,8 @@ namespace SuiBot_Core.Storage
 		[XmlElement]
 		public bool AskAI { get; set; }
 		[XmlElement]
+		public bool AskAILurk { get; set; }
+		[XmlElement]
 		public bool RatsBirthday { get; set; }
 		[XmlElement]
 		public bool Tombstone { get; set; }
@@ -426,6 +428,7 @@ namespace SuiBot_Core.Storage
 		{
 			ENABLE = false;
 			AskAI = false;
+			AskAILurk = true;
 			RatsBirthday = false;
 			Tombstone = false;
 			Lurk = false;

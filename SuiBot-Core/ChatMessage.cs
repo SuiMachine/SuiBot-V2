@@ -15,6 +15,19 @@
 		public bool IsFirstMessage;
 		public string RewardID;
 
+		public ChatMessage(ChatMessage messageToCopy)
+		{
+			this.UserRole = messageToCopy.UserRole;
+			this.MessageID = messageToCopy.MessageID;
+			this.DisplayName = messageToCopy.DisplayName;
+			this.Username = messageToCopy.Username;
+			this.UserID = messageToCopy.UserID;
+			this.Message = messageToCopy.Message;
+			this.HighlightedMessage = messageToCopy.HighlightedMessage;
+			this.IsFirstMessage = messageToCopy.IsFirstMessage;
+			this.RewardID = messageToCopy.RewardID;
+		}
+
 		public ChatMessage(string MessageID, Role UserRole, string DisplayName, string Username, string UserID, string Message, bool IsFirstMessage, bool HighlightedMessage = false, string RewardID = null)
 		{
 			this.MessageID = MessageID;
