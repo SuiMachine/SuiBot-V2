@@ -1,21 +1,54 @@
-﻿using Meebey.SmartIrc4net;
+﻿using SuiBot_Core.API.EventSub;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Runtime.Remoting.Channels;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace SuiBot_Core
 {
-	public class SuiBot
+	public class SuiBot : IDisposable
 	{
+		private static SuiBot m_Instance;
+		internal TwitchSocket TwitchSocket { get; private set; }
+		internal API.HelixAPI HelixAPI { get; private set; }
+		public bool IsDisposed { get; private set; }
+		public static SuiBot GetInstance()
+		{
+			if (m_Instance == null || m_Instance.IsDisposed)
+				m_Instance = new SuiBot(Storage.ConnectionConfig.Load(), Storage.CoreConfig.Load());
+			return m_Instance;
+		}
+
+		public static SuiBot GetInstance(Storage.ConnectionConfig BotConnectionConfig, Storage.CoreConfig BotCoreConfig)
+		{
+			if (m_Instance == null || m_Instance.IsDisposed)
+				m_Instance = new SuiBot(BotConnectionConfig, BotCoreConfig);
+			return m_Instance;
+		}
+
+		/// <summary>
+		/// Creates a new instance of SuiBot.
+		/// </summary>
+		/// <param name="BotConfig">Config struct object. SuiBot_Config.Load() may be used to load it from config file.</param>
+		private SuiBot(Storage.ConnectionConfig BotConnectionConfig, Storage.CoreConfig BotCoreConfig)
+		{
+			this.BotConnectionConfig = BotConnectionConfig;
+			this.BotName = BotConnectionConfig.Username;
+			this.BotCoreConfig = BotCoreConfig;
+			this.IntervalTimer = new System.Timers.Timer(1000 * 60) { AutoReset = true };
+			this.StatusUpdateTimer = new System.Timers.Timer(5 * 1000 * 60) { AutoReset = true };
+			this.ActiveChannels = new Dictionary<string, SuiBot_ChannelInstance>();
+			this.ChannelInstances = new Dictionary<string, SuiBot_ChannelInstance>();
+
+		}
+
 		private Storage.ConnectionConfig BotConnectionConfig { get; set; }
 		public Storage.CoreConfig BotCoreConfig { get; set; }
-		internal IrcClient MeebyIrcClient { get; set; }
-		//internal WebSocket TwitchSocket { get; set; }
-		internal ImgUploader ImageUplaoder { get; set; }
 		public Dictionary<string, SuiBot_ChannelInstance> ActiveChannels { get; set; }
+		public Dictionary<string, SuiBot_ChannelInstance> ChannelInstances { get; set; }
+
 		public bool IsAfterFirstStatusUpdate = false;
 
 		#region ImgBBGetter
@@ -32,8 +65,7 @@ namespace SuiBot_Core
 		public string BotName { get; set; }
 		public System.Timers.Timer IntervalTimer;
 		public System.Timers.Timer StatusUpdateTimer;
-		private Task BotTask;
-		public bool IsRunning = false;
+		public bool ShouldRun;
 
 		#region BotEventsDeclraration
 		public event Events.OnIrcFeedbackHandler OnIrcFeedback;
@@ -61,7 +93,6 @@ namespace SuiBot_Core
 					"channel:read:ads",
 					"channel:read:goals",
 					"channel:read:guest_star",
-					"channel:read:hype_train",
 					"channel:read:polls",
 					"channel:manage:polls",
 					"channel:read:predictions",
@@ -69,7 +100,6 @@ namespace SuiBot_Core
 					"channel:read:redemptions",
 					"channel:manage:redemptions",
 					"channel:read:subscriptions",
-					"channel:read:vips",
 					"channel:moderate",
 					"moderation:read",
 					"moderator:manage:announcements",
@@ -93,113 +123,166 @@ namespace SuiBot_Core
 				}))).ToString();
 		}
 
-
-		/// <summary>
-		/// Creates a new instance of Suibot, loading required data from files (if they exist)
-		/// </summary>
-		public SuiBot()
+		public void Connect()
 		{
-			this.BotConnectionConfig = Storage.ConnectionConfig.Load();
-			this.BotName = BotConnectionConfig.Username;
-			this.BotCoreConfig = Storage.CoreConfig.Load();
-			this.IntervalTimer = new System.Timers.Timer(1000 * 60) { AutoReset = true };
-			this.StatusUpdateTimer = new System.Timers.Timer(5 * 1000 * 60) { AutoReset = true };
-			this.ActiveChannels = new Dictionary<string, SuiBot_ChannelInstance>();
-			this.ImageUplaoder = new ImgUploader(this);
+			if (!BotConnectionConfig.IsValidConfig())
+				throw new Exception("Invalid config!");
+			if (BotCoreConfig.ChannelsToJoin.Count == 0)
+				throw new Exception("At least 1 channel is required to join.");
+
+			HelixAPI = new API.HelixAPI(this, BotConnectionConfig.Password);
+
+			TwitchSocket = new TwitchSocket(this);
+			TwitchSocket.OnConnected += TwitchSocket_Connected;
+			TwitchSocket.OnChatMessage += TwitchSocket_ChatMessage;
+
+			IntervalTimer.Elapsed += IntervalTimer_Elapsed;
+			StatusUpdateTimer.Elapsed += StatusUpdateTimer_Elapsed;
+
+			//MeebyIrc events
+			/*			MeebyIrcClient.OnError += IrcClient_OnError;
+						MeebyIrcClient.OnErrorMessage += IrcClient_OnErrorMessage;
+						MeebyIrcClient.OnConnecting += IrcClient_OnConnecting;
+						MeebyIrcClient.OnConnected += IrcClient_OnConnected;
+						MeebyIrcClient.OnAutoConnectError += IrcClient_OnAutoConnectError;
+						MeebyIrcClient.OnDisconnected += IrcClient_OnDisconnected;
+						MeebyIrcClient.OnRegistered += IrcClient_OnRegistered;
+						MeebyIrcClient.OnPart += IrcClient_OnPart;
+						MeebyIrcClient.OnJoin += IrcClient_OnJoin;
+						MeebyIrcClient.OnConnectionError += MeebyIrcClient_OnConnectionError;
+						MeebyIrcClient.OnRawMessage += MeebyIrcClient_OnRawMessage;*/
+
+
+
+			/*			MeebyIrcClient.Connect(BotConnectionConfig.Server, BotConnectionConfig.Port);
+						BotTask = Task.Factory.StartNew(() =>
+						{
+							MeebyIrcClient.Listen();
+						});
+
+						if (!MeebyIrcClient.IsConnected)
+							throw new Exception("Failed to connect");*/
+			ShouldRun = true;
 		}
 
-
-		/// <summary>
-		/// Creates a new instance of SuiBot.
-		/// </summary>
-		/// <param name="BotConfig">Config struct object. SuiBot_Config.Load() may be used to load it from config file.</param>
-		public SuiBot(Storage.ConnectionConfig BotConnectionConfig, Storage.CoreConfig BotCoreConfig)
+		private void TwitchSocket_Connected()
 		{
-			this.BotConnectionConfig = BotConnectionConfig;
-			this.BotName = BotConnectionConfig.Username;
-			this.BotCoreConfig = BotCoreConfig;
-			this.IntervalTimer = new System.Timers.Timer(1000 * 60) { AutoReset = true };
-			this.StatusUpdateTimer = new System.Timers.Timer(5 * 1000 * 60) { AutoReset = true };
-			this.ActiveChannels = new Dictionary<string, SuiBot_ChannelInstance>();
-			this.ImageUplaoder = new ImgUploader(this);
+			Console.WriteLine("Connected!");
+			ErrorLogging.WriteLine("Connected!");
+
+
+			Task.Factory.StartNew(async () =>
+			{
+				foreach (var channel in BotCoreConfig.ChannelsToJoin)
+				{
+					var result = await HelixAPI.SubscribeTo_ChatMessage(channel, TwitchSocket.SessionID);
+					if (result)
+					{
+						StartedReadingChannel(channel);
+					}
+
+					Thread.Sleep(2000);
+				}
+			});
+
+
+			//Timer tick
+			IntervalTimer.Start();
+			StatusUpdateTimer.Start();
 		}
+
+		private void TwitchSocket_Disconnected()
+		{
+			ActiveChannels.Clear();
+			IntervalTimer.Stop();
+			StatusUpdateTimer.Stop();
+		}
+
+		private void TwitchSocket_ChatMessage(ES_ChatMessage newMessage)
+		{
+			if (ActiveChannels.TryGetValue(newMessage.broadcaster_user_login, out var channelToProcess))
+			{
+				channelToProcess.DoWork(newMessage);
+			}
+		}
+
 
 		#region MeebyIrcEvents
-		private void MeebyIrcClient_OnRawMessage(object sender, IrcEventArgs e)
-		{
-			try
-			{
-				if (e.Data.Channel != null && e.Data.Nick != null && e.Data.Message != null && ActiveChannels.TryGetValue(e.Data.Channel, out SuiBot_ChannelInstance channel))
+		/*		private void MeebyIrcClient_OnRawMessage(object sender, IrcEventArgs e)
 				{
-					string messageId = e.Data.Tags["id"];
+					try
+					{
+						if (e.Data.Channel != null && e.Data.Nick != null && e.Data.Message != null && ActiveChannels.TryGetValue(e.Data.Channel, out SuiBot_ChannelInstance channel))
+						{
+							string messageId = e.Data.Tags["id"];
 
-					Role role = GetRoleFromTags(e);
-					string userName = e.Data.Nick;
-					if (!e.Data.Tags.TryGetValue("display-name", out string displayName))
-						displayName = e.Data.Nick;
+							Role role = GetRoleFromTags(e);
+							string userName = e.Data.Nick;
+							if (!e.Data.Tags.TryGetValue("display-name", out string displayName))
+								displayName = e.Data.Nick;
 
-					string userID = e.Data.Tags["user-id"];
-					string messageContent = e.Data.Message;
-					bool messageHighlighted = e.Data.Tags.ContainsKey("msg-id") ? e.Data.Tags["msg-id"] == "highlighted-message" : false;
-					string customReward = e.Data.Tags.ContainsKey("custom-reward-id") ? e.Data.Tags["custom-reward-id"] : null;
-					bool isFirstMessage = e.Data.Tags["first-msg"] == "1";
+							string userID = e.Data.Tags["user-id"];
+							string messageContent = e.Data.Message;
+							bool messageHighlighted = e.Data.Tags.ContainsKey("msg-id") ? e.Data.Tags["msg-id"] == "highlighted-message" : false;
+							string customReward = e.Data.Tags.ContainsKey("custom-reward-id") ? e.Data.Tags["custom-reward-id"] : null;
+							bool isFirstMessage = e.Data.Tags["first-msg"] == "1";
 
-					ChatMessage LastMessage = new ChatMessage(messageId,
-						role,
-						displayName,
-						userName,
-						userID,
-						messageContent,
-						isFirstMessage,
-						messageHighlighted, //if message is highlighted using Twitch points
-						customReward //custom reward using viewer points
-						);
-					this.OnChatMessageReceived?.Invoke(e.Data.Channel, LastMessage);
-					channel.DoWork(LastMessage);
-				}
-			}
-			catch (Exception ex)
-			{
-				ErrorLogging.WriteLine("Exception on raw message " + ex.Message);
-			}
-		}
+							ChatMessage LastMessage = new ChatMessage(messageId,
+								role,
+								displayName,
+								userName,
+								userID,
+								messageContent,
+								isFirstMessage,
+								messageHighlighted, //if message is highlighted using Twitch points
+								customReward //custom reward using viewer points
+								);
+							this.OnChatMessageReceived?.Invoke(e.Data.Channel, LastMessage);
+							channel.DoWork(LastMessage);
+						}
+					}
+					catch (Exception ex)
+					{
+						ErrorLogging.WriteLine("Exception on raw message " + ex.Message);
+					}
+				}*/
 
-		private Role GetRoleFromTags(IrcEventArgs e)
-		{
-			if (ActiveChannels[e.Data.Channel].IsSuperMod(e.Data.Nick))
-				return Role.SuperMod;
-			else
-			{
-				if (e.Data.Tags != null)
+		/*		private Role GetRoleFromTags(IrcEventArgs e)
 				{
-					//Ref: https://dev.twitch.tv/docs/irc/tags/
-					if (e.Data.Tags.ContainsKey("badges") && e.Data.Tags["badges"].Contains("broadcaster/1"))
+					if (ActiveChannels[e.Data.Channel].IsSuperMod(e.Data.Nick))
 						return Role.SuperMod;
-					if (e.Data.Tags.ContainsKey("mod") && e.Data.Tags["mod"] == "1")
-						return Role.Mod;
-					else if (e.Data.Tags.ContainsKey("badges") && e.Data.Tags["badges"].Contains("vip/1"))
-						return Role.VIP;
-					else if (e.Data.Tags.ContainsKey("badges") && e.Data.Tags["badges"].Contains("subscriber/1"))
-						return Role.Subscriber;
 					else
-						return Role.User;
-				}
-				else
-					return Role.User;
-			}
-		}
+					{
+						if (e.Data.Tags != null)
+						{
+							//Ref: https://dev.twitch.tv/docs/irc/tags/
+							if (e.Data.Tags.ContainsKey("badges") && e.Data.Tags["badges"].Contains("broadcaster/1"))
+								return Role.SuperMod;
+							if (e.Data.Tags.ContainsKey("mod") && e.Data.Tags["mod"] == "1")
+								return Role.Mod;
+							else if (e.Data.Tags.ContainsKey("badges") && e.Data.Tags["badges"].Contains("vip/1"))
+								return Role.VIP;
+							else if (e.Data.Tags.ContainsKey("badges") && e.Data.Tags["badges"].Contains("subscriber/1"))
+								return Role.Subscriber;
+							else
+								return Role.User;
+						}
+						else
+							return Role.User;
+					}
+				}*/
 
-		private void MeebyIrcClient_OnConnectionError(object sender, EventArgs e)
+		/*private void MeebyIrcClient_OnConnectionError(object sender, EventArgs e)
 		{
 			Console.WriteLine("!!! CONNECTION ERROR!!! " + e.ToString());
 			ErrorLogging.WriteLine("!!! CONNECTION ERROR!!! " + e.ToString());
-		}
+		}*/
 
 		private void StatusUpdateTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
 		{
 			foreach (var channel in ActiveChannels)
 			{
-				channel.Value.UpdateTwitchStatus(false);
+				//channel.Value.UpdateTwitchStatus(false);
 				Thread.Sleep(2000); //A dirty way to make sure we don't go over Request limit
 			}
 			IsAfterFirstStatusUpdate = true;
@@ -214,15 +297,30 @@ namespace SuiBot_Core
 			}
 		}
 
-		public void ConnectToChannel(string channelToJoin, Storage.ChannelConfig channelCfg)
+		public void StartedReadingChannel(string channelToJoin)
 		{
-			MeebyIrcClient.RfcJoin("#" + channelToJoin);
-			this.OnChannelJoining?.Invoke(channelToJoin);
-			ActiveChannels.Add("#" + channelToJoin, new SuiBot_ChannelInstance(channelToJoin, BotConnectionConfig.Password, this, channelCfg));
+			if (ChannelInstances.TryGetValue(channelToJoin, out var channel))
+			{
+				this.OnChannelJoining?.Invoke(channelToJoin);
+				ActiveChannels[channelToJoin] = channel;
+			}
+			else
+			{
+				this.OnChannelJoining?.Invoke(channelToJoin);
+				ActiveChannels.Add(channelToJoin, new SuiBot_ChannelInstance(channelToJoin, this, Storage.ChannelConfig.Load(channelToJoin)));
+			}
+		}
+
+		public void StopReadingChannel(string channelToLeave)
+		{
+			if(ActiveChannels.Remove(channelToLeave))
+			{
+				this.OnChannelLeaving?.Invoke(channelToLeave);
+			}
 		}
 
 
-		private void IrcClient_OnJoin(object sender, JoinEventArgs e)
+		/*private void IrcClient_OnJoin(object sender, JoinEventArgs e)
 		{
 			if (e.Data.Channel != null && e.Data.Nick != null && ActiveChannels.TryGetValue(e.Data.Channel, out SuiBot_ChannelInstance channel))
 			{
@@ -256,144 +354,36 @@ namespace SuiBot_Core
 			ActiveChannels.Clear();
 			Console.WriteLine("! Disconnected");
 			ErrorLogging.WriteLine("! Disconnected");
-		}
+		}*/
 
-		private void IrcClient_OnAutoConnectError(object sender, AutoConnectErrorEventArgs e)
-		{
-			Console.WriteLine("Auto connect error: " + e.Exception);
-			ErrorLogging.WriteLine("Auto connect error: " + e.Exception);
+		/*		private void IrcClient_OnAutoConnectError(object sender, AutoConnectErrorEventArgs e)
+				{
+					Console.WriteLine("Auto connect error: " + e.Exception);
+					ErrorLogging.WriteLine("Auto connect error: " + e.Exception);
 
-		}
+				}*/
 
-		private void IrcClient_OnConnected(object sender, EventArgs e)
-		{
-			Console.WriteLine("Connected!");
-			ErrorLogging.WriteLine("Connected!");
-			MeebyIrcClient.Login(BotConnectionConfig.Username, BotConnectionConfig.Username, 4, BotConnectionConfig.Username, "oauth:" + BotConnectionConfig.Password);
-			Thread.Sleep(2000);
 
-			//Request capabilities - https://dev.twitch.tv/docs/irc/guide/#twitch-irc-capabilities
-			MeebyIrcClient.WriteLine("CAP REQ :twitch.tv/tags twitch.tv/commands twitch.tv/membership");
-			Thread.Sleep(2000);
 
-			foreach (var channel in BotCoreConfig.ChannelsToJoin)
-			{
-				ConnectToChannel(channel, Storage.ChannelConfig.Load(channel));
-				Thread.Sleep(2000);    //Since Twitch doesn't like mass joining
-			}
-		}
+		/*		private void IrcClient_OnConnecting(object sender, EventArgs e)
+				{
+					ErrorLogging.WriteLine("Connecting...");
+				}*/
 
-		private void IrcClient_OnConnecting(object sender, EventArgs e)
-		{
-			ErrorLogging.WriteLine("Connecting...");
-		}
+		/*		private void IrcClient_OnErrorMessage(object sender, IrcEventArgs e)
+				{
+					ErrorLogging.WriteLine("Error: !" + e.Data.Message);
+					Console.WriteLine("Error: " + e.Data.Message);
+				}
 
-		private void IrcClient_OnErrorMessage(object sender, IrcEventArgs e)
-		{
-			ErrorLogging.WriteLine("Error: !" + e.Data.Message);
-			Console.WriteLine("Error: " + e.Data.Message);
-		}
-
-		private void IrcClient_OnError(object sender, ErrorEventArgs e)
-		{
-			Console.WriteLine("Error: !" + e.ErrorMessage);
-			ErrorLogging.WriteLine("Error: !" + e.ErrorMessage);
-		}
+				private void IrcClient_OnError(object sender, ErrorEventArgs e)
+				{
+					Console.WriteLine("Error: !" + e.ErrorMessage);
+					ErrorLogging.WriteLine("Error: !" + e.ErrorMessage);
+				}*/
 		#endregion
 
-		#region PublicFunctions
-		public int PerformTest()
-		{
-			//This should be async, but whatever
 
-			if (!BotConnectionConfig.IsValidConfig())
-				throw new Exception("Invalid config!");
-
-			MeebyIrcClient = new IrcClient()
-			{
-				Encoding = Encoding.UTF8,
-				SendDelay = 200,
-				AutoRetry = true,
-				AutoReconnect = true,
-				EnableUTF8Recode = true
-			};
-
-			try
-			{
-				MeebyIrcClient.Connect(BotConnectionConfig.Server, BotConnectionConfig.Port);
-			}
-			catch
-			{
-				return 1;
-			}
-			if (!MeebyIrcClient.IsConnected)
-				return 1;
-
-			MeebyIrcClient.Login(BotConnectionConfig.Username, BotConnectionConfig.Username, 4, BotConnectionConfig.Username, "oauth:" + BotConnectionConfig.Password);
-
-			DateTime Deadline = DateTime.UtcNow + TimeSpan.FromSeconds(10);
-
-			while (DateTime.UtcNow <= Deadline)
-			{
-				if (MeebyIrcClient.IsRegistered)
-					return 0;
-				MeebyIrcClient.ListenOnce();
-			}
-			return 2;
-		}
-
-		public void Connect()
-		{
-			if (!BotConnectionConfig.IsValidConfig())
-				throw new Exception("Invalid config!");
-
-/*			TwitchSocket = new WebSocket("wss://eventsub.wss.twitch.tv/ws?keepalive_timeout_seconds=30");
-			TwitchSocket.MessageReceived += (sender, package) =>
-			{
-
-			};*/
-
-			MeebyIrcClient = new IrcClient()
-			{
-				Encoding = Encoding.UTF8,
-				SendDelay = 200,
-				AutoRetry = true,
-				AutoReconnect = true,
-				EnableUTF8Recode = true
-			};
-
-			//MeebyIrc events
-			MeebyIrcClient.OnError += IrcClient_OnError;
-			MeebyIrcClient.OnErrorMessage += IrcClient_OnErrorMessage;
-			MeebyIrcClient.OnConnecting += IrcClient_OnConnecting;
-			MeebyIrcClient.OnConnected += IrcClient_OnConnected;
-			MeebyIrcClient.OnAutoConnectError += IrcClient_OnAutoConnectError;
-			MeebyIrcClient.OnDisconnected += IrcClient_OnDisconnected;
-			MeebyIrcClient.OnRegistered += IrcClient_OnRegistered;
-			MeebyIrcClient.OnPart += IrcClient_OnPart;
-			MeebyIrcClient.OnJoin += IrcClient_OnJoin;
-			MeebyIrcClient.OnConnectionError += MeebyIrcClient_OnConnectionError;
-			MeebyIrcClient.OnRawMessage += MeebyIrcClient_OnRawMessage;
-
-			if (BotCoreConfig.ChannelsToJoin.Count == 0)
-				throw new Exception("At least 1 channel is required to join.");
-
-			IsRunning = true;
-			MeebyIrcClient.Connect(BotConnectionConfig.Server, BotConnectionConfig.Port);
-			BotTask = Task.Factory.StartNew(() =>
-			{
-				MeebyIrcClient.Listen();
-			});
-
-			if (!MeebyIrcClient.IsConnected)
-				throw new Exception("Failed to connect");
-
-			//Timer tick
-			IntervalTimer.Elapsed += IntervalTimer_Elapsed;
-			IntervalTimer.Start();
-			StatusUpdateTimer.Elapsed += StatusUpdateTimer_Elapsed;
-			StatusUpdateTimer.Start();
-		}
 
 		public void Shutdown()
 		{
@@ -409,9 +399,8 @@ namespace SuiBot_Core
 				channel.Value.ShutdownTask();
 			}
 
-			MeebyIrcClient.Disconnect();
+			//MeebyIrcClient.Disconnect();
 			System.Threading.Thread.Sleep(2000);
-			IsRunning = false;
 			this.OnShutdown();
 		}
 
@@ -419,6 +408,15 @@ namespace SuiBot_Core
 		{
 			this.OnChatSendMessage?.Invoke(channel, message);
 		}
-		#endregion
+
+		public void Dispose()
+		{
+
+		}
+
+		internal void ClosedViaSocket()
+		{
+			throw new NotImplementedException();
+		}
 	}
 }

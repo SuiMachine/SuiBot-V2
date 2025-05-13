@@ -14,12 +14,11 @@ namespace SuiBot_V2
 
 			if (File.Exists("Bot/ConnectionConfig.suixml"))
 			{
-				bot = new SuiBot();
+				bot = SuiBot.GetInstance();
 				bot.Connect();
 
-
-				while (bot.IsRunning)
-					System.Threading.Thread.Sleep(1);
+				while (!bot.IsDisposed)
+					System.Threading.Thread.Sleep(15);
 			}
 			else
 			{

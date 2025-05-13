@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace SuiBot_Core
 {
@@ -226,6 +228,67 @@ namespace SuiBot_Core
 		internal static string FormatParameter(string header, string variable)
 		{
 			return header + "=" + Uri.EscapeDataString(variable);
+		}
+
+		public static async Task<string> GetAsync(string baseUrl, string scope, string parameters, Dictionary<string, string> requestHeaders, bool returnErrorCode = false)
+		{
+			HttpWebRequest request = (HttpWebRequest)WebRequest.Create(baseUrl + scope + parameters);
+
+			try
+			{
+				foreach (var requestHeader in requestHeaders)
+					request.Headers[requestHeader.Key] = requestHeader.Value;
+
+				request.Timeout = 5000;
+				request.Method = "GET";
+
+				var webResponse = await request.GetResponseAsync();
+				using (HttpWebResponse response = (HttpWebResponse)webResponse)
+				using (Stream stream = response.GetResponseStream())
+				using (StreamReader reader = new StreamReader(stream))
+				{
+					return await reader.ReadToEndAsync();
+				}
+			}
+			catch (Exception e)
+			{
+				Debug.WriteLine(e);
+				if (returnErrorCode)
+				{
+					return "Error: " + e.Message;
+				}
+				return "";
+			}
+		}
+
+		public static async Task<string> PostAsync(string baseUrl, string scope, string parameters, string jsonContent, Dictionary<string, string> requestHeaders)
+		{
+			HttpWebRequest request = (HttpWebRequest)WebRequest.Create(baseUrl + scope + parameters);
+			request.ContentType = "application/json";
+			request.Method = "POST";
+
+			try
+			{
+				foreach (var requestHeader in requestHeaders)
+					request.Headers[requestHeader.Key] = requestHeader.Value;
+
+				using (var streamWriter = new StreamWriter(await request.GetRequestStreamAsync()))
+				{
+					streamWriter.Write(jsonContent);
+				}
+
+				var httpResponse = (HttpWebResponse)await request.GetResponseAsync();
+				using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
+				{
+					var result = streamReader.ReadToEnd();
+					return result;
+				}
+			}
+			catch (Exception e)
+			{
+				ErrorLogging.WriteLine(e.ToString());
+				return "";
+			}
 		}
 	}
 }

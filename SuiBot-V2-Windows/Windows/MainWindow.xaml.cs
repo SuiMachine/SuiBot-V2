@@ -15,7 +15,9 @@ namespace SuiBot_V2_Windows.Windows
 	/// </summary>
 	public partial class MainWindow : Window
 	{
-		private SuiBot_Core.SuiBot SuiBotInstance { get; set; }
+		internal static MainWindow Instance { get; private set; }
+
+		internal SuiBot_Core.SuiBot SuiBotInstance;
 		private Thread SuiBotSlaveThread { get; set; }
 		private bool IsBotRunning { get; set; }
 		public bool MinimizeToTray { get; set; }
@@ -23,6 +25,7 @@ namespace SuiBot_V2_Windows.Windows
 
 		public MainWindow()
 		{
+			Instance = this;
 			DataContext = this;
 			ChannelTabs = new Dictionary<string, RichTextBox>();
 
@@ -35,7 +38,7 @@ namespace SuiBot_V2_Windows.Windows
 			}
 			IsBotRunning = false;
 			MinimizeToTray = false;
-			SuiBotInstance = new SuiBot_Core.SuiBot();
+			SuiBotInstance = SuiBot_Core.SuiBot.GetInstance();
 
 			ReloadActiveChannels();
 			RichBox_Log.IsReadOnly = true;
@@ -83,7 +86,7 @@ namespace SuiBot_V2_Windows.Windows
 				}
 
 				RemoveNonLogTabs();
-				SuiBotInstance = new SuiBot(connectionConfig, coreConfig);
+				SuiBotInstance = SuiBot.GetInstance(connectionConfig, coreConfig);
 				SuiBotInstance.OnChannelJoining += SuiBotInstance_OnChannelJoining;
 				SuiBotInstance.OnChannelLeaving += SuiBotInstance_OnChannelLeaving;
 				SuiBotInstance.OnChannelStatusUpdate += SuiBotInstance_OnChannelStatusUpdate;

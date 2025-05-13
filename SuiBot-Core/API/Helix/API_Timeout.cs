@@ -1,4 +1,4 @@
-﻿namespace SuiBot_Core.API_Structs
+﻿namespace SuiBot_Core.API.Helix
 {
 	public struct API_Data
 	{

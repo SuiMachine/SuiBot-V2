@@ -42,10 +42,13 @@ namespace SuiBot_V2_Windows.Windows.Settings
 		private void TestConnectionClicked(object sender, RoutedEventArgs e)
 		{
 			this.ConnectionConfig.Password = this.PassBox_Password.Password.Trim();
+			if(MainWindow.Instance.SuiBotInstance != null)
+			{
+			}
 
-			SuiBot_Core.SuiBot sb = new SuiBot_Core.SuiBot(this.ConnectionConfig, SuiBot_Core.Storage.CoreConfig.Load());
+			SuiBot_Core.SuiBot sb = SuiBot_Core.SuiBot.GetInstance(this.ConnectionConfig, SuiBot_Core.Storage.CoreConfig.Load());
 
-			var result = sb.PerformTest();
+/*			var result = sb.PerformTest();
 
 			switch (result)
 			{
@@ -56,9 +59,9 @@ namespace SuiBot_V2_Windows.Windows.Settings
 					MessageBox.Show("Failed to connect to server", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
 					break;
 				case (2):
-					MessageBox.Show("Incorrect login informaion", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+					MessageBox.Show("Incorrect login information", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
 					break;
-			}
+			}*/
 
 		}
 

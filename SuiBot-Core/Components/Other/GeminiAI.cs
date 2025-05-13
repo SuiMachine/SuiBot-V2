@@ -152,7 +152,8 @@ namespace SuiBot_Core.Components.Other
 			{
 				Gemini.GeminiContent content = null;
 				content = StreamerContent;
-				content.systemInstruction = InstanceConfig.GetSystemInstruction(channelInstance.Channel, channelInstance.API.IsOnline, channelInstance.API.Game, channelInstance.API.StoredTitle);
+				var info = channelInstance.StreamInformation;
+				content.systemInstruction = InstanceConfig.GetSystemInstruction(channelInstance.Channel, info.IsOnline, info.Game, info.StreamTitle);
 
 				if (content == null)
 				{
@@ -236,12 +237,13 @@ namespace SuiBot_Core.Components.Other
 			try
 			{
 				Gemini.GeminiContent content = null;
+				var streamInfo = channelInstance.StreamInformation;
 				content = new GeminiContent()
 				{
 					contents = new List<GeminiMessage>(),
 					tools = GeminiContent.GetTools(),
 					generationConfig = new GeminiContent.GenerationConfig(),
-					systemInstruction = InstanceConfig.GetLurkSystemInstruction(channelInstance.Channel, lastMessage.Username, channelInstance.API.IsOnline, channelInstance.API.Game, channelInstance.API.StoredTitle)
+					systemInstruction = InstanceConfig.GetLurkSystemInstruction(channelInstance.Channel, lastMessage.Username, streamInfo.IsOnline, streamInfo.Game, streamInfo.StreamTitle)
 				};
 
 				content.contents.Add(GeminiMessage.CreateUserResponse(lastMessage.Message));

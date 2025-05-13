@@ -1,21 +1,20 @@
-﻿using System;
+﻿using SuiBot_Core.API;
+using System;
 
 namespace SuiBot_Core.Components
 {
 	public class GenericUtil
 	{
 		private SuiBot_ChannelInstance ChannelInstance;
-		private TwitchAPI TwitchUpdateInstance;
 
-		public GenericUtil(SuiBot_ChannelInstance ChannelInstance, TwitchAPI TwitchUpdateInstance)
+		public GenericUtil(SuiBot_ChannelInstance ChannelInstance)
 		{
 			this.ChannelInstance = ChannelInstance;
-			this.TwitchUpdateInstance = TwitchUpdateInstance;
 		}
 
 		public void GetUpTime(ChatMessage LastMessage)
 		{
-			var startTime = this.TwitchUpdateInstance.StartTime;
+			DateTime startTime = this.ChannelInstance.StreamInformation.StreamStartTime;
 			if (startTime != DateTime.MinValue)
 			{
 				var lenght = DateTime.UtcNow - startTime;

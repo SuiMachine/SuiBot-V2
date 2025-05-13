@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json.Linq;
+using SuiBot_Core.API;
 using SuiBot_Core.Extensions.SuiStringExtension;
 using System;
 using System.Collections.Generic;
@@ -12,12 +13,10 @@ namespace SuiBot_Core.Components
 		private const string PCGW_API_URI = "https://www.pcgamingwiki.com/w/api.php";
 
 		private SuiBot_ChannelInstance ChannelInstance;
-		private TwitchAPI TwitchUpdateInstance;
 
-		public PCGW(SuiBot_ChannelInstance ChannelInstance, TwitchAPI TwitchUpdateInstance)
+		public PCGW(SuiBot_ChannelInstance ChannelInstance)
 		{
 			this.ChannelInstance = ChannelInstance;
-			this.TwitchUpdateInstance = TwitchUpdateInstance;
 		}
 
 		internal void DoWork(ChatMessage lastMessage)
@@ -26,14 +25,14 @@ namespace SuiBot_Core.Components
 
 			if (lastMessage.Message == "")
 			{
-				if (TwitchUpdateInstance.Game == "")
+				if (string.IsNullOrEmpty(ChannelInstance.StreamInformation.Game))
 				{
 					ChannelInstance.SendChatMessageResponse(lastMessage, "Current game is empty. You can try providing the game manually by using command \"!pcgw Game Name\"");
 					return;
 				}
 				else
 				{
-					ChannelInstance.SendChatMessageResponse(lastMessage, GetPCGWUrl(TwitchUpdateInstance.Game));
+					ChannelInstance.SendChatMessageResponse(lastMessage, GetPCGWUrl(ChannelInstance.StreamInformation.Game));
 					return;
 				}
 
