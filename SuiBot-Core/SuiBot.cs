@@ -141,10 +141,10 @@ namespace SuiBot_Core
 			{
 				foreach (var channel in BotCoreConfig.ChannelsToJoin)
 				{
-					var result = await HelixAPI.SubscribeTo_ChatMessage(channel, TwitchSocket.SessionID);
-					if (result)
+					API.EventSub.Subscription.Responses.Response_SubscribeToChannelMessages result = await HelixAPI.SubscribeTo_ChatMessage(channel, TwitchSocket.SessionID);
+					if (result != null)
 					{
-						StartedReadingChannel(channel);
+						StartedReadingChannel(channel, result);
 					}
 
 					Thread.Sleep(2000);
@@ -163,7 +163,7 @@ namespace SuiBot_Core
 			StatusUpdateTimer.Stop();
 
 			var channels = ActiveChannels.Keys.ToList();
-			foreach(var channel in channels)
+			foreach (var channel in channels)
 				StopReadingChannel(channel);
 		}
 
@@ -175,58 +175,11 @@ namespace SuiBot_Core
 			}
 		}
 
-
-		#region MeebyIrcEvents
-		/*		private void MeebyIrcClient_OnRawMessage(object sender, IrcEventArgs e)
-				{
-					try
-					{
-						if (e.Data.Channel != null && e.Data.Nick != null && e.Data.Message != null && ActiveChannels.TryGetValue(e.Data.Channel, out SuiBot_ChannelInstance channel))
-						{
-							string messageId = e.Data.Tags["id"];
-
-							Role role = GetRoleFromTags(e);
-							string userName = e.Data.Nick;
-							if (!e.Data.Tags.TryGetValue("display-name", out string displayName))
-								displayName = e.Data.Nick;
-
-							string userID = e.Data.Tags["user-id"];
-							string messageContent = e.Data.Message;
-							bool messageHighlighted = e.Data.Tags.ContainsKey("msg-id") ? e.Data.Tags["msg-id"] == "highlighted-message" : false;
-							string customReward = e.Data.Tags.ContainsKey("custom-reward-id") ? e.Data.Tags["custom-reward-id"] : null;
-							bool isFirstMessage = e.Data.Tags["first-msg"] == "1";
-
-							ChatMessage LastMessage = new ChatMessage(messageId,
-								role,
-								displayName,
-								userName,
-								userID,
-								messageContent,
-								isFirstMessage,
-								messageHighlighted, //if message is highlighted using Twitch points
-								customReward //custom reward using viewer points
-								);
-							this.OnChatMessageReceived?.Invoke(e.Data.Channel, LastMessage);
-							channel.DoWork(LastMessage);
-						}
-					}
-					catch (Exception ex)
-					{
-						ErrorLogging.WriteLine("Exception on raw message " + ex.Message);
-					}
-				}*/
-
-		/*private void MeebyIrcClient_OnConnectionError(object sender, EventArgs e)
-		{
-			Console.WriteLine("!!! CONNECTION ERROR!!! " + e.ToString());
-			ErrorLogging.WriteLine("!!! CONNECTION ERROR!!! " + e.ToString());
-		}*/
-
 		private void StatusUpdateTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
 		{
 			foreach (var channel in ActiveChannels)
 			{
-				//channel.Value.UpdateTwitchStatus(false);
+				channel.Value.UpdateTwitchStatus(false);
 				Thread.Sleep(2000); //A dirty way to make sure we don't go over Request limit
 			}
 			IsAfterFirstStatusUpdate = true;
@@ -241,7 +194,7 @@ namespace SuiBot_Core
 			}
 		}
 
-		public void StartedReadingChannel(string channelToJoin)
+		private void StartedReadingChannel(string channelToJoin, API.EventSub.Subscription.Responses.Response_SubscribeToChannelMessages result)
 		{
 			ErrorLogging.WriteLine($"Subscribed to read: {channelToJoin}");
 			if (ChannelInstances.TryGetValue(channelToJoin, out var channel))
@@ -251,14 +204,14 @@ namespace SuiBot_Core
 			}
 			else
 			{
-				var channelInstance = new SuiBot_ChannelInstance(channelToJoin, this, Storage.ChannelConfig.Load(channelToJoin));
+				var channelInstance = new SuiBot_ChannelInstance(channelToJoin, result.condition.broadcaster_user_id, this, Storage.ChannelConfig.Load(channelToJoin));
 				ActiveChannels.Add(channelToJoin, channelInstance);
 				ChannelInstances.Add(channelToJoin, channelInstance);
 				this.OnChannelJoining?.Invoke(channelToJoin);
 			}
 		}
 
-		public void StopReadingChannel(string channelToLeave)
+		private void StopReadingChannel(string channelToLeave)
 		{
 			ErrorLogging.WriteLine($"Unsubscribed from reading: {channelToLeave}");
 
@@ -267,72 +220,6 @@ namespace SuiBot_Core
 				this.OnChannelLeaving?.Invoke(channelToLeave);
 			}
 		}
-
-
-		/*private void IrcClient_OnJoin(object sender, JoinEventArgs e)
-		{
-			if (e.Data.Channel != null && e.Data.Nick != null && ActiveChannels.TryGetValue(e.Data.Channel, out SuiBot_ChannelInstance channel))
-			{
-#if DEBUG
-				channel.UpdateActiveUser(e.Data.Nick);
-#endif
-				Console.WriteLine($"{e.Data.Nick} joined {e.Data.Channel}");
-			}
-		}
-
-		internal void LeaveChannel(string channelToLeave)
-		{
-			this.OnChannelLeaving?.Invoke(channelToLeave);
-			MeebyIrcClient.RfcPart("#" + channelToLeave);
-		}
-
-		private void IrcClient_OnPart(object sender, PartEventArgs e)
-		{
-			//Console.WriteLine("! PART: " + e.Data.Nick);
-		}
-
-		private void IrcClient_OnRegistered(object sender, EventArgs e)
-		{
-			this.OnIrcFeedback?.Invoke(Events.IrcFeedback.Verified, "");
-			Console.WriteLine("! LOGIN VERIFIED");
-			ErrorLogging.WriteLine("! LOGIN VERIFIED");
-		}
-
-		private void IrcClient_OnDisconnected(object sender, EventArgs e)
-		{
-			ActiveChannels.Clear();
-			Console.WriteLine("! Disconnected");
-			ErrorLogging.WriteLine("! Disconnected");
-		}*/
-
-		/*		private void IrcClient_OnAutoConnectError(object sender, AutoConnectErrorEventArgs e)
-				{
-					Console.WriteLine("Auto connect error: " + e.Exception);
-					ErrorLogging.WriteLine("Auto connect error: " + e.Exception);
-
-				}*/
-
-
-
-		/*		private void IrcClient_OnConnecting(object sender, EventArgs e)
-				{
-					ErrorLogging.WriteLine("Connecting...");
-				}*/
-
-		/*		private void IrcClient_OnErrorMessage(object sender, IrcEventArgs e)
-				{
-					ErrorLogging.WriteLine("Error: !" + e.Data.Message);
-					Console.WriteLine("Error: " + e.Data.Message);
-				}
-
-				private void IrcClient_OnError(object sender, ErrorEventArgs e)
-				{
-					Console.WriteLine("Error: !" + e.ErrorMessage);
-					ErrorLogging.WriteLine("Error: !" + e.ErrorMessage);
-				}*/
-		#endregion
-
-
 
 		public void Shutdown()
 		{
@@ -360,7 +247,7 @@ namespace SuiBot_Core
 
 		public void Dispose()
 		{
-			Debug.WriteLine("Implent dispose?");
+			Debug.WriteLine("Implement dispose?");
 		}
 
 		internal void ClosedViaSocket()

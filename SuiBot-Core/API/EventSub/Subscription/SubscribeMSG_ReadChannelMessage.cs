@@ -9,7 +9,7 @@
 
 		public SubscribeMSG_ReadChannelMessage(){}
 
-		public SubscribeMSG_ReadChannelMessage(long channelId, long user,  string sessionID)
+		public SubscribeMSG_ReadChannelMessage(ulong channelId, ulong user,  string sessionID)
 		{
 			condition = new ES_Subscribe_Condition(channelId, user);
 			transport = new ES_Subscribe_Transport_Websocket(sessionID);

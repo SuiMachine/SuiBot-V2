@@ -128,6 +128,7 @@
     <Compile Include="API\EventSub\ES_SessionMessage.cs" />
     <Compile Include="API\EventSub\Subscription\SubscribeMSG_ReadChannelMessage.cs" />
     <Compile Include="API\EventSub\Subscription\SubscriptionMessage.cs" />
+    <Compile Include="API\Helix\Request\Request_SendMessage.cs" />
     <Compile Include="API\Helix\Responses\Response_StreamStatus.cs" />
     <Compile Include="API\Helix\Responses\UniversalResponse_Transport.cs" />
     <Compile Include="API\Helix\API_Timeout.cs" />

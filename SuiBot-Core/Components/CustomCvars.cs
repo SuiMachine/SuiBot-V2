@@ -96,7 +96,7 @@ namespace SuiBot_Core.Components
 			{
 				if (lastMessage.UserRole <= cvar.RequiredRole)
 				{
-					ChannelInstance.SendChatMessageResponse(lastMessage, cvar.CvarResponse, true);
+					ChannelInstance.SendChatMessageResponse(lastMessage, cvar.CvarResponse);
 					return true;
 				}
 				else

@@ -235,14 +235,14 @@ namespace SuiBot_Core.Components
 				{
 					var idOrFilter = strippedMessage;
 					if (idOrFilter == "")
-						ChannelInstance.SendChatMessageResponse(lastMessage, GetRandomQuote(), true);
+						ChannelInstance.SendChatMessageResponse(lastMessage, GetRandomQuote());
 					else if (int.TryParse(idOrFilter, out var result))
 					{
 						if (result > ChannelQuotes.QuotesList.Count)
-							ChannelInstance.SendChatMessageResponse(lastMessage, $"There is no quote with this ID (max ID + {ChannelQuotes.QuotesList.Count - 1}).", true);
+							ChannelInstance.SendChatMessageResponse(lastMessage, $"There is no quote with this ID (max ID + {ChannelQuotes.QuotesList.Count - 1}).");
 						else
 						{
-							ChannelInstance.SendChatMessageResponse(lastMessage, ChannelQuotes.QuotesList[result].ToString(), true);
+							ChannelInstance.SendChatMessageResponse(lastMessage, ChannelQuotes.QuotesList[result].ToString());
 						}
 					}
 					else
@@ -254,7 +254,7 @@ namespace SuiBot_Core.Components
 							if(possibleQuotes.Count > 0)
 							{
 								int randomQuoteId = rng.Next(possibleQuotes.Count);
-								ChannelInstance.SendChatMessageResponse(lastMessage, possibleQuotes[randomQuoteId].ToString(), true);
+								ChannelInstance.SendChatMessageResponse(lastMessage, possibleQuotes[randomQuoteId].ToString());
 							}
 							else
 							{
@@ -268,7 +268,7 @@ namespace SuiBot_Core.Components
 					}
 				}
 				else
-					ChannelInstance.SendChatMessageResponse(lastMessage, ChannelQuotes.QuotesList[id].ToString(), true);
+					ChannelInstance.SendChatMessageResponse(lastMessage, ChannelQuotes.QuotesList[id].ToString());
 			}
 		}
 

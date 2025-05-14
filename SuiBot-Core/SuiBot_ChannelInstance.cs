@@ -14,6 +14,8 @@ namespace SuiBot_Core
 		private const int DefaultCooldown = 30;
 		public static string CommandPrefix = "!";
 		public string Channel { get; private set; }
+		public ulong ChannelID { get; private set; }
+
 		public Storage.ChannelConfig ConfigInstance { get; set; }
 		Storage.CoreConfig CoreConfigInstance { get; set; }
 		public string BotName => SuiBotInstance.BotName;
@@ -36,10 +38,10 @@ namespace SuiBot_Core
 		private Dictionary<string, DateTime> UserCooldowns { get; set; }
 		private Dictionary<string, DateTime> LastUserActivity { get; set; }
 
-
-		public SuiBot_ChannelInstance(string Channel, SuiBot SuiBotInstance, Storage.ChannelConfig ConfigInstance)
+		public SuiBot_ChannelInstance(string Channel, ulong ChannelID, SuiBot SuiBotInstance, Storage.ChannelConfig ConfigInstance)
 		{
 			this.Channel = Channel;
+			this.ChannelID = ChannelID;
 			this.CoreConfigInstance = SuiBotInstance.BotCoreConfig;
 			this.SuiBotInstance = SuiBotInstance;
 			this.StreamStatus = new Response_StreamStatus();
@@ -77,7 +79,7 @@ namespace SuiBot_Core
 
 			if (ConfigInstance.LeaderboardsAutodetectCategory && StreamStatus.IsOnline)
 			{
-/*				if (StreamInformation.HasGameChanged() || !Leaderboards.LastUpdateSuccessful || vocal)
+/*				if (StreamStatus.HasGameChanged() || !Leaderboards.LastUpdateSuccessful || vocal)
 					Leaderboards.SetPreferedCategory(StreamInformation.StreamTitle, SuiBotInstance.IsAfterFirstStatusUpdate, vocal);*/
 			}
 
@@ -96,7 +98,7 @@ namespace SuiBot_Core
 			if (message.Length <= 500)
 			{
 				SuiBotInstance.SendChatMessageFeedback("#" + Channel, message);
-				//SuiBotInstance.MeebyIrcClient.SendMessage(Meebey.SmartIrc4net.SendType.Message, "#" + Channel, message);
+				SuiBotInstance.HelixAPI.SendMessage(this, message);
 			}
 			else
 			{
@@ -104,24 +106,19 @@ namespace SuiBot_Core
 				foreach (var subMessage in messages)
 				{
 					SuiBotInstance.SendChatMessageFeedback("#" + Channel, subMessage);
-					//SuiBotInstance.MeebyIrcClient.SendMessage(Meebey.SmartIrc4net.SendType.Message, "#" + Channel, subMessage);
+					SuiBotInstance.HelixAPI.SendMessage(this, subMessage);
 				}
 			}
 		}
 
-		public void SendChatMessageResponse(ES_ChatMessage messageToRespondTo, string message, bool noPersonMention = false)
+		public void SendChatMessageResponse(ES_ChatMessage messageToRespondTo, string message)
 		{
 			SetUserCooldown(messageToRespondTo, DefaultCooldown);
-			if (!noPersonMention)
-			{
-				string msgResponse = $"@{messageToRespondTo.chatter_user_name}: {message}";
-				SendChatMessage(msgResponse);
 
-			}
-			else
-			{
-				SendChatMessage(message);
-			}
+			string msgResponse = $"@{messageToRespondTo.chatter_user_name}: {message}";
+			SuiBotInstance.HelixAPI.SendResponse(messageToRespondTo, message);
+
+			SuiBotInstance.SendChatMessageFeedback("#" + Channel, $"{messageToRespondTo.reply} -> {message}");
 		}
 
 		private void SetUserCooldown(ES_ChatMessage messageToRespondTo, int cooldown)

@@ -30,7 +30,7 @@ namespace SuiBot_Core.API.EventSub
 				public string type;
 				public string text;
 				public API_ChatMessage_Fragment_Emote emote;
-				public string mention;
+				public Mention mention;
 			}
 
 			[DebuggerDisplay(nameof(ES_ChatMessage) + "." + nameof(API_ChatMessage_Fragment_Emote) + " {id}")]
@@ -39,6 +39,14 @@ namespace SuiBot_Core.API.EventSub
 				public string id;
 				public long emote_set_id;
 				public long owner_id;
+			}
+
+			[DebuggerDisplay(nameof(ES_ChatMessage) + "." + nameof(Mention) + " {user_login}")]
+			public class Mention
+			{
+				public ulong user_id;
+				public string user_login;
+				public string user_name;
 			}
 
 			public string text;
@@ -51,6 +59,19 @@ namespace SuiBot_Core.API.EventSub
 			public string set_id;
 			public int id;
 			public string info;
+		}
+
+		public class Event_Reply
+		{
+			public string parent_message_id;
+			public string parent_message_body;
+			public ulong parent_user_id;
+			public string parent_user_name;
+			public string parent_user_login;
+			public string thread_message_id;
+			public ulong thread_user_id;
+			public string thread_user_name;
+			public string thread_user_login;
 		}
 
 		public ulong broadcaster_user_id;
@@ -66,7 +87,7 @@ namespace SuiBot_Core.API.EventSub
 		public Badge[] badges = new Badge[0];
 		public string message_type;
 		public string cheer;
-		public string reply;
+		public Event_Reply reply;
 		public string channel_points_custom_reward_id;
 		public string channel_points_animation_id;
 		[NonSerialized][JsonIgnore] public Role UserRole = Role.User;

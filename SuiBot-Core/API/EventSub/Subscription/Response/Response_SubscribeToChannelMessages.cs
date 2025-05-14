@@ -9,8 +9,8 @@ namespace SuiBot_Core.API.EventSub.Subscription.Responses
 		[Serializable]
 		public class Condition
 		{
-			public long broadcaster_user_id;
-			public long user_id;
+			public ulong broadcaster_user_id;
+			public ulong user_id;
 		}
 
 		public string id;

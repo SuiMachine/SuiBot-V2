@@ -13,7 +13,7 @@ namespace SuiBot_Core.Components.Other
                 if (target != " ")
                 {
                     channelInstance.SendChatMessageResponse(lastMessage, string.Format("🐀 Rats rats we are the rats - Celebrating yet another birthday bash! {0} it's your birthday today - Cake and Ice cream is on it's way! (and) {0} been such a good boy this year - Open up your gifts while we all cheer! 🐀",
-                        target), true);
+                        target));
                 }
                 else
                     channelInstance.SendChatMessageResponse(lastMessage, "!RatsBirthday requires a target to be specified after \"spacebar\", e.g. !ratsbirthday SuiBot");

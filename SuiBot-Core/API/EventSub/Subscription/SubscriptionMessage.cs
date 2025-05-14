@@ -6,7 +6,7 @@
 		public string user_id = null;
 		public ES_Subscribe_Condition() { }
 
-		public ES_Subscribe_Condition(long broadcaster_user_id, long userID)
+		public ES_Subscribe_Condition(ulong broadcaster_user_id, ulong userID)
 		{
 			this.broadcaster_user_id = broadcaster_user_id.ToString();
 			this.user_id = userID.ToString();

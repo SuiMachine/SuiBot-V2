@@ -7,7 +7,7 @@ namespace SuiBot_Core.API.Helix.Responses
 	[DebuggerDisplay(nameof(Response_GetUserInfo) + " {login} ({id})")]
 	public class Response_GetUserInfo
 	{
-		public long id;
+		public ulong id;
 		public string login;
 		public string display_name;
 		public string type;
