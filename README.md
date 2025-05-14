@@ -12,10 +12,9 @@ Credits
 -------
   * [SuicideMachine](http://twitch.tv/suimachine)
   * Bot uses [SpeedrunComSharp](https://github.com/LiveSplit/SpeedrunComSharp) libary, written by CryZe.
-  * Bot uses [SmartIrc4Net](https://github.com/meebey/SmartIrc4net) for its IRC connection.
   * WPF client uses [Hardcodet.NotifyIcon.Wpf](https://www.nuget.org/packages/Hardcodet.NotifyIcon.Wpf/) by hardcodet to display tray icon.
   * Bot uses [Newtonsoft.Json](https://www.newtonsoft.com/json) for JSON serialisation.
-  
+  * Bot uses [WebSocket-Sharp](https://github.com/sta/websocket-sharp) for communication with Twitch.  
   
 Licence
 -------
