@@ -34,6 +34,7 @@ namespace SuiBot_Core
 
 		private System.Timers.Timer KeepAliveCheck;
 		public Action OnConnected;
+		public Action OnDisconnected;
 		public Action<ES_ChatMessage> OnChatMessage;
 
 
@@ -73,6 +74,10 @@ namespace SuiBot_Core
 			EventSubClose_Code closeType = (EventSubClose_Code)e.Code;
 			m_Connected = false;
 			KeepAliveCheck?.Stop();
+			OnDisconnected?.Invoke();
+			Socket.OnMessage -= Socket_OnMessage;
+			Socket.OnOpen -= Socket_OnOpen;
+			Socket.OnClose -= Socket_OnClose;
 
 			if (AutoReconnect)
 			{

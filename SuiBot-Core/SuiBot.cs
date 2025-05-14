@@ -1,6 +1,7 @@
 ﻿using SuiBot_Core.API.EventSub;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.Remoting.Channels;
 using System.Threading;
@@ -124,41 +125,17 @@ namespace SuiBot_Core
 			TwitchSocket = new TwitchSocket(this);
 			TwitchSocket.OnConnected += TwitchSocket_Connected;
 			TwitchSocket.OnChatMessage += TwitchSocket_ChatMessage;
+			TwitchSocket.OnDisconnected += TwitchSocket_Disconnected;
 
 			IntervalTimer.Elapsed += IntervalTimer_Elapsed;
 			StatusUpdateTimer.Elapsed += StatusUpdateTimer_Elapsed;
 
-			//MeebyIrc events
-			/*			MeebyIrcClient.OnError += IrcClient_OnError;
-						MeebyIrcClient.OnErrorMessage += IrcClient_OnErrorMessage;
-						MeebyIrcClient.OnConnecting += IrcClient_OnConnecting;
-						MeebyIrcClient.OnConnected += IrcClient_OnConnected;
-						MeebyIrcClient.OnAutoConnectError += IrcClient_OnAutoConnectError;
-						MeebyIrcClient.OnDisconnected += IrcClient_OnDisconnected;
-						MeebyIrcClient.OnRegistered += IrcClient_OnRegistered;
-						MeebyIrcClient.OnPart += IrcClient_OnPart;
-						MeebyIrcClient.OnJoin += IrcClient_OnJoin;
-						MeebyIrcClient.OnConnectionError += MeebyIrcClient_OnConnectionError;
-						MeebyIrcClient.OnRawMessage += MeebyIrcClient_OnRawMessage;*/
-
-
-
-			/*			MeebyIrcClient.Connect(BotConnectionConfig.Server, BotConnectionConfig.Port);
-						BotTask = Task.Factory.StartNew(() =>
-						{
-							MeebyIrcClient.Listen();
-						});
-
-						if (!MeebyIrcClient.IsConnected)
-							throw new Exception("Failed to connect");*/
 			ShouldRun = true;
 		}
 
 		private void TwitchSocket_Connected()
 		{
-			Console.WriteLine("Connected!");
 			ErrorLogging.WriteLine("Connected!");
-
 
 			Task.Factory.StartNew(async () =>
 			{
@@ -174,7 +151,6 @@ namespace SuiBot_Core
 				}
 			});
 
-
 			//Timer tick
 			IntervalTimer.Start();
 			StatusUpdateTimer.Start();
@@ -185,6 +161,10 @@ namespace SuiBot_Core
 			ActiveChannels.Clear();
 			IntervalTimer.Stop();
 			StatusUpdateTimer.Stop();
+
+			var channels = ActiveChannels.Keys.ToList();
+			foreach(var channel in channels)
+				StopReadingChannel(channel);
 		}
 
 		private void TwitchSocket_ChatMessage(ES_ChatMessage newMessage)
@@ -263,6 +243,7 @@ namespace SuiBot_Core
 
 		public void StartedReadingChannel(string channelToJoin)
 		{
+			ErrorLogging.WriteLine($"Subscribed to read: {channelToJoin}");
 			if (ChannelInstances.TryGetValue(channelToJoin, out var channel))
 			{
 				this.OnChannelJoining?.Invoke(channelToJoin);
@@ -279,6 +260,8 @@ namespace SuiBot_Core
 
 		public void StopReadingChannel(string channelToLeave)
 		{
+			ErrorLogging.WriteLine($"Unsubscribed from reading: {channelToLeave}");
+
 			if (ActiveChannels.Remove(channelToLeave))
 			{
 				this.OnChannelLeaving?.Invoke(channelToLeave);
@@ -377,12 +360,13 @@ namespace SuiBot_Core
 
 		public void Dispose()
 		{
-
+			Debug.WriteLine("Implent dispose?");
 		}
 
 		internal void ClosedViaSocket()
 		{
-			throw new NotImplementedException();
+			if (!IsDisposed)
+				Dispose();
 		}
 	}
 }

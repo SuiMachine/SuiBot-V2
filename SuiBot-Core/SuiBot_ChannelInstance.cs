@@ -1,6 +1,5 @@
 ﻿using SuiBot_Core.API.EventSub;
 using SuiBot_Core.API.Helix.Responses;
-using SuiBot_Core.Components;
 using SuiBot_Core.Extensions.SuiStringExtension;
 using System;
 using System.Collections.Generic;
@@ -40,12 +39,12 @@ namespace SuiBot_Core
 
 		public SuiBot_ChannelInstance(string Channel, SuiBot SuiBotInstance, Storage.ChannelConfig ConfigInstance)
 		{
+			this.Channel = Channel;
 			this.CoreConfigInstance = SuiBotInstance.BotCoreConfig;
 			this.SuiBotInstance = SuiBotInstance;
 			this.StreamStatus = new Response_StreamStatus();
 			this.SuiBotInstance.HelixAPI.GetStatus(this);
 
-			this.Channel = Channel;
 			this.ConfigInstance = ConfigInstance;
 
 			this.QuotesInstance = new Components.Quotes(this);
@@ -163,10 +162,9 @@ namespace SuiBot_Core
 			//SuiBotInstance.MeebyIrcClient.WriteLine(string.Format(":{0}!{0}@{0}.tmi.twitch.tv PRIVMSG #{1} :.shoutout {2}", SuiBotInstance.BotName, Channel, username));
 		}
 
-		public void RemoveUserMessage(ES_ChatMessage lastMassage) => SuiBotInstance.HelixAPI.RequestRemoveMessage(this, lastMassage.message_id);
-		public void UserTimeout(ES_ChatMessage lastMassage, uint length, string reason = null) => SuiBotInstance.HelixAPI.RequestTimeout(this, lastMassage.message_id, length, reason);
-		public void UserBan(ES_ChatMessage lastMassage, string reason = null) => SuiBotInstance.HelixAPI.RequestBan(this, lastMassage.chatter_user_id.ToString(), reason);
-		public void UserBan(string userID, string reason = null) => SuiBotInstance.HelixAPI.RequestBan(this, userID, reason);
+		public void RemoveUserMessage(ES_ChatMessage lastMassage) => SuiBotInstance.HelixAPI.RequestRemoveMessage(lastMassage);
+		public void UserTimeout(ES_ChatMessage lastMassage, uint length, string reason = null) => SuiBotInstance.HelixAPI.RequestTimeout(lastMassage, length, reason);
+		public void UserBan(ES_ChatMessage lastMassage, string reason = null) => SuiBotInstance.HelixAPI.RequestBan(lastMassage, reason);
 
 		internal void DoWork(ES_ChatMessage messageToProcess)
 		{

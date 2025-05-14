@@ -8,15 +8,14 @@ namespace SuiBot_Core
 	{
 		const string FILENAME = "SuiBot-Core.log";
 
-		public static void WriteLine(string Error)
+		public static void WriteLine(string text)
 		{
-
-			string errorToSave = $"{DateTime.Now}: {Error}";
+			Console.WriteLine(text);
+			string textToSave = $"{DateTime.Now}: {text}";
 #if DEBUG
-            Debug.WriteLine(errorToSave);
+            Debug.WriteLine(textToSave);
 #endif
-			File.AppendAllText(FILENAME, errorToSave + "\n");
-
+			File.AppendAllText(FILENAME, textToSave + "\n");
 		}
 
 		internal static void Close()
