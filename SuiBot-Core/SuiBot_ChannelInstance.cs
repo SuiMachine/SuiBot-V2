@@ -1,11 +1,15 @@
 ﻿using SuiBot_Core.API.EventSub;
+using SuiBot_Core.API.Helix.Responses;
 using SuiBot_Core.Components;
 using SuiBot_Core.Extensions.SuiStringExtension;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using static SuiBot_Core.API.EventSub.ES_ChatMessage;
 
 namespace SuiBot_Core
 {
+	[DebuggerDisplay(nameof(SuiBot_ChannelInstance) + " {Channel}")]
 	public class SuiBot_ChannelInstance
 	{
 		private const int DefaultCooldown = 30;
@@ -29,18 +33,21 @@ namespace SuiBot_Core
 		internal Components.Other._MemeComponents MemeComponents { get; set; }
 		#endregion
 		#endregion
-		public StreamInformation StreamInformation { get; private set; }
+		public Response_StreamStatus StreamStatus { get; internal set; }
 		private Dictionary<string, DateTime> UserCooldowns { get; set; }
 		private Dictionary<string, DateTime> LastUserActivity { get; set; }
 
 
 		public SuiBot_ChannelInstance(string Channel, SuiBot SuiBotInstance, Storage.ChannelConfig ConfigInstance)
 		{
-			this.StreamInformation = new StreamInformation(Channel);
-			this.Channel = Channel;
-			this.ConfigInstance = ConfigInstance;
 			this.CoreConfigInstance = SuiBotInstance.BotCoreConfig;
 			this.SuiBotInstance = SuiBotInstance;
+			this.StreamStatus = new Response_StreamStatus();
+			this.SuiBotInstance.HelixAPI.GetStatus(this);
+
+			this.Channel = Channel;
+			this.ConfigInstance = ConfigInstance;
+
 			this.QuotesInstance = new Components.Quotes(this);
 			this.IntervalMessagesInstance = new Components.IntervalMessages(this);
 			this.Leaderboards = new Components.Leaderboards(this);
@@ -58,32 +65,32 @@ namespace SuiBot_Core
 
 		internal void TimerTick()
 		{
-			if (ConfigInstance.IntervalMessageEnabled && StreamInformation.IsOnline)
+			if (ConfigInstance.IntervalMessageEnabled && StreamStatus.IsOnline)
 				IntervalMessagesInstance.DoTickWork();
 		}
 
-/*		internal void UpdateTwitchStatus(bool vocal)
+		internal void UpdateTwitchStatus(bool vocal)
 		{
-			API.GetStatus();
+			SuiBotInstance.HelixAPI.GetStatus(this);
 
 			if (ConfigInstance.LeaderboardsEnabled && !Leaderboards.GameOverride)
-				Leaderboards.CurrentGame = API.Game;
+				Leaderboards.CurrentGame = StreamStatus.game_name;
 
-			if (ConfigInstance.LeaderboardsAutodetectCategory && API.IsOnline)
+			if (ConfigInstance.LeaderboardsAutodetectCategory && StreamStatus.IsOnline)
 			{
-				if (API.TitleHasChanged || !Leaderboards.LastUpdateSuccessful || vocal)
-					Leaderboards.SetPreferedCategory(API.StoredTitle, SuiBotInstance.IsAfterFirstStatusUpdate, vocal);
+/*				if (StreamInformation.HasGameChanged() || !Leaderboards.LastUpdateSuccessful || vocal)
+					Leaderboards.SetPreferedCategory(StreamInformation.StreamTitle, SuiBotInstance.IsAfterFirstStatusUpdate, vocal);*/
 			}
 
 
 			if (vocal)
 			{
-				var stream_status = API.IsOnline == false ? "offline" : "online";
-				var game = API.Game == "" ? "" : " and game is " + API.Game;
+				var stream_status = StreamStatus.IsOnline == false ? "offline" : "online";
+				var game = StreamStatus.game_name == "" ? "" : " and game is " + StreamStatus.game_name;
 
 				SendChatMessage($"New obtained stream status is {stream_status}{game}.");
 			}
-		}*/
+		}
 
 		public void SendChatMessage(string message)
 		{
@@ -103,12 +110,12 @@ namespace SuiBot_Core
 			}
 		}
 
-		public void SendChatMessageResponse(ChatMessage messageToRespondTo, string message, bool noPersonMention = false)
+		public void SendChatMessageResponse(ES_ChatMessage messageToRespondTo, string message, bool noPersonMention = false)
 		{
 			SetUserCooldown(messageToRespondTo, DefaultCooldown);
 			if (!noPersonMention)
 			{
-				string msgResponse = $"@{messageToRespondTo.DisplayName}: {message}";
+				string msgResponse = $"@{messageToRespondTo.chatter_user_name}: {message}";
 				SendChatMessage(msgResponse);
 
 			}
@@ -118,7 +125,7 @@ namespace SuiBot_Core
 			}
 		}
 
-		private void SetUserCooldown(ChatMessage messageToRespondTo, int cooldown)
+		private void SetUserCooldown(ES_ChatMessage messageToRespondTo, int cooldown)
 		{
 			if (messageToRespondTo.UserRole <= Role.Mod)
 				return;
@@ -135,11 +142,11 @@ namespace SuiBot_Core
 					break;
 			}
 
-			if (!UserCooldowns.ContainsKey(messageToRespondTo.Username))
-				UserCooldowns.Add(messageToRespondTo.Username, DateTime.UtcNow + TimeSpan.FromSeconds(cooldown));
+			if (!UserCooldowns.ContainsKey(messageToRespondTo.chatter_user_login))
+				UserCooldowns.Add(messageToRespondTo.chatter_user_login, DateTime.UtcNow + TimeSpan.FromSeconds(cooldown));
 			else
 			{
-				UserCooldowns[messageToRespondTo.Username] = DateTime.UtcNow + TimeSpan.FromSeconds(cooldown);
+				UserCooldowns[messageToRespondTo.chatter_user_login] = DateTime.UtcNow + TimeSpan.FromSeconds(cooldown);
 			}
 		}
 
@@ -156,29 +163,29 @@ namespace SuiBot_Core
 			//SuiBotInstance.MeebyIrcClient.WriteLine(string.Format(":{0}!{0}@{0}.tmi.twitch.tv PRIVMSG #{1} :.shoutout {2}", SuiBotInstance.BotName, Channel, username));
 		}
 
-		public void RemoveUserMessage(ChatMessage lastMassage) => SuiBotInstance.HelixAPI.RequestRemoveMessage(this, lastMassage.MessageID);
-		public void UserTimeout(ChatMessage lastMassage, uint length, string reason = null) => SuiBotInstance.HelixAPI.RequestTimeout(this, lastMassage.UserID, length, reason);
-		public void UserBan(ChatMessage lastMassage, string reason = null) => SuiBotInstance.HelixAPI.RequestBan(this, lastMassage.UserID, reason);
+		public void RemoveUserMessage(ES_ChatMessage lastMassage) => SuiBotInstance.HelixAPI.RequestRemoveMessage(this, lastMassage.message_id);
+		public void UserTimeout(ES_ChatMessage lastMassage, uint length, string reason = null) => SuiBotInstance.HelixAPI.RequestTimeout(this, lastMassage.message_id, length, reason);
+		public void UserBan(ES_ChatMessage lastMassage, string reason = null) => SuiBotInstance.HelixAPI.RequestBan(this, lastMassage.chatter_user_id.ToString(), reason);
 		public void UserBan(string userID, string reason = null) => SuiBotInstance.HelixAPI.RequestBan(this, userID, reason);
 
 		internal void DoWork(ES_ChatMessage messageToProcess)
 		{
 			UpdateActiveUser(messageToProcess.chatter_user_login);
 
-			/*//If Filtering is enabled and timeouted or banned, we don't need to do anything else
+			//If Filtering is enabled and timeouted or banned, we don't need to do anything else
 			if (ConfigInstance.FilteringEnabled && PerformActionFiltering(messageToProcess))
 				return;
 
 			//This is a useful optimisation trick, since commands all start with a one and the same prefix, we don't actually have to spend time comparing strings, if we know that prefix was wrong
-			if (!messageToProcess.message.text.StartsWith(CommandPrefix) || CoreConfigInstance.IgnoredUsers.Contains(messageToProcess.Username))
+			if (!messageToProcess.message.text.StartsWith(CommandPrefix) || CoreConfigInstance.IgnoredUsers.Contains(messageToProcess.chatter_user_login))
 				return;
 
 			//Do not perform actions if user is on cooldown
-			if (UserCooldowns.ContainsKey(messageToProcess.Username) && UserCooldowns[messageToProcess.Username] > DateTime.UtcNow)
+			if (UserCooldowns.ContainsKey(messageToProcess.chatter_user_login) && UserCooldowns[messageToProcess.chatter_user_login] > DateTime.UtcNow)
 				return;
 
 			//All of the commands are declared with lower cases
-			var messageLazy = messageToProcess.Message.ToLower();
+			var messageLazy = messageToProcess.message.text.ToLower();
 			messageLazy = messageLazy.Remove(0, 1);
 
 			//Properties
@@ -267,7 +274,7 @@ namespace SuiBot_Core
 			//Twitch update
 			if (messageLazy.StartsWith("updatestatus") && messageToProcess.UserRole <= Role.VIP)
 			{
-				//UpdateTwitchStatus(true);
+				UpdateTwitchStatus(true);
 				return;
 			}
 
@@ -320,7 +327,7 @@ namespace SuiBot_Core
 
 				if (Cvars.PerformCustomCvar(messageToProcess))
 					return;
-			}*/
+			}
 		}
 
 		public void UpdateActiveUser(string username)
@@ -344,12 +351,12 @@ namespace SuiBot_Core
 				return false;
 		}
 
-		private bool PerformActionFiltering(ChatMessage lastMessage)
+		private bool PerformActionFiltering(ES_ChatMessage message)
 		{
-			if (lastMessage.UserRole <= Role.VIP)
+			if (message.UserRole <= Role.VIP)
 				return false;
 			else
-				return ChatFiltering.FilterOutMessages(lastMessage);
+				return ChatFiltering.FilterOutMessages(message);
 		}
 
 		internal bool IsSuperMod(string username)

@@ -1,4 +1,5 @@
 ﻿using SuiBot_Core;
+using SuiBot_Core.API.EventSub;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -202,7 +203,7 @@ namespace SuiBot_V2_Windows.Windows
 			}
 		}
 
-		private void SuiBotInstance_OnChatMessageReceived(string channel, ChatMessage message)
+		private void SuiBotInstance_OnChatMessageReceived(string channel, ES_ChatMessage message)
 		{
 			channel = channel.Trim(new char[] { '#' });
 
@@ -218,24 +219,24 @@ namespace SuiBot_V2_Windows.Windows
 				var rb = ChannelTabs[channel];
 
 				Paragraph p = new Paragraph();
-				p.Inlines.Add(new Run(message.Username + ":") { Foreground = GetBrush(message.UserRole), FontWeight = FontWeights.Bold });
-				p.Inlines.Add(new Run(" " + message.Message) { Foreground = new SolidColorBrush(Colors.Black) });
+				p.Inlines.Add(new Run(message.chatter_user_name + ":") { Foreground = GetBrush(message.UserRole), FontWeight = FontWeights.Bold });
+				p.Inlines.Add(new Run(" " + message.message.text) { Foreground = new SolidColorBrush(Colors.Black) });
 				rb.Document.Blocks.Add(p);
 				rb.ScrollToEnd();
 			}
 		}
 
-		private Brush GetBrush(Role userRole)
+		private Brush GetBrush(SuiBot_Core.API.EventSub.ES_ChatMessage.Role userRole)
 		{
 			switch (userRole)
 			{
-				case (Role.SuperMod):
+				case (SuiBot_Core.API.EventSub.ES_ChatMessage.Role.SuperMod):
 					return new SolidColorBrush(Colors.Red);
-				case (Role.Mod):
+				case (SuiBot_Core.API.EventSub.ES_ChatMessage.Role.Mod):
 					return new SolidColorBrush(Colors.Green);
-				case (Role.VIP):
+				case (SuiBot_Core.API.EventSub.ES_ChatMessage.Role.VIP):
 					return new SolidColorBrush(Colors.MediumPurple);
-				case (Role.Subscriber):
+				case (SuiBot_Core.API.EventSub.ES_ChatMessage.Role.Subscriber):
 					return new SolidColorBrush(Colors.Purple);
 				default:
 					return new SolidColorBrush(Colors.Black);

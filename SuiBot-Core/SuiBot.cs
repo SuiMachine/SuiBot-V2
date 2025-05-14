@@ -51,17 +51,6 @@ namespace SuiBot_Core
 
 		public bool IsAfterFirstStatusUpdate = false;
 
-		#region ImgBBGetter
-		/// <summary>
-		/// Gets a ImgBB Api Key (since BotConnectioNConfig is private normally to make sure passwords don't leak.
-		/// </summary>
-		/// <returns>Current ImgBB Api Key</returns>
-		internal string GetImgBBKey()
-		{
-			return this.BotConnectionConfig.ImgBBApiKey;
-		}
-		#endregion
-
 		public string BotName { get; set; }
 		public System.Timers.Timer IntervalTimer;
 		public System.Timers.Timer StatusUpdateTimer;
@@ -247,31 +236,6 @@ namespace SuiBot_Core
 					}
 				}*/
 
-		/*		private Role GetRoleFromTags(IrcEventArgs e)
-				{
-					if (ActiveChannels[e.Data.Channel].IsSuperMod(e.Data.Nick))
-						return Role.SuperMod;
-					else
-					{
-						if (e.Data.Tags != null)
-						{
-							//Ref: https://dev.twitch.tv/docs/irc/tags/
-							if (e.Data.Tags.ContainsKey("badges") && e.Data.Tags["badges"].Contains("broadcaster/1"))
-								return Role.SuperMod;
-							if (e.Data.Tags.ContainsKey("mod") && e.Data.Tags["mod"] == "1")
-								return Role.Mod;
-							else if (e.Data.Tags.ContainsKey("badges") && e.Data.Tags["badges"].Contains("vip/1"))
-								return Role.VIP;
-							else if (e.Data.Tags.ContainsKey("badges") && e.Data.Tags["badges"].Contains("subscriber/1"))
-								return Role.Subscriber;
-							else
-								return Role.User;
-						}
-						else
-							return Role.User;
-					}
-				}*/
-
 		/*private void MeebyIrcClient_OnConnectionError(object sender, EventArgs e)
 		{
 			Console.WriteLine("!!! CONNECTION ERROR!!! " + e.ToString());
@@ -306,14 +270,16 @@ namespace SuiBot_Core
 			}
 			else
 			{
+				var channelInstance = new SuiBot_ChannelInstance(channelToJoin, this, Storage.ChannelConfig.Load(channelToJoin));
+				ActiveChannels.Add(channelToJoin, channelInstance);
+				ChannelInstances.Add(channelToJoin, channelInstance);
 				this.OnChannelJoining?.Invoke(channelToJoin);
-				ActiveChannels.Add(channelToJoin, new SuiBot_ChannelInstance(channelToJoin, this, Storage.ChannelConfig.Load(channelToJoin)));
 			}
 		}
 
 		public void StopReadingChannel(string channelToLeave)
 		{
-			if(ActiveChannels.Remove(channelToLeave))
+			if (ActiveChannels.Remove(channelToLeave))
 			{
 				this.OnChannelLeaving?.Invoke(channelToLeave);
 			}

@@ -1,8 +1,10 @@
-﻿using SuiBot_Core.Extensions.SuiStringExtension;
+﻿using SuiBot_Core.API.EventSub;
+using SuiBot_Core.Extensions.SuiStringExtension;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using static SuiBot_Core.API.EventSub.ES_ChatMessage;
 
 namespace SuiBot_Core.Components
 {
@@ -24,35 +26,35 @@ namespace SuiBot_Core.Components
 			ChannelQuotes = Storage.Quotes.Load(ChannelInstance.Channel);
 		}
 
-		internal void DoWork(ChatMessage lastMessage)
+		internal void DoWork(ES_ChatMessage lastMessage)
 		{
-			lastMessage.Message = lastMessage.Message.StripSingleWord();
+			string msg = lastMessage.message.text.StripSingleWord();
 
-			if (lastMessage.Message.StartsWithWordLazy("add"))
+			if (msg.StartsWithWordLazy("add"))
 			{
-				AddQuote(lastMessage);
+				AddQuote(lastMessage, msg);
 			}
-			else if (lastMessage.Message.StartsWithWordLazy(new string[] { "remove", "delete" }))
+			else if (msg.StartsWithWordLazy(new string[] { "remove", "delete" }))
 			{
-				RemoveQuote(lastMessage);
+				RemoveQuote(lastMessage, msg);
 			}
-			else if (lastMessage.Message.StartsWithWordLazy(new string[] { "search", "find" }))
+			else if (msg.StartsWithWordLazy(new string[] { "search", "find" }))
 			{
-				SearchQuote(lastMessage);
+				SearchQuote(lastMessage, msg);
 			}
-			else if (lastMessage.Message.StartsWithLazy("last"))
+			else if (msg.StartsWithLazy("last"))
 			{
-				GetQuote(lastMessage, ChannelQuotes.QuotesList.Count - 1);
+				GetQuote(lastMessage, msg, ChannelQuotes.QuotesList.Count - 1);
 			}
 			else
 			{
-				GetQuote(lastMessage);
+				GetQuote(lastMessage, msg);
 			}
 		}
 
-		private void SearchQuote(ChatMessage lastMessage)
+		private void SearchQuote(ES_ChatMessage lastMessage, string strippedText)
 		{
-			FilterOutSegments(lastMessage.Message, out int quoteID, out string authorFilter, out string quoteTextFilter);
+			FilterOutSegments(strippedText, out int quoteID, out string authorFilter, out string quoteTextFilter);
 			if (quoteID == -2)
 				quoteID = ChannelQuotes.QuotesList.Count - 1;
 
@@ -153,17 +155,17 @@ namespace SuiBot_Core.Components
 			}
 		}
 
-		private Storage.Quote[] AdvancedSearch(Regex authorSearchPattern, Regex quoteSearchPatern)
+		private Storage.Quote[] AdvancedSearch(Regex authorSearchPattern, Regex quoteSearchPattern)
 		{
 			if (authorSearchPattern == null)
 			{
-				var filteredOut = ChannelQuotes.QuotesList.Where(x => quoteSearchPatern.IsMatch(x.Text));
+				var filteredOut = ChannelQuotes.QuotesList.Where(x => quoteSearchPattern.IsMatch(x.Text));
 				if (filteredOut.Count() > 0)
 					return filteredOut.ToArray();
 				else
 					return null;
 			}
-			else if (quoteSearchPatern == null)
+			else if (quoteSearchPattern == null)
 			{
 				var filteredOut = ChannelQuotes.QuotesList.Where(x => authorSearchPattern.IsMatch(x.Author));
 				if (filteredOut.Count() > 0)
@@ -173,7 +175,7 @@ namespace SuiBot_Core.Components
 			}
 			else
 			{
-				var filteredOut = ChannelQuotes.QuotesList.Where(x => authorSearchPattern.IsMatch(x.Author) && quoteSearchPatern.IsMatch(x.Text));
+				var filteredOut = ChannelQuotes.QuotesList.Where(x => authorSearchPattern.IsMatch(x.Author) && quoteSearchPattern.IsMatch(x.Text));
 				if (filteredOut.Count() > 0)
 					return filteredOut.ToArray();
 				else
@@ -182,7 +184,7 @@ namespace SuiBot_Core.Components
 		}
 
 		/// <summary>
-		/// Seperates quoteID, Author's Name and Quote from a provided string (quote syntax)
+		/// Separates quoteID, Author's Name and Quote from a provided string (quote syntax)
 		/// </summary>
 		/// <param name="message">Message provided by a user.</param>
 		/// <param name="quoteID">Id of a quote, if provided in message. -1 if none found or error.</param>
@@ -223,7 +225,7 @@ namespace SuiBot_Core.Components
 				quoteTextFilter = "";
 		}
 
-		private void GetQuote(ChatMessage lastMessage, int id = -1)
+		private void GetQuote(ES_ChatMessage lastMessage, string strippedMessage, int id = -1)
 		{
 			if (ChannelQuotes.QuotesList.Count == 0)
 				ChannelInstance.SendChatMessageResponse(lastMessage, "Channel doesn't have any quotes");
@@ -231,7 +233,7 @@ namespace SuiBot_Core.Components
 			{
 				if (id == -1)
 				{
-					var idOrFilter = lastMessage.Message;
+					var idOrFilter = strippedMessage;
 					if (idOrFilter == "")
 						ChannelInstance.SendChatMessageResponse(lastMessage, GetRandomQuote(), true);
 					else if (int.TryParse(idOrFilter, out var result))
@@ -247,7 +249,7 @@ namespace SuiBot_Core.Components
 					{
 						try
 						{
-							Regex searchRegex = new Regex(lastMessage.Message, RegexOptions.IgnoreCase);
+							Regex searchRegex = new Regex(strippedMessage, RegexOptions.IgnoreCase);
 							var possibleQuotes = ChannelQuotes.QuotesList.Where(x => searchRegex.IsMatch(x.Text)).ToList();
 							if(possibleQuotes.Count > 0)
 							{
@@ -276,11 +278,11 @@ namespace SuiBot_Core.Components
 			return ChannelQuotes.QuotesList[quoteId].ToString();
 		}
 
-		public void AddQuote(ChatMessage lastMessage)
+		public void AddQuote(ES_ChatMessage lastMessage, string strippedMessage)
 		{
 			if (lastMessage.UserRole <= Role.VIP)
 			{
-				FilterOutSegments(lastMessage.Message, out int _, out string authorFilter, out string quoteTextFilter);
+				FilterOutSegments(strippedMessage, out int _, out string authorFilter, out string quoteTextFilter);
 				if (quoteTextFilter != "")
 				{
 					var newQuote = new Storage.Quote(authorFilter, quoteTextFilter);
@@ -295,7 +297,7 @@ namespace SuiBot_Core.Components
 			}
 		}
 
-		public void RemoveQuote(ChatMessage lastMessage)
+		public void RemoveQuote(ES_ChatMessage lastMessage, string strippedMessage)
 		{
 			if (lastMessage.UserRole <= Role.Mod)
 			{
@@ -305,7 +307,7 @@ namespace SuiBot_Core.Components
 					return;
 				}
 
-				FilterOutSegments(lastMessage.Message, out int quoteID, out string authorFilter, out string quoteTextFilter);
+				FilterOutSegments(strippedMessage, out int quoteID, out string authorFilter, out string quoteTextFilter);
 				if (quoteID == -2)
 					quoteID = ChannelQuotes.QuotesList.Count - 1;
 

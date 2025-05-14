@@ -1,32 +1,34 @@
-﻿using SuiBot_Core.Extensions.SuiStringExtension;
+﻿using SuiBot_Core.API.EventSub;
+using SuiBot_Core.Extensions.SuiStringExtension;
 using System;
 using System.Collections.Generic;
+using static SuiBot_Core.API.EventSub.ES_ChatMessage;
 
 namespace SuiBot_Core.Components.Other
 {
 	class Lurk : MemeComponent
 	{
-		public Dictionary<string, DateTime> UsersLurking = new Dictionary<string, DateTime>();
+		public Dictionary<ulong, DateTime> UsersLurking = new Dictionary<ulong, DateTime>();
 		readonly Random rng = new Random();
 
 		List<string> Responses;
 
-		public override bool DoWork(SuiBot_ChannelInstance channelInstance, ChatMessage lastMessage)
+		public override bool DoWork(SuiBot_ChannelInstance channelInstance, ES_ChatMessage lastMessage)
 		{
 			if (Responses == null)
 				LoadResponses(channelInstance);
 
-			if (UsersLurking.TryGetValue(lastMessage.UserID, out var lurkedAt))
+			if (UsersLurking.TryGetValue(lastMessage.chatter_user_id, out var lurkedAt))
 			{
 				if (lurkedAt + TimeSpan.FromMinutes(10) > DateTime.UtcNow)
 					return true;
 			}
 
-			if (lastMessage.Message.Contains(" "))
+			if (lastMessage.message.text.Contains(" "))
 			{
 				if (lastMessage.UserRole <= Role.Mod)
 				{
-					var split = lastMessage.Message.StripSingleWord();
+					var split = lastMessage.message.text.StripSingleWord();
 					if (split != "")
 					{
 						if (split.StartsWithWordLazy("add"))
@@ -36,7 +38,7 @@ namespace SuiBot_Core.Components.Other
 							{
 								Responses.Add(split);
 								SaveResponses(channelInstance);
-								channelInstance.SendChatMessage($"Added a new response. e.g.: {string.Format(split, lastMessage.Username)}");
+								channelInstance.SendChatMessage($"Added a new response. e.g.: {string.Format(split, lastMessage.chatter_user_name)}");
 							}
 							else
 								channelInstance.SendChatMessage("Added response must contain {0}");
@@ -76,38 +78,36 @@ namespace SuiBot_Core.Components.Other
 					}
 				}
 
-				string dropWord = lastMessage.Message.StripSingleWord();
+				string dropWord = lastMessage.message.text.StripSingleWord();
 				if (channelInstance.ConfigInstance.MemeComponents.AskAILurk && dropWord != "")
 				{
 					var aiComponent = channelInstance.MemeComponents.GetComponentOfType<GeminiAI>();
 					if (aiComponent == null)
 					{
 						var randomResponse = Responses[rng.Next(Responses.Count)];
-						channelInstance.SendChatMessage(string.Format(randomResponse, lastMessage.Username));
+						channelInstance.SendChatMessage(string.Format(randomResponse, lastMessage.broadcaster_user_name));
 						return true;
 					}
 					else
 					{
-						var copy = new ChatMessage(lastMessage);
-						copy.Message = dropWord;
-						UsersLurking[lastMessage.UserID] = DateTime.UtcNow;
-						aiComponent.DoLurk(channelInstance, copy);
+						UsersLurking[lastMessage.chatter_user_id] = DateTime.UtcNow;
+						aiComponent.DoLurk(channelInstance, lastMessage, dropWord);
 						return true;
 					}
 				}
 				else
 				{
 					var randomResponse = Responses[rng.Next(Responses.Count)];
-					UsersLurking[lastMessage.UserID] = DateTime.UtcNow;
-					channelInstance.SendChatMessage(string.Format(randomResponse, lastMessage.Username));
+					UsersLurking[lastMessage.chatter_user_id] = DateTime.UtcNow;
+					channelInstance.SendChatMessage(string.Format(randomResponse, lastMessage.chatter_user_name));
 					return true;
 				}
 			}
 			else
 			{
 				var randomResponse = Responses[rng.Next(Responses.Count)];
-				UsersLurking[lastMessage.UserID] = DateTime.UtcNow;
-				channelInstance.SendChatMessage(string.Format(randomResponse, lastMessage.Username));
+				UsersLurking[lastMessage.chatter_user_id] = DateTime.UtcNow;
+				channelInstance.SendChatMessage(string.Format(randomResponse, lastMessage.chatter_user_name));
 				return true;
 			}
 		}
@@ -140,9 +140,9 @@ namespace SuiBot_Core.Components.Other
 
 	class Unlurk : MemeComponent
 	{
-		public override bool DoWork(SuiBot_ChannelInstance channelInstance, ChatMessage lastMessage)
+		public override bool DoWork(SuiBot_ChannelInstance channelInstance, ES_ChatMessage lastMessage)
 		{
-			channelInstance.SendChatMessage($"Welcome back, {lastMessage.Username}!");
+			channelInstance.SendChatMessage($"Welcome back, {lastMessage.chatter_user_name}!");
 			return true;
 		}
 	}

@@ -1,4 +1,5 @@
 ﻿using SpeedrunComSharp;
+using SuiBot_Core.API.EventSub;
 using SuiBot_Core.Extensions.SuiStringExtension;
 using System;
 using System.Collections.Generic;
@@ -186,33 +187,33 @@ namespace SuiBot_Core.Components
 			}
 		}
 
-		public void DoModWork(ChatMessage lastMessage)
+		public void DoModWork(ES_ChatMessage lastMessage)
 		{
-			lastMessage.Message = lastMessage.Message.StripSingleWord();
+			var msg = lastMessage.message.text.StripSingleWord();
 
-			if (lastMessage.Message.StartsWithLazy("username"))
+			if (msg.StartsWithLazy("username"))
 			{
-				lastMessage.Message = lastMessage.Message.StripSingleWord();
-				if (lastMessage.Message != "")
+				msg = msg.StripSingleWord();
+				if (msg != "")
 				{
-					channelInstance.ConfigInstance.LeaderboardsUsername = lastMessage.Message;
+					channelInstance.ConfigInstance.LeaderboardsUsername = msg;
 					channelInstance.ConfigInstance.Save();
 					channelInstance.SendChatMessageResponse(lastMessage, "Set Speedrun username to: " + Speedrunusername);
 				}
 				else
 				{
-					channelInstance.ConfigInstance.LeaderboardsUsername = lastMessage.Message;
+					channelInstance.ConfigInstance.LeaderboardsUsername = msg;
 					channelInstance.ConfigInstance.Save();
 					channelInstance.SendChatMessageResponse(lastMessage, "Nulled out Speedrun username");
 				}
 			}
-			else if (lastMessage.Message.StartsWithLazy("game"))
+			else if (msg.StartsWithLazy("game"))
 			{
-				lastMessage.Message = lastMessage.Message.StripSingleWord();
-				if (lastMessage.Message != "")
+				msg = msg.StripSingleWord();
+				if (msg != "")
 				{
 					GameOverride = true;
-					CurrentGame = lastMessage.Message;
+					CurrentGame = msg;
 					channelInstance.SendChatMessageResponse(lastMessage, "Set game override to: " + CurrentGame);
 				}
 				else
@@ -221,12 +222,12 @@ namespace SuiBot_Core.Components
 					channelInstance.SendChatMessageResponse(lastMessage, "Disabled game override (game will be updated on next twitch status update).");
 				}
 			}
-			else if (lastMessage.Message.StartsWithLazy("level"))
+			else if (msg.StartsWithLazy("level"))
 			{
-				lastMessage.Message = lastMessage.Message.StripSingleWord();
-				if (lastMessage.Message != "")
+				msg = msg.StripSingleWord();
+				if (msg != "")
 				{
-					LevelOverride = lastMessage.Message;
+					LevelOverride = msg;
 					channelInstance.SendChatMessageResponse(lastMessage, "Set level to: " + LevelOverride);
 				}
 				else
@@ -235,12 +236,12 @@ namespace SuiBot_Core.Components
 					channelInstance.SendChatMessageResponse(lastMessage, "Disabled level override.");
 				}
 			}
-			else if (lastMessage.Message.StartsWithLazy("category"))
+			else if (msg.StartsWithLazy("category"))
 			{
-				lastMessage.Message = lastMessage.Message.StripSingleWord();
-				if (lastMessage.Message != "")
+				msg = msg.StripSingleWord();
+				if (msg != "")
 				{
-					CategoryOverride = lastMessage.Message;
+					CategoryOverride = msg;
 					channelInstance.SendChatMessageResponse(lastMessage, "Set category to: " + CategoryOverride);
 				}
 				else
@@ -249,15 +250,15 @@ namespace SuiBot_Core.Components
 					channelInstance.SendChatMessageResponse(lastMessage, "Disabled category override.");
 				}
 			}
-			else if (lastMessage.Message.StartsWithLazy("subcategory"))
+			else if (msg.StartsWithLazy("subcategory"))
 			{
-				lastMessage.Message = lastMessage.Message.StripSingleWord().ToLower();
-				if (lastMessage.Message != "")
+				msg = msg.StripSingleWord().ToLower();
+				if (msg != "")
 				{
 					//Precise separation
-					if (lastMessage.Message.Contains(":"))
+					if (msg.Contains(":"))
 					{
-						var split = lastMessage.Message.Split(new char[] { ':' }, 2);
+						var split = msg.Split(new char[] { ':' }, 2);
 						var key = split[0].Trim();
 						var value = split[1].Trim();
 						if (key != "")
@@ -295,12 +296,12 @@ namespace SuiBot_Core.Components
 					}
 					else  //Lazy seperation
 					{
-						if (SubcategoriesOverride.ContainsKey(lastMessage.Message))
-							SubcategoriesOverride[lastMessage.Message] = "";
+						if (SubcategoriesOverride.ContainsKey(msg))
+							SubcategoriesOverride[msg] = "";
 						else
-							SubcategoriesOverride.Add(lastMessage.Message, "");
+							SubcategoriesOverride.Add(msg, "");
 
-						channelInstance.SendChatMessageResponse(lastMessage, $"Set the generic subcategory value to look for to \"{lastMessage.Message}\"");
+						channelInstance.SendChatMessageResponse(lastMessage, $"Set the generic subcategory value to look for to \"{msg}\"");
 					}
 				}
 				else
@@ -309,15 +310,15 @@ namespace SuiBot_Core.Components
 					channelInstance.SendChatMessageResponse(lastMessage, "Cleared up subcategory overrides.");
 				}
 			}
-			else if (lastMessage.Message.StartsWithLazy("variable"))
+			else if (msg.StartsWithLazy("variable"))
 			{
-				lastMessage.Message = lastMessage.Message.StripSingleWord().ToLower();
-				if (lastMessage.Message != "")
+				msg = msg.StripSingleWord().ToLower();
+				if (msg != "")
 				{
 					//Precise separation
-					if (lastMessage.Message.Contains(":"))
+					if (msg.Contains(":"))
 					{
-						var split = lastMessage.Message.Split(new char[] { ':' }, 2);
+						var split = msg.Split(new char[] { ':' }, 2);
 						var key = split[0].Trim();
 						var value = split[1].Trim();
 						if (key != "")
@@ -351,7 +352,7 @@ namespace SuiBot_Core.Components
 							channelInstance.SendChatMessageResponse(lastMessage, "Variable key can not be empty!");
 						}
 					}
-					else  //Doing lazy way would be stupid for fariables
+					else  //Doing lazy way would be stupid for variables
 					{
 						channelInstance.SendChatMessageResponse(lastMessage, "Setting variables requires key and value");
 					}
@@ -364,11 +365,11 @@ namespace SuiBot_Core.Components
 			}
 		}
 
-		public void DoWorkWR(ChatMessage lastMessage)
+		public void DoWorkWR(ES_ChatMessage lastMessage)
 		{
-			lastMessage.Message = lastMessage.Message.StripSingleWord();
+			var msg = lastMessage.message.text.StripSingleWord();
 
-			if (lastMessage.Message == "")
+			if (msg == "")
 			{
 				var currentGame = CurrentGame;
 				var category = "";
@@ -379,7 +380,7 @@ namespace SuiBot_Core.Components
 			else
 			{
 				bool isCurrentGame = false;
-				SeperateElements(lastMessage.Message, out string lookUpGame, out string lookUpCategory, out string lookUpLevel, out Dictionary<string, string> lookUpSubcategories, out Dictionary<string, string> lookUpVariables);
+				SeperateElements(msg, out string lookUpGame, out string lookUpCategory, out string lookUpLevel, out Dictionary<string, string> lookUpSubcategories, out Dictionary<string, string> lookUpVariables);
 
 				//Sort out game name
 				if (lookUpGame.ToLower() == "this")
@@ -392,7 +393,7 @@ namespace SuiBot_Core.Components
 				{
 					if (lookUpCategory == "" && lookUpLevel == "" && lookUpLevel == "" && lookUpSubcategories == null && lookUpVariables == null)
 					{
-						lookUpGame = lastMessage.Message;
+						lookUpGame = msg;
 					}
 					else
 					{
@@ -523,18 +524,18 @@ namespace SuiBot_Core.Components
 			}
 		}
 
-		internal void DoWorkPB(ChatMessage lastMessage)
+		internal void DoWorkPB(ES_ChatMessage lastMessage)
 		{
-			lastMessage.Message = lastMessage.Message.StripSingleWord();
+			var msg = lastMessage.message.text.StripSingleWord();
 
-			if (lastMessage.Message == "")
+			if (msg == "")
 			{
 				channelInstance.SendChatMessageResponse(lastMessage, GetPB(CurrentGame, true, "", "", null, null));
 			}
 			else
 			{
 				bool isCurrentGame = false;
-				SeperateElements(lastMessage.Message, out string lookUpGame, out string lookUpCategory, out string lookUpLevel, out Dictionary<string, string> lookUpSubcategories, out Dictionary<string, string> lookUpVariables);
+				SeperateElements(msg, out string lookUpGame, out string lookUpCategory, out string lookUpLevel, out Dictionary<string, string> lookUpSubcategories, out Dictionary<string, string> lookUpVariables);
 
 				//Sort out game name
 				if (lookUpGame.ToLower() == "this")
@@ -547,7 +548,7 @@ namespace SuiBot_Core.Components
 				{
 					if (lookUpCategory == "" && lookUpLevel == "" && lookUpLevel == "" && lookUpSubcategories == null && lookUpVariables == null)
 					{
-						lookUpGame = lastMessage.Message;
+						lookUpGame = msg;
 					}
 				}
 

@@ -1,4 +1,5 @@
-﻿using SuiBot_Core.Extensions.SuiStringExtension;
+﻿using SuiBot_Core.API.EventSub;
+using SuiBot_Core.Extensions.SuiStringExtension;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -6,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Xml;
 using System.Xml.Serialization;
+using static SuiBot_Core.API.EventSub.ES_ChatMessage;
 
 namespace SuiBot_Core.Storage
 {
@@ -29,8 +31,6 @@ namespace SuiBot_Core.Storage
 		public string Username { get; set; }
 		[XmlElement]
 		public string Password { get; set; }
-		[XmlElement]
-		public string ImgBBApiKey { get; set; }
 
 		public ConnectionConfig()
 		{
@@ -38,16 +38,14 @@ namespace SuiBot_Core.Storage
 			this.Port = 6667;
 			this.Username = "";
 			this.Password = "";
-			this.ImgBBApiKey = "";
 		}
 
-		public ConnectionConfig(string Server, int Port, string Username, string Password, string ImgBBApiKey)
+		public ConnectionConfig(string Server, int Port, string Username, string Password)
 		{
 			this.Server = Server;
 			this.Port = Port;
 			this.Username = Username;
 			this.Password = Password;
-			this.ImgBBApiKey = ImgBBApiKey;
 		}
 
 		public bool IsValidConfig() => Server != null && Port != 0 && Username != null && Password != null && Username != "" && Password != "";
@@ -81,8 +79,6 @@ namespace SuiBot_Core.Storage
 				Username = "";
 			if (Password == null)
 				Password = "";
-			if (ImgBBApiKey == null)
-				ImgBBApiKey = "";
 		}
 
 
@@ -197,11 +193,11 @@ namespace SuiBot_Core.Storage
 			LeaderboardsUpdateProxyNames = true;
 		}
 
-		internal void GetProperty(SuiBot_ChannelInstance channelInstance, ChatMessage lastMessage)
+		internal void GetProperty(SuiBot_ChannelInstance channelInstance, ES_ChatMessage lastMessage)
 		{
 			if (lastMessage.UserRole <= Role.Mod)
 			{
-				var msg = lastMessage.Message.StripSingleWord().ToLower();
+				var msg = lastMessage.message.text.StripSingleWord().ToLower();
 				if (msg != "")
 				{
 					try
@@ -216,7 +212,7 @@ namespace SuiBot_Core.Storage
 						}
 						else
 						{
-							channelInstance.SendChatMessageResponse(lastMessage, "No proparty was found");
+							channelInstance.SendChatMessageResponse(lastMessage, "No property was found");
 						}
 					}
 					catch
@@ -227,9 +223,9 @@ namespace SuiBot_Core.Storage
 			}
 		}
 
-		internal void SetPropety(SuiBot_ChannelInstance channelInstance, ChatMessage lastMessage)
+		internal void SetPropety(SuiBot_ChannelInstance channelInstance, ES_ChatMessage lastMessage)
 		{
-			var msg = lastMessage.Message.StripSingleWord();
+			var msg = lastMessage.message.text.StripSingleWord();
 			if (msg != "")
 			{
 				try
@@ -417,8 +413,6 @@ namespace SuiBot_Core.Storage
 		[XmlElement]
 		public bool RatsBirthday { get; set; }
 		[XmlElement]
-		public bool Tombstone { get; set; }
-		[XmlElement]
 		public bool Lurk { get; set; }
 		[XmlElement]
 		public bool Hug { get; set; }
@@ -430,7 +424,6 @@ namespace SuiBot_Core.Storage
 			AskAI = false;
 			AskAILurk = true;
 			RatsBirthday = false;
-			Tombstone = false;
 			Lurk = false;
 			Hug = false;
 		}

@@ -1,10 +1,8 @@
 ﻿using Newtonsoft.Json.Linq;
-using SuiBot_Core.API;
+using SuiBot_Core.API.EventSub;
 using SuiBot_Core.Extensions.SuiStringExtension;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace SuiBot_Core.Components
 {
@@ -19,27 +17,27 @@ namespace SuiBot_Core.Components
 			this.ChannelInstance = ChannelInstance;
 		}
 
-		internal void DoWork(ChatMessage lastMessage)
+		internal void DoWork(ES_ChatMessage lastMessage)
 		{
-			lastMessage.Message = lastMessage.Message.StripSingleWord();
+			var msg = lastMessage.message.text.StripSingleWord();
 
-			if (lastMessage.Message == "")
+			if (msg == "")
 			{
-				if (string.IsNullOrEmpty(ChannelInstance.StreamInformation.Game))
+				if (string.IsNullOrEmpty(ChannelInstance.StreamStatus.game_name))
 				{
 					ChannelInstance.SendChatMessageResponse(lastMessage, "Current game is empty. You can try providing the game manually by using command \"!pcgw Game Name\"");
 					return;
 				}
 				else
 				{
-					ChannelInstance.SendChatMessageResponse(lastMessage, GetPCGWUrl(ChannelInstance.StreamInformation.Game));
+					ChannelInstance.SendChatMessageResponse(lastMessage, GetPCGWUrl(ChannelInstance.StreamStatus.game_name));
 					return;
 				}
 
 			}
 			else
 			{
-				ChannelInstance.SendChatMessageResponse(lastMessage, GetPCGWUrl(lastMessage.Message));
+				ChannelInstance.SendChatMessageResponse(lastMessage, GetPCGWUrl(msg));
 				return;
 			}
 		}

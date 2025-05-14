@@ -1,5 +1,7 @@
 ﻿using SuiBot_Core.API;
+using SuiBot_Core.API.EventSub;
 using System;
+using static SuiBot_Core.API.EventSub.ES_ChatMessage;
 
 namespace SuiBot_Core.Components
 {
@@ -12,9 +14,9 @@ namespace SuiBot_Core.Components
 			this.ChannelInstance = ChannelInstance;
 		}
 
-		public void GetUpTime(ChatMessage LastMessage)
+		public void GetUpTime(ES_ChatMessage LastMessage)
 		{
-			DateTime startTime = this.ChannelInstance.StreamInformation.StreamStartTime;
+			DateTime startTime = this.ChannelInstance.StreamStatus.started_at;
 			if (startTime != DateTime.MinValue)
 			{
 				var lenght = DateTime.UtcNow - startTime;
@@ -32,22 +34,22 @@ namespace SuiBot_Core.Components
 			}
 		}
 
-		public void Shoutout(ChatMessage LastMessage)
+		public void Shoutout(ES_ChatMessage LastMessage)
 		{
 			if (LastMessage.UserRole <= Role.Mod)
 			{
-				if (LastMessage.Message.Contains(" "))
+				if (LastMessage.message.text.Contains(" "))
 				{
-					var split = LastMessage.Message.Split(new char[] { ' ' }, 2)[1].Trim();
+					var split = LastMessage.message.text.Split(new char[] { ' ' }, 2)[1].Trim();
 					if (split != "")
 					{
 						ChannelInstance.UserShoutout(split);
 					}
 					else
-						ChannelInstance.SendChatMessageResponse(LastMessage, "Invalid syntax! Needs to be \"!so  username\"");
+						ChannelInstance.SendChatMessageResponse(LastMessage, "Invalid syntax! Needs to be \"!so username\"");
 				}
 				else
-					ChannelInstance.SendChatMessageResponse(LastMessage, "Invalid syntax! Needs to be \"!so  username\"");
+					ChannelInstance.SendChatMessageResponse(LastMessage, "Invalid syntax! Needs to be \"!so username\"");
 			}
 		}
 	}

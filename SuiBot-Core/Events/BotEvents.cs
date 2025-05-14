@@ -1,4 +1,6 @@
-﻿namespace SuiBot_Core.Events
+﻿using SuiBot_Core.API.EventSub;
+
+namespace SuiBot_Core.Events
 {
 	public enum IrcFeedback
 	{
@@ -14,7 +16,7 @@
 	public delegate void OnChannelJoiningHandler(string channel);
 	public delegate void OnChannelLeavingHandler(string channel);
 	public delegate void OnChatSendMessageHandler(string channel, string message);
-	public delegate void OnChatMessageReceivedHandler(string channel, ChatMessage message);
+	public delegate void OnChatMessageReceivedHandler(string channel, ES_ChatMessage message);
 	public delegate void OnLoginRegisteredHandler(string text);
 	public delegate void OnModerationActionHandler(string channel, string user, string response, string duration);
 	public delegate void OnShutdownHandler();

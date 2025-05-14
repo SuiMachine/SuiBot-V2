@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using SuiBot_Core.API.EventSub;
 using SuiBot_Core.Components.Other.Gemini;
 using SuiBot_Core.Extensions.SuiStringExtension;
 using System;
@@ -129,9 +130,9 @@ namespace SuiBot_Core.Components.Other
 			return true;
 		}
 
-		public override bool DoWork(SuiBot_ChannelInstance channelInstance, ChatMessage lastMessage)
+		public override bool DoWork(SuiBot_ChannelInstance channelInstance, ES_ChatMessage lastMessage)
 		{
-			if (lastMessage.UserRole == Role.SuperMod || lastMessage.Username == channelInstance.Channel)
+			if (lastMessage.UserRole == ES_ChatMessage.Role.SuperMod || lastMessage.chatter_user_name == channelInstance.Channel)
 			{
 				Task.Run(async () =>
 				{
@@ -146,14 +147,14 @@ namespace SuiBot_Core.Components.Other
 			return true;
 		}
 
-		private async Task GetResponse(SuiBot_ChannelInstance channelInstance, ChatMessage lastMessage)
+		private async Task GetResponse(SuiBot_ChannelInstance channelInstance, ES_ChatMessage lastMessage)
 		{
 			try
 			{
 				Gemini.GeminiContent content = null;
 				content = StreamerContent;
-				var info = channelInstance.StreamInformation;
-				content.systemInstruction = InstanceConfig.GetSystemInstruction(channelInstance.Channel, info.IsOnline, info.Game, info.StreamTitle);
+				var info = channelInstance.StreamStatus;
+				content.systemInstruction = InstanceConfig.GetSystemInstruction(channelInstance.Channel, info.IsOnline, info.game_name, info.title);
 
 				if (content == null)
 				{
@@ -161,7 +162,7 @@ namespace SuiBot_Core.Components.Other
 					return;
 				}
 
-				content.contents.Add(Gemini.GeminiMessage.CreateUserResponse(lastMessage.Message.StripSingleWord()));
+				content.contents.Add(Gemini.GeminiMessage.CreateUserResponse(lastMessage.message.text.StripSingleWord()));
 
 				string json = JsonConvert.SerializeObject(content);
 
@@ -224,29 +225,29 @@ namespace SuiBot_Core.Components.Other
 			}
 		}
 
-		internal void DoLurk(SuiBot_ChannelInstance channelInstance, ChatMessage lastMessage)
+		internal void DoLurk(SuiBot_ChannelInstance channelInstance, ES_ChatMessage lastMessage, string strippedMessage)
 		{
 			Task.Run(async () =>
 			{
-				await GetResponseLurk(channelInstance, lastMessage);
+				await GetResponseLurk(channelInstance, lastMessage, strippedMessage);
 			});
 		}
 
-		private async Task GetResponseLurk(SuiBot_ChannelInstance channelInstance, ChatMessage lastMessage)
+		private async Task GetResponseLurk(SuiBot_ChannelInstance channelInstance, ES_ChatMessage lastMessage, string strippedMessage)
 		{
 			try
 			{
 				Gemini.GeminiContent content = null;
-				var streamInfo = channelInstance.StreamInformation;
+				var streamInfo = channelInstance.StreamStatus;
 				content = new GeminiContent()
 				{
 					contents = new List<GeminiMessage>(),
 					tools = GeminiContent.GetTools(),
 					generationConfig = new GeminiContent.GenerationConfig(),
-					systemInstruction = InstanceConfig.GetLurkSystemInstruction(channelInstance.Channel, lastMessage.Username, streamInfo.IsOnline, streamInfo.Game, streamInfo.StreamTitle)
+					systemInstruction = InstanceConfig.GetLurkSystemInstruction(channelInstance.Channel, lastMessage.chatter_user_name, streamInfo.IsOnline, streamInfo.game_name, streamInfo.title)
 				};
 
-				content.contents.Add(GeminiMessage.CreateUserResponse(lastMessage.Message));
+				content.contents.Add(GeminiMessage.CreateUserResponse(lastMessage.message.text));
 
 				string json = JsonConvert.SerializeObject(content, Formatting.Indented);
 
@@ -294,7 +295,7 @@ namespace SuiBot_Core.Components.Other
 			}
 		}
 
-		private void HandleFunctionCall(SuiBot_ChannelInstance channelInstance, ChatMessage message, GeminiResponseFunctionCall func)
+		private void HandleFunctionCall(SuiBot_ChannelInstance channelInstance, ES_ChatMessage message, GeminiResponseFunctionCall func)
 		{
 			if (func.name == "timeout")
 				func.args.ToObject<Gemini.FunctionTypes.TimeOutUser>().Perform(channelInstance, message);

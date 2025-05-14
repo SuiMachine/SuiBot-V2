@@ -1,6 +1,8 @@
-﻿using SuiBot_Core.Extensions.SuiStringExtension;
+﻿using SuiBot_Core.API.EventSub;
+using SuiBot_Core.Extensions.SuiStringExtension;
 using System.Collections.Generic;
 using System.Linq;
+using static SuiBot_Core.API.EventSub.ES_ChatMessage;
 
 namespace SuiBot_Core.Components.Other
 {
@@ -40,9 +42,6 @@ namespace SuiBot_Core.Components.Other
 				if (memeConfig.RatsBirthday)
 					memeComponents.Add("ratsbirthday", new RatsBirthday());
 
-				if (memeConfig.Tombstone)
-					memeComponents.Add("tombstone", new Tombstone());
-
 				if (memeConfig.Lurk)
 				{
 					memeComponents.Add("lurk", new Lurk());
@@ -77,17 +76,17 @@ namespace SuiBot_Core.Components.Other
 			}
 		}
 
-		public bool DoWork(ChatMessage lastMessage)
+		public bool DoWork(ES_ChatMessage lastMessage)
 		{
 			if (lastMessage.UserRole <= Role.Mod)
 			{
-				if (lastMessage.Message.StartsWithLazy("!reloadmemes"))
+				if (lastMessage.message.text.StartsWithLazy("!reloadmemes"))
 					ReloadComponents();
 			}
 
 			if (memeComponents.Count > 0)
 			{
-				var component = memeComponents.FirstOrDefault(x => lastMessage.Message.StartsWithLazy("!" + x.Key));
+				var component = memeComponents.FirstOrDefault(x => lastMessage.message.text.StartsWithLazy("!" + x.Key));
 				if (component.Value != null)
 				{
 					return component.Value.DoWork(channelInstance, lastMessage);

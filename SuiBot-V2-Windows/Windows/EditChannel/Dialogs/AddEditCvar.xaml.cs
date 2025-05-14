@@ -1,16 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+using static SuiBot_Core.API.EventSub.ES_ChatMessage;
 
 namespace SuiBot_V2_Windows.Windows.EditChannel.Dialogs
 {
@@ -26,7 +17,7 @@ namespace SuiBot_V2_Windows.Windows.EditChannel.Dialogs
             InitializeComponent();
 
             //This is way easier than declaring this in WPF, one line instead of like 10 really ugly ones
-            this.CBox_Role.ItemsSource = Enum.GetValues(typeof(SuiBot_Core.Role)).Cast<SuiBot_Core.Role>();
+            this.CBox_Role.ItemsSource = Enum.GetValues(typeof(Role)).Cast<Role>();
 
             if (ModifiedCvar != null)
             {

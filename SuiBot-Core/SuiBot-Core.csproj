@@ -128,6 +128,7 @@
     <Compile Include="API\EventSub\ES_SessionMessage.cs" />
     <Compile Include="API\EventSub\Subscription\SubscribeMSG_ReadChannelMessage.cs" />
     <Compile Include="API\EventSub\Subscription\SubscriptionMessage.cs" />
+    <Compile Include="API\Helix\Responses\Response_StreamStatus.cs" />
     <Compile Include="API\Helix\Responses\UniversalResponse_Transport.cs" />
     <Compile Include="API\Helix\API_Timeout.cs" />
     <Compile Include="API\API_Util.cs" />
@@ -148,7 +149,6 @@
     <Compile Include="Components\Other\Hug.cs" />
     <Compile Include="Components\Other\MemeComponent.cs" />
     <Compile Include="Components\Other\Lurk.cs" />
-    <Compile Include="Components\Other\Tombstone.cs" />
     <Compile Include="Components\Other\RatsBirthday.cs" />
     <Compile Include="Components\Other\_MemeComponents.cs" />
     <Compile Include="Components\PCGW.cs" />
@@ -159,7 +159,6 @@
     <Compile Include="ErrorLogging.cs" />
     <Compile Include="Events\BotEvents.cs" />
     <Compile Include="Extensions\SuiStringExtansions.cs" />
-    <Compile Include="ImgUploader.cs" />
     <Compile Include="HttpWebRequestHandlers.cs" />
     <Compile Include="ChatMessage.cs" />
     <Compile Include="Components\RNG.cs" />

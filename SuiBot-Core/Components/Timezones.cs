@@ -1,4 +1,5 @@
-﻿using SuiBot_Core.Extensions.SuiStringExtension;
+﻿using SuiBot_Core.API.EventSub;
+using SuiBot_Core.Extensions.SuiStringExtension;
 using System;
 using System.Text;
 
@@ -14,9 +15,9 @@ namespace SuiBot_Core.Components
 			this.ChannelInstance = ChannelInstance;
 		}
 
-		public void DoWork(ChatMessage lastMessage)
+		public void DoWork(ES_ChatMessage lastMessage)
 		{
-			string strip = lastMessage.Message.StripSingleWord();
+			string strip = lastMessage.message.text.StripSingleWord();
 
 			if (DateTime.TryParse(strip, out DateTime result))
 			{

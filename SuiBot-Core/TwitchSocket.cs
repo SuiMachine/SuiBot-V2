@@ -135,8 +135,13 @@ namespace SuiBot_Core
 		{
 			var eventText = payload["event"];
 
-			//var dbg = eventText.ToString();
+			var dbg = eventText.ToString();
 			var msg = eventText.ToObject<ES_ChatMessage>();
+
+			if (!BotInstance.ChannelInstances.TryGetValue(msg.broadcaster_user_login, out SuiBot_ChannelInstance instance))
+				instance = null; //Not needed, but makes VS shutup
+			msg.SetupRole(instance);
+
 			OnChatMessage?.Invoke(msg);
 		}
 

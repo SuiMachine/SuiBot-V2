@@ -1,6 +1,8 @@
-﻿using SuiBot_Core.Extensions.SuiStringExtension;
+﻿using SuiBot_Core.API.EventSub;
+using SuiBot_Core.Extensions.SuiStringExtension;
 using System;
 using System.Collections.Generic;
+using static SuiBot_Core.API.EventSub.ES_ChatMessage;
 
 namespace SuiBot_Core.Components.Other
 {
@@ -10,14 +12,14 @@ namespace SuiBot_Core.Components.Other
 
 		List<string> Responses;
 
-		public override bool DoWork(SuiBot_ChannelInstance channelInstance, ChatMessage lastMessage)
+		public override bool DoWork(SuiBot_ChannelInstance channelInstance, ES_ChatMessage lastMessage)
 		{
 			if (Responses == null)
 				LoadResponses(channelInstance);
 
-			if (lastMessage.UserRole <= Role.Mod && lastMessage.Message.Contains(" "))
+			if (lastMessage.UserRole <= Role.Mod && lastMessage.message.text.Contains(" "))
 			{
-				var split = lastMessage.Message.StripSingleWord();
+				var split = lastMessage.message.text.StripSingleWord();
 				if (split != "")
 				{
 					if (split.StartsWithWordLazy("add"))
@@ -27,7 +29,7 @@ namespace SuiBot_Core.Components.Other
 						{
 							Responses.Add(split);
 							SaveResponses(channelInstance);
-							channelInstance.SendChatMessage($"Added a new response. e.g.: {string.Format(split, lastMessage.Username, "<target_here>")}");
+							channelInstance.SendChatMessage($"Added a new response. e.g.: {string.Format(split, lastMessage.chatter_user_name, "<target_here>")}");
 						}
 						else
 							channelInstance.SendChatMessage("Added response must contain {0} and {1}");
@@ -68,28 +70,28 @@ namespace SuiBot_Core.Components.Other
 			}
 
 			var trimLength = "!hug ".Length;
-			if (lastMessage.Message.Length > trimLength)
+			if (lastMessage.message.text.Length > trimLength)
 			{
-				string trim = lastMessage.Message.Substring(trimLength).Trim().TrimStart('@').Trim();
+				string trim = lastMessage.message.text.Substring(trimLength).Trim().TrimStart('@').Trim();
 				if (trim.Length > 0)
 				{
-					if (trim.ToLower() == lastMessage.Username.ToLower())
-						channelInstance.SendChatMessage($"{lastMessage.Username} hugs themselves - somehow...");
+					if (trim.ToLower() == lastMessage.message.text.ToLower())
+						channelInstance.SendChatMessage($"{lastMessage.chatter_user_name} hugs themselves - somehow...");
 					else if (channelInstance.ActiveUsersContains(trim) || channelInstance.Channel == trim)
 					{
 						string randomResponse = Responses[rng.Next(Responses.Count)];
-						channelInstance.SendChatMessage(string.Format(randomResponse, lastMessage.Username, trim));
+						channelInstance.SendChatMessage(string.Format(randomResponse, lastMessage.chatter_user_name, trim));
 					}
 					else
 					{
-						channelInstance.SendChatMessage($"{lastMessage.Username} - doesn't seem like such user has been recently active...");
+						channelInstance.SendChatMessage($"{lastMessage.chatter_user_name} - doesn't seem like such user has been recently active...");
 					}
 				}
 				else
-					channelInstance.SendChatMessage($"{lastMessage.Username} hugs themselves - somehow...");
+					channelInstance.SendChatMessage($"{lastMessage.chatter_user_name} hugs themselves - somehow...");
 			}
 			else
-				channelInstance.SendChatMessage($"{lastMessage.Username} hugs themselves - somehow...");
+				channelInstance.SendChatMessage($"{lastMessage.chatter_user_name} hugs themselves - somehow...");
 
 			return true;
 		}

@@ -21,6 +21,8 @@ namespace SuiBot_Core.Components
 
 		public void SetGameID(string ID) => GameID = ID;
 
+		internal void SetIsOnline(bool v) => IsOnline = v;
+
 		public bool IsOnline { get; private set; }
 		public DateTime StreamStartTime { get; internal set; }
 	}

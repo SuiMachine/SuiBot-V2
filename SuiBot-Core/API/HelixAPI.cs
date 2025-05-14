@@ -36,81 +36,92 @@ namespace SuiBot_Core.API
 			this.OAUTH = aouth;
 		}
 
-		public void GetStatus()
+		public void GetStatus(SuiBot_ChannelInstance instance)
 		{
-			/*//TODO: Deserialize this - this is a mess!
-			if (HttpWebRequestHandlers.PerformGetRequest(sUrlTwitchStatus, RequestHeaders, out string res))
+			//TODO: Deserialize this - this is a mess!
+			if (HttpWebRequestHandlers.PerformGetRequest(new Uri($"https://api.twitch.tv/helix/streams?user_login={instance.Channel}"), BuildDefaultHeaders(), out string res))
 			{
-				try
+				var response = JObject.Parse(res);
+				if (response["data"] != null)
 				{
-					var response = JObject.Parse(res);
-					if (response["data"] != null && response["data"].Children().Count() > 0)
-					{
-						var dataNode = response["data"].First;
-						if (dataNode["title"] != null)
-						{
-							IsOnline = true;
-							var title = dataNode["title"].ToString();
-							TitleHasChanged = StoredTitle != title;
-							StoredTitle = title;
-
-							if (dataNode["type"] != null)
-							{
-								var streamType = dataNode["type"].ToString();
-								if (streamType == "live")
-									IsOnline = true;
-								else
-									IsOnline = false;
-							}
-
-							if (dataNode["started_at"] != null)
-							{
-								string dateTimeStartAsString = dataNode["started_at"].ToString();
-								if (DateTime.TryParse(dateTimeStartAsString, out DateTime ParsedTime))
-								{
-									StartTime = ParsedTime.ToUniversalTime();
-								}
-								else
-									StartTime = DateTime.MinValue;
-							}
-
-							if (dataNode["game_id"] != null)
-							{
-								var gameIdAsString = dataNode["game_id"].ToString();
-								Game = ResolveNameFromId(gameIdAsString);
-								if (Game == "ul")
-								{
-									Game = String.Empty;
-								}
-								Console.WriteLine($"{m_ChannelName} - Checked stream status. Is online, playing {Game}");
-							}
-							else
-							{
-								Console.WriteLine($"{m_ChannelName} - Checked stream status. Is online (no game?)");
-							}
-						}
-						else
-						{
-							IsOnline = false;
-							Console.WriteLine($"{m_ChannelName} - Checked stream status. Is offline.");
-						}
-					}
-					else
-					{
-						IsOnline = false;
-						Console.WriteLine($"{m_ChannelName} - Checked stream status. Is offline.");
-					}
+					var data = response["data"].ToObject<Response_StreamStatus[]>();
+					if (data.Length > 0)
+						instance.StreamStatus = data[0];
 				}
-				catch (Exception e)
+				else
 				{
-					ErrorLogging.WriteLine("Error trying to parse Json when doing stream update request: " + e.Message);
-					IsOnline = false;
+					instance.StreamStatus = new Response_StreamStatus();
 				}
+				/*				try
+								{
+									if (response["data"] != null && response["data"].Children().Count() > 0)
+									{
+										var dataNode = response["data"].First;
+										if (dataNode["title"] != null)
+										{
+											instance.StreamInformation.SetIsOnline(true);
+											var title = dataNode["title"].ToString();
+											TitleHasChanged = StoredTitle != title;
+											StoredTitle = title;
+
+											if (dataNode["type"] != null)
+											{
+												var streamType = dataNode["type"].ToString();
+												if (streamType == "live")
+													IsOnline = true;
+												else
+													IsOnline = false;
+											}
+
+											if (dataNode["started_at"] != null)
+											{
+												string dateTimeStartAsString = dataNode["started_at"].ToString();
+												if (DateTime.TryParse(dateTimeStartAsString, out DateTime ParsedTime))
+												{
+													StartTime = ParsedTime.ToUniversalTime();
+												}
+												else
+													StartTime = DateTime.MinValue;
+											}
+
+											if (dataNode["game_id"] != null)
+											{
+												var gameIdAsString = dataNode["game_id"].ToString();
+												Game = ResolveNameFromId(gameIdAsString);
+												if (Game == "ul")
+												{
+													Game = String.Empty;
+												}
+												Console.WriteLine($"{m_ChannelName} - Checked stream status. Is online, playing {Game}");
+											}
+											else
+											{
+												Console.WriteLine($"{m_ChannelName} - Checked stream status. Is online (no game?)");
+											}
+										}
+										else
+										{
+											IsOnline = false;
+											Console.WriteLine($"{m_ChannelName} - Checked stream status. Is offline.");
+										}
+									}
+									else
+									{
+										//IsOnline = false;
+										Console.WriteLine($"{m_ChannelName} - Checked stream status. Is offline.");
+									}
+								}
+								catch (Exception e)
+								{
+									ErrorLogging.WriteLine("Error trying to parse Json when doing stream update request: " + e.Message);
+									//IsOnline = false;
+								}
+				*/
 			}
 			else
 			{
 				Console.WriteLine("Error checking Json");
-			}*/
+			}
 		}
 
 		public string ResolveNameFromId(string id)
@@ -138,21 +149,21 @@ namespace SuiBot_Core.API
 
 		public void RequestRemoveMessage(SuiBot_ChannelInstance channel, string messageID)
 		{
-/*			string botId = GetUserId(m_BotName);
-			if (botId == "")
-			{
-				ErrorLogging.WriteLine($"Can't obtain bot user id!");
-				return;
-			}
+			/*			string botId = GetUserId(m_BotName);
+						if (botId == "")
+						{
+							ErrorLogging.WriteLine($"Can't obtain bot user id!");
+							return;
+						}
 
-			var info = channel.StreamInformation;
-			if (string.IsNullOrEmpty(info.ChannelID))
-			{
-				ErrorLogging.WriteLine($"Can't obtain id for channel: {channel.Channel}");
-				return;
-			}
+						var info = channel.StreamInformation;
+						if (string.IsNullOrEmpty(info.ChannelID))
+						{
+							ErrorLogging.WriteLine($"Can't obtain id for channel: {channel.Channel}");
+							return;
+						}
 
-			_ = HttpWebRequestHandlers.PerformDelete(new Uri($"https://api.twitch.tv/helix/moderation/chat?broadcaster_id={info.ChannelID}&moderator_id={botId}&message_id={messageID}"), BuildDefaultHeaders(), out string _);*/
+						_ = HttpWebRequestHandlers.PerformDelete(new Uri($"https://api.twitch.tv/helix/moderation/chat?broadcaster_id={info.ChannelID}&moderator_id={botId}&message_id={messageID}"), BuildDefaultHeaders(), out string _);*/
 		}
 
 		public void RequestTimeout(SuiBot_ChannelInstance channel, string userId, uint length, string reason)
@@ -246,15 +257,16 @@ namespace SuiBot_Core.API
 
 		public void RequestUpdate(SuiBot_ChannelInstance instance)
 		{
-			/*			GetStatus();
-						if (Game != string.Empty)
-						{
-							instance.SendChatMessage($"New isOnline status is - {IsOnline} and the game is: {Game}");
-						}
-						else
-						{
-							instance.SendChatMessage($"New isOnline status is - {IsOnline}");
-						}*/
+			//var oldStatus = instance.StreamStatus;
+			GetStatus(instance);
+			if (instance.StreamStatus.game_name != string.Empty)
+			{
+				instance.SendChatMessage($"New isOnline status is - {instance.StreamStatus.IsOnline} and the game is: {instance.StreamStatus.game_name}");
+			}
+			else
+			{
+				instance.SendChatMessage($"New isOnline status is - {instance.StreamStatus.IsOnline}");
+			}
 		}
 
 		internal async Task<bool> SubscribeTo_ChatMessage(string channel, string sessionId)

@@ -1,9 +1,8 @@
-﻿using System;
+﻿using SuiBot_Core.API.EventSub;
 using SuiBot_Core.Extensions.SuiStringExtension;
-using System.Collections.Generic;
+using System;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using static SuiBot_Core.API.EventSub.ES_ChatMessage;
 
 namespace SuiBot_Core.Components
 {
@@ -23,19 +22,19 @@ namespace SuiBot_Core.Components
 			Cvars.Save();
 		}
 
-		public void DoWork(ChatMessage lastMessage)
+		public void DoWork(ES_ChatMessage lastMessage)
 		{
 			if (lastMessage.UserRole <= Role.Mod)
 			{
-				lastMessage.Message = lastMessage.Message.StripSingleWord();
-				if (lastMessage.Message.StartsWithWordLazy("add"))
+				var msg = lastMessage.message.text.StripSingleWord();
+				if (msg.StartsWithWordLazy("add"))
 				{
-					AddCvar(lastMessage);
+					AddCvar(lastMessage, msg);
 				}
-				else if (lastMessage.Message.StartsWithWordLazy("remove"))
+				else if (msg.StartsWithWordLazy("remove"))
 				{
 					//Add update
-					RemoveCvar(lastMessage);
+					RemoveCvar(lastMessage, msg);
 				}
 				else
 					ChannelInstance.SendChatMessageResponse(lastMessage, "Cvar should be followed by add or remove.");
@@ -43,12 +42,12 @@ namespace SuiBot_Core.Components
 
 		}
 
-		private void AddCvar(ChatMessage lastMessage)
+		private void AddCvar(ES_ChatMessage lastMessage, string strippedMessage)
 		{
-			lastMessage.Message = lastMessage.Message.StripSingleWord();
-			if (lastMessage.Message.Contains(" "))
+			strippedMessage = strippedMessage.StripSingleWord();
+			if (strippedMessage.Contains(" "))
 			{
-				var cvar = lastMessage.Message.Split(new char[] { ' ' }, 2);
+				var cvar = strippedMessage.Split(new char[] { ' ' }, 2);
 				var newCvar = new Storage.CustomCvar(cvar[0].ToLower(), cvar[1]);
 				if (Cvars.Add(newCvar))
 				{
@@ -62,15 +61,15 @@ namespace SuiBot_Core.Components
 				ChannelInstance.SendChatMessageResponse(lastMessage, "Cvar add should be followed by command name and then text, e.g. \"!cvar add test Test response\".");
 		}
 
-		private void RemoveCvar(ChatMessage lastMessage)
+		private void RemoveCvar(ES_ChatMessage lastMessage, string strippedMessage)
 		{
-			lastMessage.Message = lastMessage.Message.StripSingleWord();
-			if (int.TryParse(lastMessage.Message, out int id))
+			strippedMessage = strippedMessage.StripSingleWord();
+			if (int.TryParse(strippedMessage, out int id))
 			{
 				if (Cvars.RemoveAt(id))
 				{
 					Cvars.Save();
-					ChannelInstance.SendChatMessageResponse(lastMessage, "Removed cvar with ID:" + id.ToString());
+					ChannelInstance.SendChatMessageResponse(lastMessage, $"Removed cvar with ID: {id}");
 				}
 				else
 					ChannelInstance.SendChatMessageResponse(lastMessage, "Cvar ID out of bounds");
@@ -78,19 +77,19 @@ namespace SuiBot_Core.Components
 			}
 			else
 			{
-				if (Cvars.Remove(lastMessage.Message))
+				if (Cvars.Remove(strippedMessage))
 				{
 					Cvars.Save();
-					ChannelInstance.SendChatMessageResponse(lastMessage, "Removed cvar: " + lastMessage.Message);
+					ChannelInstance.SendChatMessageResponse(lastMessage, $"Removed cvar: {strippedMessage}");
 				}
 				else
-					ChannelInstance.SendChatMessageResponse(lastMessage, "Cvar " + lastMessage.Message + " not found.");
+					ChannelInstance.SendChatMessageResponse(lastMessage, $"Cvar {strippedMessage} not found.");
 			}
 		}
 
-		public bool PerformCustomCvar(ChatMessage lastMessage)
+		public bool PerformCustomCvar(ES_ChatMessage lastMessage)
 		{
-			var cvar = Cvars.GetResponse(lastMessage.Message);
+			var cvar = Cvars.GetResponse(lastMessage.message.text);
 			if (cvar == null)
 				return false;
 			else

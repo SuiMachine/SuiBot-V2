@@ -1,5 +1,7 @@
-﻿using SuiBot_Core.Extensions.SuiStringExtension;
+﻿using SuiBot_Core.API.EventSub;
+using SuiBot_Core.Extensions.SuiStringExtension;
 using System.Linq;
+using static SuiBot_Core.API.EventSub.ES_ChatMessage;
 
 namespace SuiBot_Core.Components
 {
@@ -28,24 +30,24 @@ namespace SuiBot_Core.Components
 		/// Function used for running moderation actions related to interval messages (like adding, removing, finding interval messages)
 		/// </summary>
 		/// <param name="LastMessage">Command posted in chat</param>
-		internal void DoWork(ChatMessage LastMessage)
+		internal void DoWork(ES_ChatMessage LastMessage)
 		{
 			if (LastMessage.UserRole <= Role.Mod)
 			{
-				LastMessage.Message = LastMessage.Message.StripSingleWord();
+				var msg = LastMessage.message.text.StripSingleWord();
 
-				if (LastMessage.Message.StartsWithWordLazy("add"))
-					Add(LastMessage);
-				else if (LastMessage.Message.StartsWithWordLazy(new string[] { "remove", "delete" }))
-					Remove(LastMessage);
-				else if (LastMessage.Message.StartsWithWordLazy(new string[] { "find", "search" }))
-					Find(LastMessage);
+				if (msg.StartsWithWordLazy("add"))
+					Add(LastMessage, msg);
+				else if (msg.StartsWithWordLazy(new string[] { "remove", "delete" }))
+					Remove(LastMessage, msg);
+				else if (msg.StartsWithWordLazy(new string[] { "find", "search" }))
+					Find(LastMessage, msg);
 				else
 					NotifyInvalid(LastMessage);
 			}
 		}
 
-		private void NotifyInvalid(ChatMessage lastMessage)
+		private void NotifyInvalid(ES_ChatMessage lastMessage)
 		{
 			ChannelInstance.SendChatMessageResponse(lastMessage, "Invalid command. IntervalMessage commands should be followed by: add / remove / find");
 		}
@@ -54,12 +56,12 @@ namespace SuiBot_Core.Components
 		/// Function ran to add a new interval message
 		/// </summary>
 		/// <param name="lastMessage">Command</param>
-		private void Add(ChatMessage lastMessage)
+		private void Add(ES_ChatMessage lastMessage, string strippedMessage)
 		{
-			lastMessage.Message = lastMessage.Message.StripSingleWord();
-			if (lastMessage.Message.Contains(":"))
+			strippedMessage = strippedMessage.StripSingleWord();
+			if (strippedMessage.Contains(":"))
 			{
-				string[] split = lastMessage.Message.Split(new char[] { ':' }, 2);
+				string[] split = strippedMessage.Split(new char[] { ':' }, 2);
 				if (int.TryParse(split[0].Trim(), out int interval))
 				{
 					string message = split[1].Trim();
@@ -76,14 +78,14 @@ namespace SuiBot_Core.Components
 					ChannelInstance.SendChatMessageResponse(lastMessage, "Failed to parse interval value.");
 			}
 			else
-				ChannelInstance.SendChatMessageResponse(lastMessage, "No seperator provided!");
+				ChannelInstance.SendChatMessageResponse(lastMessage, "No separator provided!");
 		}
 
 		/// <summary>
 		/// Function ran to find already added interval message
 		/// </summary>
 		/// <param name="lastMessage">Command</param>
-		private void Find(ChatMessage lastMessage)
+		private void Find(ES_ChatMessage lastMessage, string strippedMessage)
 		{
 			ChannelInstance.SendChatMessageResponse(lastMessage, "Not implemented. Go Away!");
 		}
@@ -92,14 +94,14 @@ namespace SuiBot_Core.Components
 		/// Function ran to remove interval message
 		/// </summary>
 		/// <param name="lastMessage">Command</param>
-		private void Remove(ChatMessage lastMessage)
+		private void Remove(ES_ChatMessage lastMessage, string strippedMessage)
 		{
-			lastMessage.Message = lastMessage.Message.StripSingleWord();
-			if (lastMessage.Message == "")
+			strippedMessage = strippedMessage.StripSingleWord();
+			if (strippedMessage == "")
 			{
 				ChannelInstance.SendChatMessageResponse(lastMessage, "No ID provided");
 			}
-			else if (lastMessage.Message.StartsWithLazy("last"))
+			else if (strippedMessage.StartsWithLazy("last"))
 			{
 				var msg = IntervalMessagesStorage.Messages.Last();
 				IntervalMessagesStorage.Messages.Remove(msg);
@@ -109,7 +111,7 @@ namespace SuiBot_Core.Components
 			}
 			else
 			{
-				if (int.TryParse(lastMessage.Message, out int id))
+				if (int.TryParse(strippedMessage, out int id))
 				{
 					if (id >= IntervalMessagesStorage.Messages.Count)
 						ChannelInstance.SendChatMessageResponse(lastMessage, $"Interval message ID was outside the list bounds ({IntervalMessagesStorage.Messages.Count})");
