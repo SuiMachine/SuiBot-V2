@@ -316,7 +316,7 @@ namespace SuiBot_Core.API
 			return false;
 		}
 
-		internal async Task<bool> SubcribeToChannelAdBreak(ulong channelID, string sessionID)
+		internal async Task<bool> SubscribeToChannelAdBreak(ulong channelID, string sessionID)
 		{
 			var request = new SubscribeMSG_ChannelAdBreakBegin(channelID, sessionID);
 			var serialize = JsonConvert.SerializeObject(request, Formatting.Indented, new JsonSerializerSettings()

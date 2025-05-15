@@ -122,7 +122,7 @@ namespace SuiBot_Core
 			HelixAPI = new API.HelixAPI(this, BotConnectionConfig.Password);
 			if (!HelixAPI.ValidateToken())
 			{
-				Close();
+				ErrorLogging.WriteLine("Invalid token!");
 				throw new Exception("Invalid token");
 			}
 
@@ -163,7 +163,7 @@ namespace SuiBot_Core
 						continue;
 					if (!await HelixAPI.SubscribeToOfflineStatus(channel.condition.broadcaster_user_id, TwitchSocket.SessionID))
 						continue;
-					if (!await HelixAPI.SubcribeToChannelAdBreak(channel.condition.broadcaster_user_id, TwitchSocket.SessionID))
+					if (!await HelixAPI.SubscribeToChannelAdBreak(channel.condition.broadcaster_user_id, TwitchSocket.SessionID))
 						continue;
 
 					await Task.Delay(2000);
