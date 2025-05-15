@@ -1,15 +1,15 @@
 ﻿namespace SuiBot_Core.API.EventSub.Subscription
 {
-	internal class SubscribeMSG_ReadChannelMessage
+	internal class SubscribeMSG_ChannelChatUserMessageUpdate
 	{
-		public string type = "channel.chat.message";
+		public string type = "channel.chat.user_message_update";
 		public int version = 1;
 		public ES_Subscribe_Condition condition;
 		public ES_Subscribe_Transport_Websocket transport;
 
-		private SubscribeMSG_ReadChannelMessage(){}
+		public SubscribeMSG_ChannelChatUserMessageUpdate() { }
 
-		public SubscribeMSG_ReadChannelMessage(ulong channelId, ulong user,  string sessionID)
+		public SubscribeMSG_ChannelChatUserMessageUpdate(ulong channelId, ulong user, string sessionID)
 		{
 			condition = ES_Subscribe_Condition.CreateBroadcasterAndUserOnly(channelId, user);
 			transport = new ES_Subscribe_Transport_Websocket(sessionID);

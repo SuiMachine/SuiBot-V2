@@ -146,19 +146,7 @@ namespace SuiBot_Core
 			}
 		}
 
-		public void SendChatMessage_NoDelays(string message)
-		{
-/*			int originalDelay = SuiBotInstance.MeebyIrcClient.SendDelay;
-			SuiBotInstance.MeebyIrcClient.SendDelay = 0;
-			SuiBotInstance.MeebyIrcClient.SendMessage(Meebey.SmartIrc4net.SendType.Message, "#" + Channel, message);
-			SuiBotInstance.MeebyIrcClient.SendDelay = originalDelay;*/
-		}
-
-		public void UserShoutout(string username)
-		{
-			//SuiBotInstance.MeebyIrcClient.WriteLine(string.Format(":{0}!{0}@{0}.tmi.twitch.tv PRIVMSG #{1} :.shoutout {2}", SuiBotInstance.BotName, Channel, username));
-		}
-
+		public void UserShoutout(ES_ChatMessage lastMessage, string username) => SuiBotInstance.HelixAPI.RequestShoutout(lastMessage, username);
 		public void RemoveUserMessage(ES_ChatMessage lastMassage) => SuiBotInstance.HelixAPI.RequestRemoveMessage(lastMassage);
 		public void UserTimeout(ES_ChatMessage lastMassage, uint length, string reason = null) => SuiBotInstance.HelixAPI.RequestTimeout(lastMassage, length, reason);
 		public void UserBan(ES_ChatMessage lastMassage, string reason = null) => SuiBotInstance.HelixAPI.RequestBan(lastMassage, reason);

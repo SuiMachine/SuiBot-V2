@@ -79,7 +79,6 @@ namespace SuiBot_Core
 				{
 					"bits:read",
 					"channel:bot",
-					"channel:manage:ads",
 					"channel:read:ads",
 					"channel:read:goals",
 					"channel:read:guest_star",
@@ -121,6 +120,11 @@ namespace SuiBot_Core
 				throw new Exception("At least 1 channel is required to join.");
 
 			HelixAPI = new API.HelixAPI(this, BotConnectionConfig.Password);
+			if (!HelixAPI.ValidateToken())
+			{
+				Close();
+				throw new Exception("Invalid token");
+			}
 
 			TwitchSocket = new TwitchSocket(this);
 			TwitchSocket.OnConnected += TwitchSocket_Connected;
@@ -139,15 +143,30 @@ namespace SuiBot_Core
 
 			Task.Factory.StartNew(async () =>
 			{
+				List<API.EventSub.Subscription.Responses.Response_SubscribeTo.Subscription_Response_Data> channelsToSubScribeAdditionalInformationTo = new List<API.EventSub.Subscription.Responses.Response_SubscribeTo.Subscription_Response_Data>();
+
 				foreach (var channel in BotCoreConfig.ChannelsToJoin)
 				{
-					API.EventSub.Subscription.Responses.Response_SubscribeToChannelMessages result = await HelixAPI.SubscribeTo_ChatMessage(channel, TwitchSocket.SessionID);
+					API.EventSub.Subscription.Responses.Response_SubscribeTo.Subscription_Response_Data result = await HelixAPI.SubscribeTo_ChatMessage(channel, TwitchSocket.SessionID);
 					if (result != null)
 					{
+						channelsToSubScribeAdditionalInformationTo.Add(result);
 						StartedReadingChannel(channel, result);
 					}
 
-					Thread.Sleep(2000);
+					await Task.Delay(2000);
+				}
+
+				foreach (var channel in channelsToSubScribeAdditionalInformationTo)
+				{
+					if (!await HelixAPI.SubscribeToOnlineStatus(channel.condition.broadcaster_user_id, TwitchSocket.SessionID))
+						continue;
+					if (!await HelixAPI.SubscribeToOfflineStatus(channel.condition.broadcaster_user_id, TwitchSocket.SessionID))
+						continue;
+					if (!await HelixAPI.SubcribeToChannelAdBreak(channel.condition.broadcaster_user_id, TwitchSocket.SessionID))
+						continue;
+
+					await Task.Delay(2000);
 				}
 			});
 
@@ -194,7 +213,7 @@ namespace SuiBot_Core
 			}
 		}
 
-		private void StartedReadingChannel(string channelToJoin, API.EventSub.Subscription.Responses.Response_SubscribeToChannelMessages result)
+		private void StartedReadingChannel(string channelToJoin, API.EventSub.Subscription.Responses.Response_SubscribeTo.Subscription_Response_Data result)
 		{
 			ErrorLogging.WriteLine($"Subscribed to read: {channelToJoin}");
 			if (ChannelInstances.TryGetValue(channelToJoin, out var channel))

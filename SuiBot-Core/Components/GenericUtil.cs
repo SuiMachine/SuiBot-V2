@@ -34,22 +34,20 @@ namespace SuiBot_Core.Components
 			}
 		}
 
-		public void Shoutout(ES_ChatMessage LastMessage)
+		public void Shoutout(ES_ChatMessage lastMessage)
 		{
-			if (LastMessage.UserRole <= Role.Mod)
+			if (lastMessage.UserRole <= Role.Mod)
 			{
-				if (LastMessage.message.text.Contains(" "))
+				if (lastMessage.message.text.Contains(" "))
 				{
-					var split = LastMessage.message.text.Split(new char[] { ' ' }, 2)[1].Trim();
+					var split = lastMessage.message.text.Split(new char[] { ' ' }, 2)[1].Trim();
 					if (split != "")
-					{
-						ChannelInstance.UserShoutout(split);
-					}
+						ChannelInstance.UserShoutout(lastMessage, split);
 					else
-						ChannelInstance.SendChatMessageResponse(LastMessage, "Invalid syntax! Needs to be \"!so username\"");
+						ChannelInstance.SendChatMessageResponse(lastMessage, "Invalid syntax! Needs to be \"!so username\"");
 				}
 				else
-					ChannelInstance.SendChatMessageResponse(LastMessage, "Invalid syntax! Needs to be \"!so username\"");
+					ChannelInstance.SendChatMessageResponse(lastMessage, "Invalid syntax! Needs to be \"!so username\"");
 			}
 		}
 	}

@@ -4,12 +4,24 @@
 	{
 		public string broadcaster_user_id = null;
 		public string user_id = null;
-		public ES_Subscribe_Condition() { }
+		private ES_Subscribe_Condition() { }
 
-		public ES_Subscribe_Condition(ulong broadcaster_user_id, ulong userID)
+		public static ES_Subscribe_Condition CreateBroadcasterOnly(ulong broadcaster_user_id)
 		{
-			this.broadcaster_user_id = broadcaster_user_id.ToString();
-			this.user_id = userID.ToString();
+			return new ES_Subscribe_Condition()
+			{
+				broadcaster_user_id = broadcaster_user_id.ToString(),
+				user_id = null
+			};
+		}
+
+		public static ES_Subscribe_Condition CreateBroadcasterAndUserOnly(ulong broadcaster_user_id, ulong userID)
+		{
+			return new ES_Subscribe_Condition()
+			{
+				broadcaster_user_id = broadcaster_user_id.ToString(),
+				user_id = userID.ToString()
+			};
 		}
 	}
 
