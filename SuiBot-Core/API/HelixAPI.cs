@@ -42,20 +42,33 @@ namespace SuiBot_Core.API
 
 		public void GetStatus(SuiBot_ChannelInstance instance)
 		{
-			if (HttpWebRequestHandlers.PerformGetRequest(new Uri($"https://api.twitch.tv/helix/streams?user_login={instance.Channel}"), BuildDefaultHeaders(), out string res))
+			var oldStatus = instance.StreamStatus;
+
+			var result = HttpWebRequestHandlers.GetSync(BASE_URI, "streams", $"?user_login={instance.Channel}", BuildDefaultHeaders());
+			if (result != "")
 			{
-				var response = JObject.Parse(res);
+				var response = JObject.Parse(result);
 				if (response["data"] != null)
 				{
 					var data = response["data"].ToObject<Response_StreamStatus[]>();
 					if (data.Length > 0)
+					{
 						instance.StreamStatus = data[0];
+						instance.StreamStatus.IsOnline = true;
+						instance.StreamStatus.GameChangedSinceLastTime = oldStatus.game_id != instance.StreamStatus.game_id;
+					}
 					else
+					{
 						instance.StreamStatus = new Response_StreamStatus();
+						instance.StreamStatus.IsOnline = false;
+						instance.StreamStatus.GameChangedSinceLastTime = oldStatus.game_id != instance.StreamStatus.game_id;
+					}
 				}
 				else
 				{
 					instance.StreamStatus = new Response_StreamStatus();
+					instance.StreamStatus.IsOnline = false;
+					instance.StreamStatus.GameChangedSinceLastTime = oldStatus.game_id != instance.StreamStatus.game_id;
 				}
 			}
 			else

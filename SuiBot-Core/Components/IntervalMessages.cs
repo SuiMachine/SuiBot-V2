@@ -133,11 +133,11 @@ namespace SuiBot_Core.Components
 		/// </summary>
 		internal void DoTickWork()
 		{
-			foreach (var message in IntervalMessagesStorage.Messages)
+			lock(IntervalMessagesStorage.Messages)
 			{
-				message.IntervalTick--;
-				if (message.IntervalTick <= 0)
+				foreach (var message in IntervalMessagesStorage.Messages)
 				{
+					message.IntervalTick--;
 					if (message.IntervalTick <= 0)
 					{
 						ChannelInstance.SendChatMessage(message.Message);

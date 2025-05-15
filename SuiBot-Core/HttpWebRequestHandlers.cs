@@ -37,46 +37,63 @@ namespace SuiBot_Core
 			}
 		}
 
-		/// <summary>
-		/// A more complex function for during HTTP requests.
-		/// </summary>
-		/// <param name="address">Address to perform HTTP requests on</param>
-		/// <param name="headers">Dictionary for HTTP headers</param>
-		/// <param name="contantType">Content type</param>
-		/// <param name="acceptStr">Accept typestring</param>
-		/// <param name="Method">Method</param>
-		/// <param name="result">JSON returned of request (or empty on failed)</param>
-		/// <returns>True if succeeds, False if failed.</returns>
-		public static bool PerformGetRequest(Uri address, Dictionary<string, string> headers, out string result)
+		public static string GetSync(string baseUrl, string scope, string parameters, Dictionary<string, string> requestHeaders)
 		{
 			try
 			{
-				HttpWebRequest wRequest = (HttpWebRequest)HttpWebRequest.Create(address);
+				HttpWebRequest request = (HttpWebRequest)WebRequest.Create(baseUrl + scope + parameters);
 
 				//Headers
-				if (headers != null)
+				if (requestHeaders != null)
 				{
-					foreach (var header in headers)
+					foreach (var header in requestHeaders)
 					{
-						wRequest.Headers[header.Key] = header.Value;
+						request.Headers[header.Key] = header.Value;
 					}
 				}
 
-				wRequest.ContentType = "application/json";
-				wRequest.Accept = "application/vnd.twitchtv.v3+json";
-				wRequest.Method = "GET";
+				request.ContentType = "application/json";
+				request.Method = "GET";
 
-				dynamic wResponse = wRequest.GetResponse().GetResponseStream();
-				StreamReader reader = new StreamReader(wResponse);
-				result = reader.ReadToEnd();
-				reader.Close();
-				wResponse.Close();
-				return true;
+				var webResponse = request.GetResponse();
+				using (HttpWebResponse response = (HttpWebResponse)webResponse)
+				using (Stream stream = response.GetResponseStream())
+				using (StreamReader reader = new StreamReader(stream))
+				{
+					return reader.ReadToEnd();
+				}
 			}
-			catch (Exception)
+			catch (Exception e)
 			{
-				result = "";
-				return false;
+				ErrorLogging.WriteLine($"Failed to perform get: {e}");
+				return "";
+			}
+		}
+
+		public static async Task<string> GetAsync(string baseUrl, string scope, string parameters, Dictionary<string, string> requestHeaders)
+		{
+			HttpWebRequest request = (HttpWebRequest)WebRequest.Create(baseUrl + scope + parameters);
+
+			try
+			{
+				foreach (var requestHeader in requestHeaders)
+					request.Headers[requestHeader.Key] = requestHeader.Value;
+
+				request.Timeout = 5000;
+				request.Method = "GET";
+
+				var webResponse = await request.GetResponseAsync();
+				using (HttpWebResponse response = (HttpWebResponse)webResponse)
+				using (Stream stream = response.GetResponseStream())
+				using (StreamReader reader = new StreamReader(stream))
+				{
+					return await reader.ReadToEndAsync();
+				}
+			}
+			catch (Exception e)
+			{
+				ErrorLogging.WriteLine($"Failed to perform get: {e}");
+				return "";
 			}
 		}
 
@@ -228,37 +245,6 @@ namespace SuiBot_Core
 		internal static string FormatParameter(string header, string variable)
 		{
 			return header + "=" + Uri.EscapeDataString(variable);
-		}
-
-		public static async Task<string> GetAsync(string baseUrl, string scope, string parameters, Dictionary<string, string> requestHeaders, bool returnErrorCode = false)
-		{
-			HttpWebRequest request = (HttpWebRequest)WebRequest.Create(baseUrl + scope + parameters);
-
-			try
-			{
-				foreach (var requestHeader in requestHeaders)
-					request.Headers[requestHeader.Key] = requestHeader.Value;
-
-				request.Timeout = 5000;
-				request.Method = "GET";
-
-				var webResponse = await request.GetResponseAsync();
-				using (HttpWebResponse response = (HttpWebResponse)webResponse)
-				using (Stream stream = response.GetResponseStream())
-				using (StreamReader reader = new StreamReader(stream))
-				{
-					return await reader.ReadToEndAsync();
-				}
-			}
-			catch (Exception e)
-			{
-				Debug.WriteLine(e);
-				if (returnErrorCode)
-				{
-					return "Error: " + e.Message;
-				}
-				return "";
-			}
 		}
 
 		public static async Task<string> PostAsync(string baseUrl, string scope, string parameters, string jsonContent, Dictionary<string, string> requestHeaders)

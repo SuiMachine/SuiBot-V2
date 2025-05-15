@@ -23,5 +23,6 @@ namespace SuiBot_Core.API.Helix.Responses
 		public bool is_mature;
 
 		[JsonIgnore][NonSerialized] public bool IsOnline = false;
+		[JsonIgnore][NonSerialized] public bool GameChangedSinceLastTime = false;
 	}
 }

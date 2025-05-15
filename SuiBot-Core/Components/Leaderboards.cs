@@ -26,11 +26,11 @@ namespace SuiBot_Core.Components
 		public string CurrentGame { get; set; }
 		public string LevelOverride { get; set; }
 		public string CategoryOverride { get; set; }
-		public string PreferedCategory { get; set; }
+		public string PreferredCategory { get; set; }
 		public Dictionary<string, string> SubcategoriesOverride { get; set; }
 		public Dictionary<string, string> VariablesOverride { get; set; }
 
-		private string Speedrunusername => channelInstance.ConfigInstance.LeaderboardsUsername;
+		private string SpeedrunUsername => channelInstance.ConfigInstance.LeaderboardsUsername;
 		public bool LastUpdateSuccessful { get; private set; }
 
 
@@ -55,7 +55,7 @@ namespace SuiBot_Core.Components
 			CurrentGame = "";
 			LevelOverride = "";
 			CategoryOverride = "";
-			PreferedCategory = "";
+			PreferredCategory = "";
 			SubcategoriesOverride = new Dictionary<string, string>();
 
 
@@ -143,7 +143,7 @@ namespace SuiBot_Core.Components
 
 		}
 
-		public void SetPreferedCategory(string StreamTitle, bool isAfterFirstUpdate, bool vocal)
+		public void SetPreferredCategory(string StreamTitle, bool isAfterFirstUpdate, bool vocal)
 		{
 			var currentTitleLC = StreamTitle.ToLower();
 
@@ -160,17 +160,17 @@ namespace SuiBot_Core.Components
 					{
 						if (currentTitleLC.Contains(category.Name.ToLower()))
 						{
-							if (PreferedCategory != category.Name || vocal)
+							if (PreferredCategory != category.Name || vocal)
 							{
-								PreferedCategory = category.Name;
+								PreferredCategory = category.Name;
 								LastUpdateSuccessful = true;
 								if (vocal || isAfterFirstUpdate)
-									channelInstance.SendChatMessage($"Set leaderboards category to: \"{PreferedCategory}\" based on stream title");
+									channelInstance.SendChatMessage($"Set leaderboards category to: \"{PreferredCategory}\" based on stream title");
 							}
 							return;
 						}
 					}
-					PreferedCategory = "";
+					PreferredCategory = "";
 					LastUpdateSuccessful = true;
 					if (vocal || isAfterFirstUpdate)
 						channelInstance.SendChatMessage("Haven't found the category in stream title.");
@@ -198,7 +198,7 @@ namespace SuiBot_Core.Components
 				{
 					channelInstance.ConfigInstance.LeaderboardsUsername = msg;
 					channelInstance.ConfigInstance.Save();
-					channelInstance.SendChatMessageResponse(lastMessage, "Set Speedrun username to: " + Speedrunusername);
+					channelInstance.SendChatMessageResponse(lastMessage, "Set Speedrun username to: " + SpeedrunUsername);
 				}
 				else
 				{
@@ -595,7 +595,7 @@ namespace SuiBot_Core.Components
 						if (srLevel == null)
 							return "No level was found";
 
-						var pbs = srSearch.Users.GetPersonalBests(Speedrunusername, gameId: srGame.ID);
+						var pbs = srSearch.Users.GetPersonalBests(SpeedrunUsername, gameId: srGame.ID);
 
 						var levelPBs = pbs.Where(x => x.LevelID == srLevel.ID);
 						if (levelPBs.Count() > 0)
@@ -632,7 +632,7 @@ namespace SuiBot_Core.Components
 						if (srCategory == null)
 							return "No category was found";
 
-						var pbs = srSearch.Users.GetPersonalBests(Speedrunusername, gameId: srGame.ID);
+						var pbs = srSearch.Users.GetPersonalBests(SpeedrunUsername, gameId: srGame.ID);
 
 						if (pbs.Count > 0)
 						{
@@ -722,8 +722,8 @@ namespace SuiBot_Core.Components
 
 			if (category == "" && isCurrent)
 			{
-				if (PreferedCategory != "")
-					category = PreferedCategory;
+				if (PreferredCategory != "")
+					category = PreferredCategory;
 				if (CategoryOverride != "")
 					category = CategoryOverride;
 			}

@@ -79,8 +79,8 @@ namespace SuiBot_Core
 
 			if (ConfigInstance.LeaderboardsAutodetectCategory && StreamStatus.IsOnline)
 			{
-/*				if (StreamStatus.HasGameChanged() || !Leaderboards.LastUpdateSuccessful || vocal)
-					Leaderboards.SetPreferedCategory(StreamInformation.StreamTitle, SuiBotInstance.IsAfterFirstStatusUpdate, vocal);*/
+				if (StreamStatus.GameChangedSinceLastTime || !Leaderboards.LastUpdateSuccessful || vocal)
+					Leaderboards.SetPreferredCategory(StreamStatus.title, SuiBotInstance.IsAfterFirstStatusUpdate, vocal);
 			}
 
 
