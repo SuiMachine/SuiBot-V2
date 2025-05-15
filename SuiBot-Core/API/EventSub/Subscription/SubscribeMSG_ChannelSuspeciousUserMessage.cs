@@ -9,9 +9,9 @@
 
 		public SubscribeMSG_ChannelSuspiciousUserMessage() { }
 
-		public SubscribeMSG_ChannelSuspiciousUserMessage(ulong channelId, ulong user, string sessionID)
+		public SubscribeMSG_ChannelSuspiciousUserMessage(ulong channelId, ulong moderatorId, string sessionID)
 		{
-			condition = ES_Subscribe_Condition.CreateBroadcasterAndUserOnly(channelId, user);
+			condition = ES_Subscribe_Condition.CreateBroadcasterAndModerator(channelId, moderatorId);
 			transport = new ES_Subscribe_Transport_Websocket(sessionID);
 		}
 	}

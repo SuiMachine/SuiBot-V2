@@ -11,7 +11,7 @@
 
 		public SubscribeMSG_ReadChannelMessage(ulong channelId, ulong user,  string sessionID)
 		{
-			condition = ES_Subscribe_Condition.CreateBroadcasterAndUserOnly(channelId, user);
+			condition = ES_Subscribe_Condition.CreateBroadcasterAndUser(channelId, user);
 			transport = new ES_Subscribe_Transport_Websocket(sessionID);
 		}
 	}

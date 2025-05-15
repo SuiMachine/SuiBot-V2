@@ -9,9 +9,9 @@
 
 		public SubscribeMSG_ChannelAdBreakBegin() { }
 
-		public SubscribeMSG_ChannelAdBreakBegin(ulong channelId, string sessionID)
+		public SubscribeMSG_ChannelAdBreakBegin(ulong channelId, ulong botid, string sessionID)
 		{
-			condition = ES_Subscribe_Condition.CreateBroadcasterOnly(channelId);
+			condition = ES_Subscribe_Condition.CreateBroadcasterAndModerator(channelId, botid);
 			transport = new ES_Subscribe_Transport_Websocket(sessionID);
 		}
 	}

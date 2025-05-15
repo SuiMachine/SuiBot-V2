@@ -159,13 +159,15 @@ namespace SuiBot_Core
 
 				foreach (var channel in channelsToSubScribeAdditionalInformationTo)
 				{
-					if (!await HelixAPI.SubscribeToOnlineStatus(channel.condition.broadcaster_user_id, TwitchSocket.SessionID))
-						continue;
-					if (!await HelixAPI.SubscribeToOfflineStatus(channel.condition.broadcaster_user_id, TwitchSocket.SessionID))
-						continue;
-					if (!await HelixAPI.SubscribeToChannelAdBreak(channel.condition.broadcaster_user_id, TwitchSocket.SessionID))
-						continue;
-
+					var onLineSub = await HelixAPI.SubscribeToOnlineStatus(channel.condition.broadcaster_user_id, TwitchSocket.SessionID);
+					await Task.Delay(2000);
+					var offlineSub = await HelixAPI.SubscribeToOfflineStatus(channel.condition.broadcaster_user_id, TwitchSocket.SessionID);
+					await Task.Delay(2000);
+					/*					if (!await HelixAPI.SubscribeToChannelAdBreak(channel.condition.broadcaster_user_id, TwitchSocket.SessionID))
+											continue;*/
+					var automodHold = await HelixAPI.SubscribeToAutoModHold(channel.condition.broadcaster_user_id, TwitchSocket.SessionID);
+					await Task.Delay(2000);
+					var susMessage = await HelixAPI.SubscribeToChannelSuspiciousUserMessage(channel.condition.broadcaster_user_id, TwitchSocket.SessionID);
 					await Task.Delay(2000);
 				}
 			});

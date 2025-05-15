@@ -11,7 +11,7 @@
 
 		public SubscribeMSG_StreamOnline(ulong channelId, string sessionID)
 		{
-			condition = ES_Subscribe_Condition.CreateBroadcasterOnly(channelId);
+			condition = ES_Subscribe_Condition.CreateBroadcaster(channelId);
 			transport = new ES_Subscribe_Transport_Websocket(sessionID);
 		}
 	}

@@ -316,9 +316,60 @@ namespace SuiBot_Core.API
 			return false;
 		}
 
+		internal async Task<bool> SubscribeToAutoModHold(ulong channelID, string sessionID)
+		{
+			var request = new SubscribeMSG_AutomodMessageHold(channelID, BotUserId, sessionID);
+			var serialize = JsonConvert.SerializeObject(request, Formatting.Indented, new JsonSerializerSettings()
+			{
+				NullValueHandling = NullValueHandling.Ignore
+			});
+
+			var result = await HttpWebRequestHandlers.PostAsync(BASE_URI, "eventsub/subscriptions", "", serialize, BuildDefaultHeaders());
+			if (result != null)
+			{
+				Response_SubscribeTo deserialize = JsonConvert.DeserializeObject<Response_SubscribeTo>(result);
+				if (deserialize != null)
+				{
+					deserialize.PerformCostCheck();
+					var channel = deserialize.data.FirstOrDefault(x => x.condition.broadcaster_user_id == channelID);
+					return channel != null;
+				}
+				else
+					return false;
+			}
+
+			return false;
+		}
+
+		internal async Task<bool> SubscribeToChannelSuspiciousUserMessage(ulong channelID, string sessionID)
+		{
+			var request = new SubscribeMSG_ChannelSuspiciousUserMessage(channelID, BotUserId, sessionID);
+			var serialize = JsonConvert.SerializeObject(request, Formatting.Indented, new JsonSerializerSettings()
+			{
+				NullValueHandling = NullValueHandling.Ignore
+			});
+
+			var result = await HttpWebRequestHandlers.PostAsync(BASE_URI, "eventsub/subscriptions", "", serialize, BuildDefaultHeaders());
+			if (result != null)
+			{
+				Response_SubscribeTo deserialize = JsonConvert.DeserializeObject<Response_SubscribeTo>(result);
+				if (deserialize != null)
+				{
+					deserialize.PerformCostCheck();
+					var channel = deserialize.data.FirstOrDefault(x => x.condition.broadcaster_user_id == channelID);
+					return channel != null;
+				}
+				else
+					return false;
+			}
+
+			return false;
+		}
+
 		internal async Task<bool> SubscribeToChannelAdBreak(ulong channelID, string sessionID)
 		{
-			var request = new SubscribeMSG_ChannelAdBreakBegin(channelID, sessionID);
+			//Idk... why this breaks with 403
+			var request = new SubscribeMSG_ChannelAdBreakBegin(channelID, BotUserId, sessionID);
 			var serialize = JsonConvert.SerializeObject(request, Formatting.Indented, new JsonSerializerSettings()
 			{
 				NullValueHandling = NullValueHandling.Ignore
