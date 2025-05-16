@@ -21,14 +21,14 @@ namespace SuiBot_Core
 		public string BotName => SuiBotInstance.BotName;
 		SuiBot SuiBotInstance { get; set; }
 		#region Components
-		Components.Quotes QuotesInstance { get; set; }
-		Components.IntervalMessages IntervalMessagesInstance { get; set; }
-		Components.ChatFiltering ChatFiltering { get; set; }
-		Components.Leaderboards Leaderboards { get; set; }
-		Components.CustomCvars Cvars { get; set; }
-		Components.GenericUtil GenericUtil { get; set; }
-		Components.PCGW PCGW { get; set; }
-		Components.Timezones Timezones { get; set; }
+		internal Components.Quotes QuotesInstance { get; set; }
+		internal Components.IntervalMessages IntervalMessagesInstance { get; set; }
+		internal Components.ChatFiltering ChatFiltering { get; set; }
+		internal Components.Leaderboards Leaderboards { get; set; }
+		internal Components.CustomCvars Cvars { get; set; }
+		internal Components.GenericUtil GenericUtil { get; set; }
+		internal Components.PCGW PCGW { get; set; }
+		internal Components.Timezones Timezones { get; set; }
 
 		#region Other
 		internal Components.Other._MemeComponents MemeComponents { get; set; }
@@ -341,7 +341,7 @@ namespace SuiBot_Core
 			if (message.UserRole <= Role.VIP)
 				return false;
 			else
-				return ChatFiltering.FilterOutMessages(message);
+				return ChatFiltering.FilterOutMessages(message, false);
 		}
 
 		internal bool IsSuperMod(string username)

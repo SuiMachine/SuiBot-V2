@@ -12,8 +12,8 @@ using static SuiBot_Core.API.EventSub.ES_ChatMessage;
 namespace SuiBot_Core.Storage
 {
 	/*
-     * Comparing to first iteration one of the fundemental changes planned from get-go was offloading the login information
-     * to a seperate config file and using more of a "high" level syntax. Thus serialized XML was chosen in place of custom
+     * Comparing to first iteration one of the fundamental changes planned from get-go was offloading the login information
+     * to a separate config file and using more of a "high" level syntax. Thus serialized XML was chosen in place of custom
      * and quite frankly pointless syntax.
     */
 

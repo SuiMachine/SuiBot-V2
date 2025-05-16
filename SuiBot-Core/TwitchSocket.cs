@@ -3,7 +3,9 @@ using Newtonsoft.Json.Linq;
 using SuiBot_Core.API.EventSub;
 using SuiBot_Core.Storage;
 using System;
+using System.CodeDom;
 using System.Diagnostics;
+using System.IO;
 using System.Threading.Tasks;
 using WebSocketSharp;
 
@@ -36,7 +38,6 @@ namespace SuiBot_Core
 		public Action OnConnected;
 		public Action OnDisconnected;
 		public Action<ES_ChatMessage> OnChatMessage;
-
 
 		private void CreateSessionAndSocket()
 		{
@@ -114,6 +115,8 @@ namespace SuiBot_Core
 				case EventSub_MessageType.notification:
 					ProcessNotification(message);
 					break;
+				case EventSub_MessageType.session_reconnect:
+					break;
 				default:
 					Debug.WriteLine($"Unhandled message: {message}");
 					break;
@@ -128,13 +131,25 @@ namespace SuiBot_Core
 					return;
 				case "channel.chat.message":
 					ProcessChatMessage(message.payload);
-					break;
+					return;
 				case "channel.channel_points_custom_reward_redemption.add":
 					ProcessChannelRedeem(message.payload);
-					break;
+					return;
+				case "stream.online":
+					ProcessStreamOnline(message.payload);
+					return;
+				case "stream.offline":
+					ProcessStreamOffline(message.payload);
+					return;
+				case "automod.message.hold":
+					ProcessAutomodMessageHold(message.payload);
+					return;
+				case "channel.suspicious_user.message":
+					ProcessSuspiciousUserMessage(message.payload);
+					return;
 				default:
 					Console.WriteLine($"Unhandled message type: {message.metadata.subscription_type}");
-					break;
+					return;
 			}
 		}
 
@@ -161,6 +176,77 @@ namespace SuiBot_Core
 
 			//Debug.WriteLine($"Received payload with text: {obj.user_input}");
 			//OnChannelPointsRedeem?.Invoke(passedData);
+		}
+
+		private void ProcessStreamOnline(JToken payload)
+		{
+			var eventText = payload["event"];
+			if (eventText == null)
+				return;
+
+			var dbgTxt = payload.ToString();
+			var msg = eventText.ToObject<ES_StreamOnline>();
+			if (msg == null)
+				return;
+
+			if (!BotInstance.ChannelInstances.TryGetValue(msg.broadcaster_user_login, out var channelInstance))
+				return;
+
+		}
+
+		private void ProcessStreamOffline(JToken payload)
+		{
+			var eventText = payload["event"];
+			if (eventText == null)
+				return;
+
+			var dbgTxt = payload.ToString();
+			var msg = eventText.ToObject<ES_StreamOffline>();
+			if (msg == null)
+				return;
+
+			if (!BotInstance.ChannelInstances.TryGetValue(msg.broadcaster_user_login, out var channelInstance))
+				return;
+		}
+
+		private void ProcessAutomodMessageHold(JToken payload)
+		{
+			var eventText = payload["event"];
+			if (eventText == null)
+				return;
+
+			var dbgTxt = payload.ToString();
+			var msg = eventText.ToObject<ES_AutomodMessageHold>();
+			if (msg == null)
+				return;
+		}
+
+		private void ProcessSuspiciousUserMessage(JToken payload)
+		{
+			var eventText = payload["event"];
+			if (eventText == null)
+				return;
+
+			var dbgTxt = payload.ToString();
+			var msg = eventText.ToObject<ES_Suspicious_UserMessage>();
+			if (msg == null)
+				return;
+
+			if (!BotInstance.ActiveChannels.TryGetValue(msg.broadcaster_user_login, out SuiBot_ChannelInstance channel))
+				return;
+
+			if (channel.ConfigInstance.FilteringEnabled)
+			{
+				var asMessage = msg.ConvertToChatMessage();
+
+				if (channel.ChatFiltering.FilterOutMessages(asMessage, true))
+				{
+					channel.UserBan(asMessage);
+					channel.SendChatMessage("Bam! Banned suspicious chatter!");
+				}
+
+				//TODO: implement checking against AI?
+			}
 		}
 
 		private void ProcessWelcome(JToken payload)

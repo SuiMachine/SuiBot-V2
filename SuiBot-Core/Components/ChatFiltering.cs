@@ -585,17 +585,19 @@ namespace SuiBot_Core.Components
 		/// </summary>
 		/// <param name="lastMassage">Message to iterate through</param>
 		/// <returns>Boolean value indicating whatever an action needed to be taken or not.</returns>
-		public bool FilterOutMessages(ES_ChatMessage lastMassage)
+		public bool FilterOutMessages(ES_ChatMessage lastMassage, bool isHeldForModeration)
 		{
 			if (ChannelInstance.ConfigInstance.FilterLinks && !UserDB.CanPostLinks(lastMassage.chatter_user_login))
 			{
 				if (ContainsLink(lastMassage))
 				{
-					ChannelInstance.RemoveUserMessage(lastMassage);
-
 					UserDB.ResetCounter(lastMassage.chatter_user_login);
-/*					if (!lastMassage.IsFirstMessage)
-						ChannelInstance.SendChatMessageResponse(lastMassage, string.Format("Please make sure you have more than 3 messages in the chat before posting a link."));*/
+					if (!isHeldForModeration)
+					{
+						ChannelInstance.RemoveUserMessage(lastMassage);
+						ChannelInstance.SendChatMessageResponse(lastMassage, "Please make sure you have more than 3 messages in the chat before posting a link.");
+					}
+
 					return true;
 				}
 			}
@@ -607,7 +609,8 @@ namespace SuiBot_Core.Components
 				{
 					if (filter.CompiledSyntax.IsMatch(lastMassage.message.text))
 					{
-						ChannelInstance.RemoveUserMessage(lastMassage);
+						if (!isHeldForModeration)
+							ChannelInstance.RemoveUserMessage(lastMassage);
 						ChannelInstance.SendChatMessageResponse(lastMassage, $"Removed message: {filter.Response} (filterID: {id})");
 						return true;
 					}

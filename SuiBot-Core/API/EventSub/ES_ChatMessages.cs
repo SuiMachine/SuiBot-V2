@@ -29,16 +29,16 @@ namespace SuiBot_Core.API.EventSub
 			{
 				public string type;
 				public string text;
-				public API_ChatMessage_Fragment_Emote emote;
+				public ChatMessage_Fragment_Emote emote;
 				public Mention mention;
 			}
 
-			[DebuggerDisplay(nameof(ES_ChatMessage) + "." + nameof(API_ChatMessage_Fragment_Emote) + " {id}")]
-			public class API_ChatMessage_Fragment_Emote
+			[DebuggerDisplay(nameof(ES_ChatMessage) + "." + nameof(ChatMessage_Fragment_Emote) + " {id}")]
+			public class ChatMessage_Fragment_Emote
 			{
 				public string id;
 				public long emote_set_id;
-				public long owner_id;
+				public string owner_id;
 			}
 
 			[DebuggerDisplay(nameof(ES_ChatMessage) + "." + nameof(Mention) + " {user_login}")]

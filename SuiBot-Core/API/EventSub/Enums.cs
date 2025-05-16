@@ -17,7 +17,8 @@
 		invalid,
 		session_welcome,
 		session_keepalive,
-		notification
+		notification,
+		session_reconnect
 	}
 
 	public enum EventSub_ChannelPoint_RedeemStatus
