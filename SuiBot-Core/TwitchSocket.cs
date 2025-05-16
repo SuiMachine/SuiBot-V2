@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SuiBot_Core.API.EventSub;
+using SuiBot_Core.Components;
 using SuiBot_Core.Storage;
 using System;
 using System.CodeDom;
@@ -35,16 +36,16 @@ namespace SuiBot_Core
 		public WebSocket Socket { get; private set; }
 
 		private System.Timers.Timer KeepAliveCheck;
-		public Action OnConnected;
-		public Action OnDisconnected;
-		public Action<ES_ChatMessage> OnChatMessage;
 
 		private void CreateSessionAndSocket()
 		{
+			BotInstance?.TwitchSocket_Disconnected();
+			m_Connected = false;
 			m_Connecting = true;
 
 			Socket = new WebSocket(WEBSOCKET_URI);
 			Socket.SslConfiguration.EnabledSslProtocols = System.Security.Authentication.SslProtocols.Tls12;
+
 			Socket.OnMessage += Socket_OnMessage;
 			Socket.OnOpen += Socket_OnOpen;
 			Socket.OnClose += Socket_OnClose;
@@ -55,6 +56,7 @@ namespace SuiBot_Core
 		private void Socket_OnOpen(object sender, EventArgs e)
 		{
 			m_Connected = true;
+			m_Connecting = false;
 			Debug.WriteLine("Opened Twitch socket");
 			KeepAliveCheck = new System.Timers.Timer(30 * 1000);
 			KeepAliveCheck.Elapsed += KeepAliveCheck_Elapsed;
@@ -75,7 +77,6 @@ namespace SuiBot_Core
 			EventSubClose_Code closeType = (EventSubClose_Code)e.Code;
 			m_Connected = false;
 			KeepAliveCheck?.Stop();
-			OnDisconnected?.Invoke();
 			Socket.OnMessage -= Socket_OnMessage;
 			Socket.OnOpen -= Socket_OnOpen;
 			Socket.OnClose -= Socket_OnClose;
@@ -163,8 +164,7 @@ namespace SuiBot_Core
 			if (!BotInstance.ChannelInstances.TryGetValue(msg.broadcaster_user_login, out SuiBot_ChannelInstance instance))
 				instance = null; //Not needed, but makes VS shutup
 			msg.SetupRole(instance);
-
-			OnChatMessage?.Invoke(msg);
+			BotInstance.TwitchSocket_ChatMessage(msg);
 		}
 
 		private void ProcessChannelRedeem(JToken payload)
@@ -200,13 +200,25 @@ namespace SuiBot_Core
 			if (eventText == null)
 				return;
 
-			var dbgTxt = payload.ToString();
+			//var dbgTxt = payload.ToString();
 			var msg = eventText.ToObject<ES_StreamOffline>();
 			if (msg == null)
 				return;
 
 			if (!BotInstance.ChannelInstances.TryGetValue(msg.broadcaster_user_login, out var channelInstance))
 				return;
+
+			channelInstance.StreamStatus = new API.Helix.Responses.Response_StreamStatus()
+			{
+				IsOnline = false,
+				GameChangedSinceLastTime = true
+			};
+
+			if (channelInstance.ConfigInstance.LeaderboardsEnabled)
+			{
+				if (!channelInstance.Leaderboards.GameOverride)
+					channelInstance.Leaderboards.CurrentGame = channelInstance.StreamStatus.game_name;
+			}
 		}
 
 		private void ProcessAutomodMessageHold(JToken payload)
@@ -254,26 +266,7 @@ namespace SuiBot_Core
 			var content = payload["session"].ToObject<ES_SessionMessage>();
 			SessionID = content.id;
 			AutoReconnect = true;
-			OnConnected?.Invoke();
-
-			/*			if (!Connected)
-						{
-							//Do reconnect
-							if (AutoReconnect && !m_Connecting)
-							{
-								Task.Factory.StartNew(async () =>
-								{
-									await CreateSessionAndSocket();
-								});
-							}
-							return;
-						}
-
-						//THIS IS NOT SAFE!
-						Task.Factory.StartNew(async () =>
-						{
-							await MainForm.Instance.TwitchBot.Irc.KrakenConnection.EventSub_SubscribeToChannelPoints(MainForm.Instance.TwitchBot.Irc.KrakenConnection.BroadcasterID, SessionID);
-						});*/
+			BotInstance?.TwitchSocket_Connected();
 		}
 
 		internal void Close()

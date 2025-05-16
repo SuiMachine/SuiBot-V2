@@ -126,9 +126,6 @@ namespace SuiBot_Core
 			}
 
 			TwitchSocket = new TwitchSocket(this);
-			TwitchSocket.OnConnected += TwitchSocket_Connected;
-			TwitchSocket.OnChatMessage += TwitchSocket_ChatMessage;
-			TwitchSocket.OnDisconnected += TwitchSocket_Disconnected;
 
 			IntervalTimer.Elapsed += IntervalTimer_Elapsed;
 			StatusUpdateTimer.Elapsed += StatusUpdateTimer_Elapsed;
@@ -136,7 +133,7 @@ namespace SuiBot_Core
 			ShouldRun = true;
 		}
 
-		private void TwitchSocket_Connected()
+		internal void TwitchSocket_Connected()
 		{
 			ErrorLogging.WriteLine("Connected!");
 
@@ -176,18 +173,18 @@ namespace SuiBot_Core
 			StatusUpdateTimer.Start();
 		}
 
-		private void TwitchSocket_Disconnected()
+		internal void TwitchSocket_Disconnected()
 		{
-			ActiveChannels.Clear();
 			IntervalTimer.Stop();
 			StatusUpdateTimer.Stop();
 
 			var channels = ActiveChannels.Keys.ToList();
 			foreach (var channel in channels)
 				StopReadingChannel(channel);
+			ActiveChannels.Clear();
 		}
 
-		private void TwitchSocket_ChatMessage(ES_ChatMessage newMessage)
+		internal void TwitchSocket_ChatMessage(ES_ChatMessage newMessage)
 		{
 			if (ActiveChannels.TryGetValue(newMessage.broadcaster_user_login, out var channelToProcess))
 			{
