@@ -1,12 +1,9 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SuiBot_Core.API.EventSub;
-using SuiBot_Core.Components;
 using SuiBot_Core.Storage;
 using System;
-using System.CodeDom;
 using System.Diagnostics;
-using System.IO;
 using System.Threading.Tasks;
 using WebSocketSharp;
 
@@ -31,6 +28,7 @@ namespace SuiBot_Core
 
 		public string SessionID { get; private set; }
 		public bool Connected => m_Connected;
+		public bool Connecting => m_Connecting;
 		public volatile bool AutoReconnect;
 		public DateTime LastMessageAt { get; private set; }
 		public WebSocket Socket { get; private set; }
