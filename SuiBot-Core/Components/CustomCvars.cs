@@ -1,7 +1,6 @@
 ﻿using SuiBot_Core.API.EventSub;
 using SuiBot_Core.Extensions.SuiStringExtension;
 using System;
-using System.Linq;
 using static SuiBot_Core.API.EventSub.ES_ChatMessage;
 
 namespace SuiBot_Core.Components

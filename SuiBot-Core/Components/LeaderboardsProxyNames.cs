@@ -6,13 +6,10 @@ namespace SuiBot_Core.Components
 	[Serializable]
 	public struct ProxyNameInFile
 	{
-		//Stupid Visual Studio....
-#pragma warning disable CS0649
 		[XmlAttribute] public string Game; //Game on Twitch
 		[XmlAttribute] public string ProxyName; //Game on Speedrun.com
 		[XmlAttribute] public string Category;
 		//[XmlAttribute] public string Subcategory;
-#pragma warning restore CS0649
 	}
 
 	[Serializable]

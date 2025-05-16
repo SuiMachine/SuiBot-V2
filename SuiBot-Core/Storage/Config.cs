@@ -23,14 +23,10 @@ namespace SuiBot_Core.Storage
 	[Serializable]
 	public class ConnectionConfig
 	{
-		[XmlElement]
-		public string Server { get; set; }
-		[XmlElement]
-		public int Port { get; set; }
-		[XmlElement]
-		public string Username { get; set; }
-		[XmlElement]
-		public string Password { get; set; }
+		[XmlElement] public string Server { get; set; }
+		[XmlElement] public int Port { get; set; }
+		[XmlElement] public string Username { get; set; }
+		[XmlElement] public string Password { get; set; }
 
 		public ConnectionConfig()
 		{
@@ -127,11 +123,6 @@ namespace SuiBot_Core.Storage
 		public void Save() => XML_Utils.Save("Bot/Config.xml", this);
 	}
 
-	/*
-     * Another drastic change compared to original SuiBot was standardizing names of modules and properties. In case of Channel Config, schema is:
-     * ModuleEnabled, where Module is a name of module, thus for Quotes to be enabled we have QuotesEnabled. With both Words sarting with uppercase.
-     * If the property is different like Amount of coins, it always follows same schema - CoinsAmount.
-     */
 	/// <summary>
 	/// Config struct for channel specific settings (generally which functions are enabled)
 	/// </summary>

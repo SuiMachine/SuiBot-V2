@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace SuiBot_Core.API.Helix.Request
+﻿namespace SuiBot_Core.API.Helix.Request
 {
 	public class Request_SendChatMessage
 	{

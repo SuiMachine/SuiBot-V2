@@ -1,5 +1,4 @@
-﻿using SuiBot_Core.API;
-using SuiBot_Core.API.EventSub;
+﻿using SuiBot_Core.API.EventSub;
 using System;
 using static SuiBot_Core.API.EventSub.ES_ChatMessage;
 

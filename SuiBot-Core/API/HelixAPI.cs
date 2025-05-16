@@ -9,7 +9,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Web.UI.WebControls;
 using static SuiBot_Core.API.EventSub.Subscription.Responses.Response_SubscribeTo;
 
 namespace SuiBot_Core.API

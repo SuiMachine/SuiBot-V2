@@ -87,7 +87,7 @@ namespace SuiBot_Core.Components
 			}
 			catch (Exception e)
 			{
-				ErrorLogging.WriteLine("Error checking Proxyname XML on Github " + e.Message);
+				ErrorLogging.WriteLine($"Error checking Proxyname XML on Github {e.Message}");
 			}
 		}
 

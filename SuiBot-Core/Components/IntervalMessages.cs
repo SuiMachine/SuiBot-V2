@@ -133,7 +133,7 @@ namespace SuiBot_Core.Components
 		/// </summary>
 		internal void DoTickWork()
 		{
-			lock(IntervalMessagesStorage.Messages)
+			lock (IntervalMessagesStorage.Messages)
 			{
 				foreach (var message in IntervalMessagesStorage.Messages)
 				{
