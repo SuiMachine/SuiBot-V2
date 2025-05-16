@@ -149,7 +149,9 @@ namespace SuiBot_Core
 		public void UserShoutout(ES_ChatMessage lastMessage, string username) => SuiBotInstance.HelixAPI.RequestShoutout(lastMessage, username);
 		public void RemoveUserMessage(ES_ChatMessage lastMassage) => SuiBotInstance.HelixAPI.RequestRemoveMessage(lastMassage);
 		public void UserTimeout(ES_ChatMessage lastMassage, uint length, string reason = null) => SuiBotInstance.HelixAPI.RequestTimeout(lastMassage, length, reason);
+		public void UserTimeout(ES_ChatMessage lastMassage, TimeSpan length, string reason = null) => SuiBotInstance.HelixAPI.RequestTimeout(lastMassage, length, reason);
 		public void UserBan(ES_ChatMessage lastMassage, string reason = null) => SuiBotInstance.HelixAPI.RequestBan(lastMassage, reason);
+		public void UserBan(ulong user_id, string reason = null) => SuiBotInstance.HelixAPI.RequestBan(user_id, reason);
 
 		internal void DoWork(ES_ChatMessage messageToProcess)
 		{

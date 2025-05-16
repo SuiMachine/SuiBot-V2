@@ -134,6 +134,7 @@
     <Compile Include="API\EventSub\Subscription\SubscribeMSG_StreamOffline.cs" />
     <Compile Include="API\EventSub\Subscription\SubscribeMSG_StreamOnline.cs" />
     <Compile Include="API\EventSub\Subscription\SubscriptionMessage.cs" />
+    <Compile Include="API\Helix\Request\Request_Ban.cs" />
     <Compile Include="API\Helix\Request\Request_SendMessage.cs" />
     <Compile Include="API\Helix\Responses\Response_StreamStatus.cs" />
     <Compile Include="API\Helix\Responses\Response_ValidateToken.cs" />

@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web.UI.WebControls;
 using static SuiBot_Core.API.EventSub.Subscription.Responses.Response_SubscribeTo;
 
 namespace SuiBot_Core.API
@@ -109,7 +110,7 @@ namespace SuiBot_Core.API
 			{
 				try
 				{
-					_ = HttpWebRequestHandlers.PerformDelete(new Uri($"https://api.twitch.tv/helix/moderation/chat?broadcaster_id={messageID.broadcaster_user_id}&moderator_id={BotUserId}&message_id={messageID}"), BuildDefaultHeaders(), out string _);
+					_ = await HttpWebRequestHandlers.PerformDeleteAsync(BASE_URI, "moderation/chat", $"?broadcaster_id={messageID.broadcaster_user_id}&moderator_id={BotUserId}&message_id={messageID}", BuildDefaultHeaders());
 				}
 				catch (Exception e)
 				{
@@ -118,82 +119,60 @@ namespace SuiBot_Core.API
 			});
 		}
 
+		public void RequestTimeout(ES_ChatMessage message, TimeSpan length, string reason)
+		{
+			Task.Run(async () =>
+			{
+				var serialize = JsonConvert.SerializeObject(Request_Ban.CreateTimeout(message.chatter_user_id, length, reason), Formatting.Indented, new JsonSerializerSettings()
+				{
+					NullValueHandling = NullValueHandling.Ignore
+				});
+
+				var result = await HttpWebRequestHandlers.PerformPostAsync(BASE_URI, "moderation/bans", "", BuildDefaultHeaders(), serialize);
+
+			});
+		}
+
 		public void RequestTimeout(ES_ChatMessage message, uint length, string reason)
 		{
 			Task.Run(async () =>
 			{
+				var serialize = JsonConvert.SerializeObject(Request_Ban.CreateTimeout(message.chatter_user_id, (int)length, reason), Formatting.Indented, new JsonSerializerSettings()
+				{
+					NullValueHandling = NullValueHandling.Ignore
+				});
 
+				var result = await HttpWebRequestHandlers.PerformPostAsync(BASE_URI, "moderation/bans", "", BuildDefaultHeaders(), serialize);
 
 			});
+		}
 
-			/*var botId = GetUserId(m_BotName);
-			if (botId == "")
+		public void RequestBan(ulong user_id, string reason)
+		{
+			Task.Run(async () =>
 			{
-				ErrorLogging.WriteLine($"Can't obtain bot user id!");
-				return;
-			}
-
-			var info = channel.StreamInformation;
-			if (string.IsNullOrEmpty(info.ChannelID))
-			{
-				ErrorLogging.WriteLine($"Can't obtain id for channel: {channel}");
-				return;
-			}
-
-			API.Helix.API_Data data = new API.Helix.API_Data()
-			{
-				data = new API.Helix.API_Timeout()
+				var serialize = JsonConvert.SerializeObject(Request_Ban.CreateBan(user_id, reason), Formatting.Indented, new JsonSerializerSettings()
 				{
-					user_id = userId,
-					duration = length == 0 ? 1 : length,
-					reason = string.IsNullOrEmpty(reason) ? null : reason
-				}
-			};
+					NullValueHandling = NullValueHandling.Ignore
+				});
 
-			string dataStr = JsonConvert.SerializeObject(data);
+				var result = await HttpWebRequestHandlers.PerformPostAsync(BASE_URI, "moderation/bans", "", BuildDefaultHeaders(), serialize);
 
-			if (HttpWebRequestHandlers.PerformTwitchPost(new Uri($"https://api.twitch.tv/helix/moderation/bans?broadcaster_id={info.ChannelID}&moderator_id={botId}"), BuildDefaultHeaders(), dataStr, out string _))
-			{
-			}*/
+			});
 		}
 
 		public void RequestBan(ES_ChatMessage message, string reason)
 		{
 			Task.Run(async () =>
 			{
+				var serialize = JsonConvert.SerializeObject(Request_Ban.CreateBan(message.chatter_user_id, reason), Formatting.Indented, new JsonSerializerSettings()
+				{
+					NullValueHandling = NullValueHandling.Ignore
+				});
+
+				var result = await HttpWebRequestHandlers.PerformPostAsync(BASE_URI, "moderation/bans", "", BuildDefaultHeaders(), serialize);
 
 			});
-
-			/*var botId = GetUserId(m_BotName);
-			if (botId == "")
-			{
-				ErrorLogging.WriteLine($"Can't obtain bot user id!");
-				return;
-			}
-
-			var info = channel.StreamInformation;
-			if (string.IsNullOrWhiteSpace(info.ChannelID))
-			{
-				ErrorLogging.WriteLine($"Can't obtain id for channel: {channel}");
-				return;
-			}*/
-
-			/*			API.Helix.API_Data data = new API.Helix.API_Data()
-						{
-							data = new API.Helix.Ban()
-							{
-								user_id = userId,
-								duration = 0,
-								reason = string.IsNullOrEmpty(reason) ? null : reason
-							}
-						};
-
-						string dataStr = JsonConvert.SerializeObject(data);
-
-						if (HttpWebRequestHandlers.PerformTwitchPost(new Uri($"https://api.twitch.tv/helix/moderation/bans?broadcaster_id={channelID}&moderator_id={botId}"), RequestHeaders, dataStr, out string _))
-						{
-
-						}*/
 		}
 
 		private async Task<Response_GetUserInfo> GetUserInfo(string userName)
@@ -396,7 +375,7 @@ namespace SuiBot_Core.API
 		{
 			Task.Run(async () =>
 			{
-				var content = Request_SendMessage.CreateMessage(instance.ChannelID, BotUserId, text);
+				var content = Request_SendChatMessage.CreateMessage(instance.ChannelID, BotUserId, text);
 				var serialize = JsonConvert.SerializeObject(content, Formatting.Indented, new JsonSerializerSettings()
 				{
 					NullValueHandling = NullValueHandling.Ignore
@@ -411,7 +390,7 @@ namespace SuiBot_Core.API
 		{
 			Task.Run(async () =>
 			{
-				var content = Request_SendMessage.CreateResponse(messageToRespondTo.broadcaster_user_id, BotUserId, messageToRespondTo.message_id, message);
+				var content = Request_SendChatMessage.CreateResponse(messageToRespondTo.broadcaster_user_id, BotUserId, messageToRespondTo.message_id, message);
 				var serialize = JsonConvert.SerializeObject(content, Formatting.Indented, new JsonSerializerSettings()
 				{
 					NullValueHandling = NullValueHandling.Ignore

@@ -126,13 +126,15 @@ namespace SuiBot_Core
 			{
 				case null:
 					return;
-				case "channel.channel_points_custom_reward_redemption.add":
-					ProcessChannelRedeem(message.payload);
-					break;
 				case "channel.chat.message":
 					ProcessChatMessage(message.payload);
 					break;
-
+				case "channel.channel_points_custom_reward_redemption.add":
+					ProcessChannelRedeem(message.payload);
+					break;
+				default:
+					Console.WriteLine($"Unhandled message type: {message.metadata.subscription_type}");
+					break;
 			}
 		}
 
