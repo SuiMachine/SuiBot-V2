@@ -140,7 +140,6 @@
     <Compile Include="API\Helix\Responses\Response_ValidateToken.cs" />
     <Compile Include="API\Helix\Responses\UniversalResponse_Transport.cs" />
     <Compile Include="API\Helix\API_Timeout.cs" />
-    <Compile Include="API\API_Util.cs" />
     <Compile Include="API\Helix\Responses\Response_GetUserInfo.cs" />
     <Compile Include="API\EventSub\Subscription\Response\Response_SubscribeTo.cs" />
     <Compile Include="Components\ChatFiltering.cs" />

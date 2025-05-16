@@ -275,5 +275,32 @@ namespace SuiBot_Core
 			if (!IsDisposed)
 				Dispose();
 		}
+
+		public string VerifyAuthy()
+		{
+			HelixAPI = new API.HelixAPI(this, BotConnectionConfig.Password);
+			var validation = HelixAPI.GetValidation();
+			if (validation == null)
+				return "";
+			else
+			{
+				var expiry = TimeSpan.FromSeconds(validation.expires_in);
+
+				if(expiry.Seconds <= 0)
+				{
+					return $"Token validation:\n" +
+						$"User login: {validation.login}\n" +
+						$"User id: {validation.user_id}\n" +
+						$"Token is expired!!!!";
+				}
+				else
+				{
+					return $"Token validation:\n" +
+						$"User login: {validation.login}\n" +
+						$"User id: {validation.user_id}\n" +
+						$"Expires in: {expiry.Days} days {expiry.Hours} hours {expiry.Minutes} minutes {expiry.Seconds} seconds\n";
+				}
+			}
+		}
 	}
 }

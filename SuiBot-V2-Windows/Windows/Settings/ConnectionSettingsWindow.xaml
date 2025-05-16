@@ -5,24 +5,21 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SuiBot_V2_Windows.Windows.Settings"
         mc:Ignorable="d"
-        Title="Connection Settings" Height="177" Width="428.613" ResizeMode="NoResize" Initialized="Window_Initialized">
+        Title="Connection Settings" Height="141" Width="428.613" ResizeMode="NoResize" Initialized="Window_Initialized">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition/>
+            <ColumnDefinition Width="35*"/>
+            <ColumnDefinition Width="108*"/>
         </Grid.ColumnDefinitions>
-        <Label Content="Server:" HorizontalAlignment="Left" Margin="0,1,0,0" VerticalAlignment="Top"/>
-        <TextBox x:Name="TB_ServerAddress" Height="23" Margin="96,4,5,0" TextWrapping="Wrap" Text="{Binding Server, Mode=TwoWay}" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
-        <Label Content="Port:" HorizontalAlignment="Left" Margin="0,32,0,0" VerticalAlignment="Top"/>
-        <TextBox x:Name="TB_ServerAddress_Copy" Height="23" Margin="96,35,5,0" TextWrapping="Wrap" Text="{Binding Port, Mode=TwoWay}" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
-        <Label Content="Bot username:" HorizontalAlignment="Left" Margin="0,60,0,0" VerticalAlignment="Top"/>
-        <TextBox x:Name="TB_BotUsername" Height="23" Margin="96,63,5,0" TextWrapping="Wrap" Text="{Binding Username, Mode=TwoWay}" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
-        <Label Content="Bot password:" HorizontalAlignment="Left" Margin="0,88,0,0" VerticalAlignment="Top"/>
+        <Label Content="Bot username:" HorizontalAlignment="Left" Margin="0,3,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="TB_BotUsername" Height="23" Margin="96,6,5,0" TextWrapping="Wrap" Text="{Binding Username, Mode=TwoWay}" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
+        <Label Content="Bot password:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,31,0,0"/>
         <Button Content="OK" Margin="9,0,0,6" VerticalAlignment="Bottom" Click="OKClicked" HorizontalAlignment="Left" Width="75"/>
-        <Button Content="Cancel" HorizontalAlignment="Left" Margin="89,0,0,6" VerticalAlignment="Bottom" Width="75" Click="CancelClicked"/>
-        <PasswordBox x:Name="PassBox_Password" Margin="96,91,5,0" VerticalAlignment="Top" Height="23"/>
-        <Button Content="Test Connection" HorizontalAlignment="Right" Margin="0,0,5,6" VerticalAlignment="Bottom" Width="105" Click="TestConnectionClicked"/>
-        <Button Content="Obtain Oauth" HorizontalAlignment="Right" Margin="0,0,115,6" VerticalAlignment="Bottom" Width="92" Click="ObtainAuthy"/>
-        <Separator HorizontalAlignment="Left" Height="23" Margin="-5,114,0,0" VerticalAlignment="Top" Width="423" RenderTransformOrigin="0.509,1.487"/>
+        <Button Content="Cancel" HorizontalAlignment="Left" Margin="89,0,0,6" VerticalAlignment="Bottom" Width="75" Click="CancelClicked" Grid.ColumnSpan="2"/>
+        <PasswordBox x:Name="PassBox_Password" Margin="96,33,5,0" VerticalAlignment="Top" Height="23" Grid.ColumnSpan="2"/>
+        <Button Content="Verify oauth" HorizontalAlignment="Right" Margin="0,0,5,6" VerticalAlignment="Bottom" Width="105" Click="TestConnectionClicked" Grid.Column="1"/>
+        <Button Content="Obtain Oauth" HorizontalAlignment="Right" Margin="0,0,115,6" VerticalAlignment="Bottom" Width="92" Click="ObtainAuthy" Grid.Column="1"/>
+        <Separator HorizontalAlignment="Left" Height="23" VerticalAlignment="Top" Width="423" RenderTransformOrigin="0.509,1.487" Margin="3,56,0,0" Grid.ColumnSpan="2"/>
 
     </Grid>
 </Window>

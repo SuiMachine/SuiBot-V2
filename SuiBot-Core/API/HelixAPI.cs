@@ -59,6 +59,15 @@ namespace SuiBot_Core.API
 			return true;
 		}
 
+		public Response_ValidateToken GetValidation()
+		{
+			var res = HttpWebRequestHandlers.GetSync("https://id.twitch.tv/oauth2/", "validate", "", BuildDefaultHeaders());
+			if (string.IsNullOrEmpty(res))
+				return null;
+
+			return JsonConvert.DeserializeObject<Response_ValidateToken>(res);
+		}
+
 		//For testing
 		public HelixAPI(SuiBot bot, string aouth)
 		{

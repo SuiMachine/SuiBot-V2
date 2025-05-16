@@ -40,27 +40,15 @@ namespace SuiBot_V2_Windows.Windows.Settings
 		private void TestConnectionClicked(object sender, RoutedEventArgs e)
 		{
 			this.ConnectionConfig.Password = this.PassBox_Password.Password.Trim();
-			if(MainWindow.Instance.SuiBotInstance != null)
-			{
-			}
 
 			SuiBot_Core.SuiBot sb = SuiBot_Core.SuiBot.GetInstance(this.ConnectionConfig, SuiBot_Core.Storage.CoreConfig.Load());
-
-/*			var result = sb.PerformTest();
-
-			switch (result)
+			var result = sb.VerifyAuthy();
+			if(string.IsNullOrEmpty(result))
+				MessageBox.Show("Failed to verify login!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+			else
 			{
-				case (0):
-					MessageBox.Show("Test performed successfully! You are good to go!", "Success!", MessageBoxButton.OK, MessageBoxImage.Information);
-					break;
-				case (1):
-					MessageBox.Show("Failed to connect to server", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-					break;
-				case (2):
-					MessageBox.Show("Incorrect login information", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-					break;
-			}*/
-
+				MessageBox.Show(result, "Result", MessageBoxButton.OK, MessageBoxImage.Information);
+			}
 		}
 
 		private void ObtainAuthy(object sender, RoutedEventArgs e)

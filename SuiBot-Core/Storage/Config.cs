@@ -23,28 +23,22 @@ namespace SuiBot_Core.Storage
 	[Serializable]
 	public class ConnectionConfig
 	{
-		[XmlElement] public string Server { get; set; }
-		[XmlElement] public int Port { get; set; }
 		[XmlElement] public string Username { get; set; }
 		[XmlElement] public string Password { get; set; }
 
 		public ConnectionConfig()
 		{
-			this.Server = "irc.chat.twitch.tv";
-			this.Port = 6667;
 			this.Username = "";
 			this.Password = "";
 		}
 
-		public ConnectionConfig(string Server, int Port, string Username, string Password)
+		public ConnectionConfig(string Username, string Password)
 		{
-			this.Server = Server;
-			this.Port = Port;
 			this.Username = Username;
 			this.Password = Password;
 		}
 
-		public bool IsValidConfig() => Server != null && Port != 0 && Username != null && Password != null && Username != "" && Password != "";
+		public bool IsValidConfig() => !string.IsNullOrEmpty(Username) && !string.IsNullOrEmpty(Password);
 
 		public static bool ConfigExists()
 		{
@@ -67,10 +61,6 @@ namespace SuiBot_Core.Storage
 		/// </summary>
 		private void FillEmpty()
 		{
-			if (Server == null)
-				this.Server = "irc.twitch.tv";
-			if (Port == 0)
-				Port = 6667;
 			if (Username == null)
 				Username = "";
 			if (Password == null)
