@@ -11,8 +11,8 @@ namespace SuiBot_Core.API.EventSub.Subscription.Responses
 		{
 			public class Condition
 			{
-				public ulong broadcaster_user_id;
-				public ulong user_id;
+				public ulong? broadcaster_user_id;
+				public ulong? user_id;
 			}
 
 			public string id;

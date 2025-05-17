@@ -93,7 +93,6 @@ namespace SuiBot_V2_Windows.Windows
 				SuiBotInstance.OnChannelStatusUpdate += SuiBotInstance_OnChannelStatusUpdate;
 				SuiBotInstance.OnChatMessageReceived += SuiBotInstance_OnChatMessageReceived;
 				SuiBotInstance.OnChatSendMessage += SuiBotInstance_OnChatSendMessage;
-				SuiBotInstance.OnIrcFeedback += SuiBotInstance_OnIrcFeedback;
 				SuiBotInstance.OnModerationActionPerformed += SuiBotInstance_OnModerationActionPerformed;
 				SuiBotInstance.OnShutdown += SuiBotInstance_OnShutdown;
 				IsBotRunning = true;
@@ -138,7 +137,6 @@ namespace SuiBot_V2_Windows.Windows
 			SuiBotInstance.OnChannelStatusUpdate -= SuiBotInstance_OnChannelStatusUpdate;
 			SuiBotInstance.OnChatMessageReceived -= SuiBotInstance_OnChatMessageReceived;
 			SuiBotInstance.OnChatSendMessage -= SuiBotInstance_OnChatSendMessage;
-			SuiBotInstance.OnIrcFeedback -= SuiBotInstance_OnIrcFeedback;
 			SuiBotInstance.OnModerationActionPerformed -= SuiBotInstance_OnModerationActionPerformed;
 			SuiBotInstance.OnShutdown -= SuiBotInstance_OnShutdown;
 			IsBotRunning = false;
@@ -154,18 +152,6 @@ namespace SuiBot_V2_Windows.Windows
 		private void SuiBotInstance_OnModerationActionPerformed(string channel, string user, string response, string duration)
 		{
 			channel = channel.Trim(new char[] { '#' });
-		}
-
-		private void SuiBotInstance_OnIrcFeedback(SuiBot_Core.Events.IrcFeedback feedback, string message)
-		{
-			if (this.Dispatcher.Thread != System.Threading.Thread.CurrentThread)
-			{
-				this.Dispatcher.Invoke(() =>
-				SuiBotInstance_OnIrcFeedback(feedback, message));
-				return;
-			}
-
-			LogRB_AppendLine(feedback.ToString() + " " + message);
 		}
 
 		private void LogRB_AppendLine(string text)

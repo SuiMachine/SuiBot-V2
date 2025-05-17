@@ -416,5 +416,27 @@ namespace SuiBot_Core.API
 
 			});
 		}
+
+		internal async Task<Response_SubscribeTo> GetCurrentSubscriptions()
+		{
+			var result = await HttpWebRequestHandlers.GetAsync(BASE_URI, "eventsub/subscriptions", "", BuildDefaultHeaders());
+			if (result != null)
+			{
+				Response_SubscribeTo deserialize = JsonConvert.DeserializeObject<Response_SubscribeTo>(result);
+				if (deserialize != null)
+				{
+					return deserialize;
+				}
+				else
+					return null;
+			}
+
+			return null;
+		}
+
+		internal async Task CloseSubscription(Subscription_Response_Data subscription)
+		{
+			await HttpWebRequestHandlers.PerformDeleteAsync(BASE_URI, "eventsub/subscriptions", $"?id={subscription.id}", BuildDefaultHeaders());
+		}
 	}
 }

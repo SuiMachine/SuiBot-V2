@@ -2,16 +2,6 @@
 
 namespace SuiBot_Core.Events
 {
-	public enum IrcFeedback
-	{
-		Connecting,
-		Connected,
-		Verified,
-		Disconnected,
-		Error
-	}
-
-	public delegate void OnIrcFeedbackHandler(IrcFeedback feedback, string message);
 	public delegate void OnChannelStatusUpdateHandler(string channel, bool IsOnline, string game);
 	public delegate void OnChannelJoiningHandler(string channel);
 	public delegate void OnChannelLeavingHandler(string channel);

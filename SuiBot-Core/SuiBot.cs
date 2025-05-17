@@ -1,4 +1,5 @@
 ﻿using SuiBot_Core.API.EventSub;
+using SuiBot_Core.API.EventSub.Subscription.Responses;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -57,7 +58,6 @@ namespace SuiBot_Core
 		public bool ShouldRun;
 
 		#region BotEventsDeclraration
-		public event Events.OnIrcFeedbackHandler OnIrcFeedback;
 		public event Events.OnChatMessageReceivedHandler OnChatMessageReceived;
 		public event Events.OnChannelJoiningHandler OnChannelJoining;
 		public event Events.OnChannelLeavingHandler OnChannelLeaving;
@@ -153,17 +153,27 @@ namespace SuiBot_Core
 					await Task.Delay(2000);
 				}
 
+				Response_SubscribeTo currentSubscriptionChecks = await HelixAPI.GetCurrentSubscriptions();
+				foreach (var subscription in currentSubscriptionChecks.data)
+				{
+					if (subscription.status != "enabled" || subscription.transport.session_id != TwitchSocket.SessionID)
+					{
+						await HelixAPI.CloseSubscription(subscription);
+						await Task.Delay(1000);
+					}
+				}
+
 				foreach (var channel in channelsToSubScribeAdditionalInformationTo)
 				{
-					var onLineSub = await HelixAPI.SubscribeToOnlineStatus(channel.condition.broadcaster_user_id, TwitchSocket.SessionID);
+					var onLineSub = await HelixAPI.SubscribeToOnlineStatus(channel.condition.broadcaster_user_id.Value, TwitchSocket.SessionID);
 					await Task.Delay(2000);
-					var offlineSub = await HelixAPI.SubscribeToOfflineStatus(channel.condition.broadcaster_user_id, TwitchSocket.SessionID);
+					var offlineSub = await HelixAPI.SubscribeToOfflineStatus(channel.condition.broadcaster_user_id.Value, TwitchSocket.SessionID);
 					await Task.Delay(2000);
-					/*					if (!await HelixAPI.SubscribeToChannelAdBreak(channel.condition.broadcaster_user_id, TwitchSocket.SessionID))
-											continue;*/
-					var automodHold = await HelixAPI.SubscribeToAutoModHold(channel.condition.broadcaster_user_id, TwitchSocket.SessionID);
+					/*					var adSub = await HelixAPI.SubscribeToChannelAdBreak(channel.condition.broadcaster_user_id, TwitchSocket.SessionID);
+										await Task.Delay(2000);*/
+					var automodHold = await HelixAPI.SubscribeToAutoModHold(channel.condition.broadcaster_user_id.Value, TwitchSocket.SessionID);
 					await Task.Delay(2000);
-					var susMessage = await HelixAPI.SubscribeToChannelSuspiciousUserMessage(channel.condition.broadcaster_user_id, TwitchSocket.SessionID);
+					var susMessage = await HelixAPI.SubscribeToChannelSuspiciousUserMessage(channel.condition.broadcaster_user_id.Value, TwitchSocket.SessionID);
 					await Task.Delay(2000);
 				}
 			});
@@ -221,7 +231,7 @@ namespace SuiBot_Core
 			}
 			else
 			{
-				var channelInstance = new SuiBot_ChannelInstance(channelToJoin, result.condition.broadcaster_user_id, this, Storage.ChannelConfig.Load(channelToJoin));
+				var channelInstance = new SuiBot_ChannelInstance(channelToJoin, result.condition.broadcaster_user_id.Value, this, Storage.ChannelConfig.Load(channelToJoin));
 				ActiveChannels.Add(channelToJoin, channelInstance);
 				ChannelInstances.Add(channelToJoin, channelInstance);
 				this.OnChannelJoining?.Invoke(channelToJoin);
