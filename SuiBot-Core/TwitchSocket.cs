@@ -295,7 +295,7 @@ namespace SuiBot_Core
 				else if (channel.ConfigInstance.FilterUsingAI)
 				{
 					if (channel.GeminiAI.IsConfigured())
-						channel.GeminiAI.PerformAIFiltering(channel, asMessage, asMessage.message.text.StripSingleWord());
+						channel.GeminiAI.PerformAIFiltering(channel, asMessage);
 				}
 			}
 		}

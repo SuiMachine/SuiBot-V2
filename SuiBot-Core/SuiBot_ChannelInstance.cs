@@ -308,7 +308,7 @@ namespace SuiBot_Core
 						if (!GeminiAI.IsConfigured())
 							SendChatMessageResponse(messageToProcess, "AI isn't configured properly");
 						else
-							GeminiAI.PerformAIFiltering(this, messageToProcess, messageLazy);
+							GeminiAI.GetAIResponse(messageToProcess);
 						return;
 					}
 					else

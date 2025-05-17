@@ -313,7 +313,7 @@ namespace SuiBot_Core.Components
 			});
 		}
 
-		internal void PerformAIFiltering(SuiBot_ChannelInstance channelInstance, ES_ChatMessage lastMessage, string strippedMessage)
+		internal void PerformAIFiltering(SuiBot_ChannelInstance channelInstance, ES_ChatMessage lastMessage)
 		{
 			Task.Run(async () =>
 			{
