@@ -21,14 +21,15 @@ namespace SuiBot_Core
 		public string BotName => SuiBotInstance.BotName;
 		private SuiBot SuiBotInstance { get; set; }
 		#region Components
-		internal Components.Quotes QuotesInstance { get; set; }
-		internal Components.IntervalMessages IntervalMessagesInstance { get; set; }
-		internal Components.ChatFiltering ChatFiltering { get; set; }
-		internal Components.Leaderboards Leaderboards { get; set; }
-		internal Components.CustomCvars Cvars { get; set; }
-		internal Components.GenericUtil GenericUtil { get; set; }
-		internal Components.PCGW PCGW { get; set; }
-		internal Components.Timezones Timezones { get; set; }
+		internal Components.Quotes QuotesInstance { get; private set; }
+		internal Components.IntervalMessages IntervalMessagesInstance { get; private set; }
+		internal Components.ChatFiltering ChatFiltering { get; private set; }
+		internal Components.Leaderboards Leaderboards { get; private set; }
+		internal Components.CustomCvars Cvars { get; private set; }
+		internal Components.GenericUtil GenericUtil { get; private set; }
+		internal Components.PCGW PCGW { get; private set; }
+		internal Components.Timezones Timezones { get; private set; }
+		internal Components.GeminiAI GeminiAI { get; private set; }
 
 		#region Other
 		internal Components.Other._MemeComponents MemeComponents { get; set; }
@@ -59,6 +60,7 @@ namespace SuiBot_Core
 			this.PCGW = new Components.PCGW(this);
 			this.GenericUtil = new Components.GenericUtil(this);
 			this.Timezones = new Components.Timezones(this);
+			this.GeminiAI = new Components.GeminiAI(this);
 
 			//Other
 			MemeComponents = new Components.Other._MemeComponents(this, ConfigInstance.MemeComponents);
@@ -292,9 +294,27 @@ namespace SuiBot_Core
 				if (MemeComponents.DoWork(messageToProcess))
 				{
 					SetUserCooldown(messageToProcess, DefaultCooldown);
+					return;
 				}
 			}
 
+			//Ask AI
+			if (ConfigInstance.AskAI)
+			{
+				if (messageLazy.StartsWithLazy(new string[] { "ai", "ask" }))
+				{
+					if (messageToProcess.UserRole <= Role.Mod)
+					{
+						if (!GeminiAI.IsConfigured())
+							SendChatMessageResponse(messageToProcess, "AI isn't configured properly");
+						else
+							GeminiAI.PerformAIFiltering(this, messageToProcess, messageLazy);
+						return;
+					}
+					else
+						return;
+				}
+			}
 
 			//Custom Cvars
 			if (ConfigInstance.CustomCvarsEnabled)

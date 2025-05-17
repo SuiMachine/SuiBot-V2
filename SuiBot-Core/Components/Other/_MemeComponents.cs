@@ -53,18 +53,6 @@ namespace SuiBot_Core.Components.Other
 					memeComponents.Add("hug", new Hug());
 				}
 
-				if (memeConfig.AskAI)
-				{
-					var geminiAI = new GeminiAI();
-					if (geminiAI.IsConfigured(channelInstance))
-					{
-						memeComponents.Add("ai", geminiAI);
-						memeComponents.Add("ask", geminiAI);
-					}
-					else
-						memeConfig.AskAI = false;
-				}
-
 				if (notify)
 					channelInstance.SendChatMessage("Meme components reloaded!");
 			}

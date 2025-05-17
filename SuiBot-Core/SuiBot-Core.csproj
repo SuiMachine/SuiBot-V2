@@ -151,7 +151,7 @@
     <Compile Include="Components\IntervalMessages.cs" />
     <Compile Include="Components\Leaderboards.cs" />
     <Compile Include="Components\LeaderboardsProxyNames.cs" />
-    <Compile Include="Components\Other\GeminiAI.cs" />
+    <Compile Include="Components\GeminiAI.cs" />
     <Compile Include="Components\Other\Gemini\FunctionTypes\FunctionCalls.cs" />
     <Compile Include="Components\Other\Gemini\FunctionTypes\Parameters.cs" />
     <Compile Include="Components\Other\Gemini\GeminiContent.cs" />

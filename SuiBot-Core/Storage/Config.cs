@@ -128,15 +128,12 @@ namespace SuiBot_Core.Storage
 		//Rest of roles we get from Twitch IRC
 		#endregion
 
-		[XmlElement]
-		public bool QuotesEnabled { get; set; }
-		[XmlElement]
-		public bool CustomCvarsEnabled { get; set; }
-		[XmlElement]
-		public MemeConfig MemeComponents { get; set; }
-		[XmlElement]
-		public GenericUtilConfig GenericUtil { get; set; }
-		//bool AskCleverbot { get; set; }
+		[XmlElement] public bool QuotesEnabled { get; set; }
+		[XmlElement] public bool CustomCvarsEnabled { get; set; }
+		[XmlElement] public MemeConfig MemeComponents { get; set; }
+		[XmlElement] public GenericUtilConfig GenericUtil { get; set; }
+		[XmlElement] public bool AskAI { get; set; }
+
 		[XmlElement] public bool FilteringEnabled { get; set; }
 		[XmlElement] public bool FilterLinks { get; set; }
 		[XmlElement] public bool FilterUsingAI { get; set; }
@@ -385,25 +382,16 @@ namespace SuiBot_Core.Storage
 	[Serializable]
 	public class MemeConfig
 	{
-		[XmlElement]
-		public bool ENABLE { get; set; }
-		[XmlElement]
-		public bool AskAI { get; set; }
-		[XmlElement]
-		public bool AskAILurk { get; set; }
-		[XmlElement]
-		public bool RatsBirthday { get; set; }
-		[XmlElement]
-		public bool Lurk { get; set; }
-		[XmlElement]
-		public bool Hug { get; set; }
-
+		[XmlElement] public bool ENABLE { get; set; }
+		[XmlElement] public bool AskAILurk { get; set; }
+		[XmlElement] public bool RatsBirthday { get; set; }
+		[XmlElement] public bool Lurk { get; set; }
+		[XmlElement] public bool Hug { get; set; }
 
 		public MemeConfig()
 		{
 			ENABLE = false;
-			AskAI = false;
-			AskAILurk = true;
+			AskAILurk = false;
 			RatsBirthday = false;
 			Lurk = false;
 			Hug = false;
@@ -413,12 +401,9 @@ namespace SuiBot_Core.Storage
 	[Serializable]
 	public class GenericUtilConfig
 	{
-		[XmlElement]
-		public bool ENABLE { get; set; }
-		[XmlElement]
-		public bool UptimeEnabled { get; set; }
-		[XmlElement]
-		public bool Shoutout { get; set; }
+		[XmlElement] public bool ENABLE { get; set; }
+		[XmlElement] public bool UptimeEnabled { get; set; }
+		[XmlElement] public bool Shoutout { get; set; }
 
 		public GenericUtilConfig()
 		{

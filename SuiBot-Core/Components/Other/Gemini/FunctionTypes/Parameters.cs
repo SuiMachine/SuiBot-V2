@@ -46,13 +46,11 @@ namespace SuiBot_Core.Components.Other.Gemini.FunctionTypes
 	[Serializable]
 	public class TimeOutParameters : GeminiProperty
 	{
-		public Parameter_String username;
 		public Parameter_Number duration_in_seconds;
 		public Parameter_String text_response;
 
 		public TimeOutParameters()
 		{
-			this.username = new Parameter_String();
 			this.duration_in_seconds = new Parameter_Number();
 			this.text_response = new Parameter_String();
 		}
@@ -63,11 +61,11 @@ namespace SuiBot_Core.Components.Other.Gemini.FunctionTypes
 	[Serializable]
 	public class BanParameters : GeminiProperty
 	{
-		public Parameter_String username;
+		public Parameter_String response;
 
 		public BanParameters()
 		{
-			this.username = new Parameter_String();
+			this.response = new Parameter_String();
 		}
 
 		public override List<string> GetRequiredFieldsNames() => new List<string>() { };

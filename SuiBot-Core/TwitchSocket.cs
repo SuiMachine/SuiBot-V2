@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SuiBot_Core.API.EventSub;
+using SuiBot_Core.Extensions.SuiStringExtension;
 using SuiBot_Core.Storage;
 using System;
 using System.Diagnostics;
@@ -226,7 +227,6 @@ namespace SuiBot_Core
 
 			if (!BotInstance.ChannelInstances.TryGetValue(msg.broadcaster_user_login, out var channelInstance))
 				return;
-
 		}
 
 		private void ProcessStreamOffline(JToken payload)
@@ -294,7 +294,8 @@ namespace SuiBot_Core
 				}
 				else if (channel.ConfigInstance.FilterUsingAI)
 				{
-					//TODO: implement checking against AI?
+					if (channel.GeminiAI.IsConfigured())
+						channel.GeminiAI.PerformAIFiltering(channel, asMessage, asMessage.message.text.StripSingleWord());
 				}
 			}
 		}

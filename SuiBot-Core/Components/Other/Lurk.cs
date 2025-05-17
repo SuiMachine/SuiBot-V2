@@ -81,7 +81,7 @@ namespace SuiBot_Core.Components.Other
 				string dropWord = lastMessage.message.text.StripSingleWord();
 				if (channelInstance.ConfigInstance.MemeComponents.AskAILurk && dropWord != "")
 				{
-					var aiComponent = channelInstance.MemeComponents.GetComponentOfType<GeminiAI>();
+					var aiComponent = channelInstance.GeminiAI;
 					if (aiComponent == null)
 					{
 						var randomResponse = Responses[rng.Next(Responses.Count)];
@@ -91,7 +91,7 @@ namespace SuiBot_Core.Components.Other
 					else
 					{
 						UsersLurking[lastMessage.chatter_user_id] = DateTime.UtcNow;
-						aiComponent.DoLurk(channelInstance, lastMessage, dropWord);
+						aiComponent.GetResponseLurk(channelInstance, lastMessage, dropWord);
 						return true;
 					}
 				}
