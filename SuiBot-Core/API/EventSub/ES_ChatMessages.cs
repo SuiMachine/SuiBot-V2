@@ -36,7 +36,7 @@ namespace SuiBot_Core.API.EventSub
 			public class ChatMessage_Fragment_Emote
 			{
 				public string id;
-				public long emote_set_id;
+				public string emote_set_id;
 				public string owner_id;
 			}
 
