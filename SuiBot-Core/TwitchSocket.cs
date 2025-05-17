@@ -197,6 +197,17 @@ namespace SuiBot_Core
 			var dbg = eventText.ToString();
 			var msg = eventText.ToObject<ES_ChatMessage>();
 
+			//"text"
+			//"channel_points_highlighted"
+			//"channel_points_sub_only"
+			//"power_ups_message_effect"
+			//"power_ups_gigantified_emote"
+			//"user_intro"
+			if (msg.message_type == "user_intro")
+			{
+				Debug.WriteLine("Verify this?");
+			}
+
 			if (!BotInstance.ChannelInstances.TryGetValue(msg.broadcaster_user_login, out SuiBot_ChannelInstance instance))
 				instance = null; //Not needed, but makes VS shutup
 			msg.SetupRole(instance);
