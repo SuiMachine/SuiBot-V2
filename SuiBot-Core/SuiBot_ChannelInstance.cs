@@ -17,9 +17,9 @@ namespace SuiBot_Core
 		public ulong ChannelID { get; private set; }
 
 		public Storage.ChannelConfig ConfigInstance { get; set; }
-		Storage.CoreConfig CoreConfigInstance { get; set; }
+		private Storage.CoreConfig CoreConfigInstance { get; set; }
 		public string BotName => SuiBotInstance.BotName;
-		SuiBot SuiBotInstance { get; set; }
+		private SuiBot SuiBotInstance { get; set; }
 		#region Components
 		internal Components.Quotes QuotesInstance { get; set; }
 		internal Components.IntervalMessages IntervalMessagesInstance { get; set; }

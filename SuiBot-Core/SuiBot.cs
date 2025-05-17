@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.Remoting.Channels;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -158,13 +159,16 @@ namespace SuiBot_Core
 				{
 					if (subscription.status != "enabled" || subscription.transport.session_id != TwitchSocket.SessionID)
 					{
+						Console.WriteLine($"Unsubscribing from {subscription.type} ({subscription.status})");
 						await HelixAPI.CloseSubscription(subscription);
-						await Task.Delay(1000);
+						await Task.Delay(100);
 					}
 				}
 
 				foreach (var channel in channelsToSubScribeAdditionalInformationTo)
 				{
+					Console.WriteLine($"Subscribing to additional events for {channel.condition.broadcaster_user_id}");
+
 					var onLineSub = await HelixAPI.SubscribeToOnlineStatus(channel.condition.broadcaster_user_id.Value, TwitchSocket.SessionID);
 					await Task.Delay(2000);
 					var offlineSub = await HelixAPI.SubscribeToOfflineStatus(channel.condition.broadcaster_user_id.Value, TwitchSocket.SessionID);
@@ -176,6 +180,7 @@ namespace SuiBot_Core
 					var susMessage = await HelixAPI.SubscribeToChannelSuspiciousUserMessage(channel.condition.broadcaster_user_id.Value, TwitchSocket.SessionID);
 					await Task.Delay(2000);
 				}
+				Console.WriteLine($"Done!");
 			});
 
 			//Timer tick
@@ -293,7 +298,7 @@ namespace SuiBot_Core
 			{
 				var expiry = TimeSpan.FromSeconds(validation.expires_in);
 
-				if(expiry.Seconds <= 0)
+				if (expiry.Seconds <= 0)
 				{
 					return $"Token validation:\n" +
 						$"User login: {validation.login}\n" +

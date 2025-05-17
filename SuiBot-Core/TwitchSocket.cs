@@ -11,7 +11,7 @@ namespace SuiBot_Core
 {
 	public class TwitchSocket
 	{
-		private const string WEBSOCKET_URI = "wss://eventsub.wss.twitch.tv/ws?keepalive_timeout_seconds=30";
+		private string WEBSOCKET_URI = "wss://eventsub.wss.twitch.tv/ws?keepalive_timeout_seconds=30";
 
 		private SuiBot BotInstance;
 		private ConnectionConfig botConnectionConfig;
@@ -25,6 +25,7 @@ namespace SuiBot_Core
 		private Task SubscribingTask;
 		private volatile bool m_Connected;
 		private volatile bool m_Connecting;
+		private volatile bool m_ExternalReconnect;
 
 		public string SessionID { get; private set; }
 		public bool Connected => m_Connected;
@@ -37,7 +38,8 @@ namespace SuiBot_Core
 
 		private void CreateSessionAndSocket()
 		{
-			BotInstance?.TwitchSocket_Disconnected();
+			if (!m_ExternalReconnect)
+				BotInstance?.TwitchSocket_Disconnected();
 			m_Connected = false;
 			m_Connecting = true;
 
@@ -49,6 +51,14 @@ namespace SuiBot_Core
 			Socket.OnClose += Socket_OnClose;
 			Socket.EmitOnPing = true;
 			Socket.ConnectAsync();
+		}
+
+		private void ReconnectWithUrl(string reconnect_url)
+		{
+			this.m_ExternalReconnect = true;
+			this.AutoReconnect = true;
+			this.WEBSOCKET_URI = reconnect_url;
+			this.Socket.Close();
 		}
 
 		private void Socket_OnOpen(object sender, EventArgs e)
@@ -74,6 +84,7 @@ namespace SuiBot_Core
 		{
 			EventSubClose_Code closeType = (EventSubClose_Code)e.Code;
 			m_Connected = false;
+			m_Connecting = false;
 			KeepAliveCheck?.Stop();
 			Socket.OnMessage -= Socket_OnMessage;
 			Socket.OnOpen -= Socket_OnOpen;
@@ -115,11 +126,37 @@ namespace SuiBot_Core
 					ProcessNotification(message);
 					break;
 				case EventSub_MessageType.session_reconnect:
+					ProcessReconnect(message.payload);
 					break;
 				default:
 					Debug.WriteLine($"Unhandled message: {message}");
 					break;
 			}
+		}
+
+		private void ProcessReconnect(JToken payload)
+		{
+			var sessionField = payload["session"];
+			if (sessionField == null)
+			{
+				ErrorLogging.WriteLine($"Something when wrong with reconnect, debug this message:\n{payload}");
+				return;
+			}
+
+			var reconnect = sessionField.ToObject<ES_ReconnectSession>();
+			if (reconnect == null)
+			{
+				ErrorLogging.WriteLine($"Something when wrong with reconnect, debug this message:\n{sessionField}");
+				return;
+			}
+
+			if (reconnect.id != SessionID)
+			{
+				ErrorLogging.WriteLine("Wrong session ID?!");
+				return;
+			}
+
+			this.ReconnectWithUrl(reconnect.reconnect_url);
 		}
 
 		private void ProcessNotification(ES_ServerMessage message)
@@ -253,9 +290,12 @@ namespace SuiBot_Core
 				{
 					channel.UserBan(asMessage);
 					channel.SendChatMessage("Bam! Banned suspicious chatter!");
+					return;
 				}
-
-				//TODO: implement checking against AI?
+				else if (channel.ConfigInstance.FilterUsingAI)
+				{
+					//TODO: implement checking against AI?
+				}
 			}
 		}
 
@@ -264,7 +304,9 @@ namespace SuiBot_Core
 			var content = payload["session"].ToObject<ES_SessionMessage>();
 			SessionID = content.id;
 			AutoReconnect = true;
-			BotInstance?.TwitchSocket_Connected();
+			if (m_ExternalReconnect == false)
+				BotInstance?.TwitchSocket_Connected();
+			m_ExternalReconnect = false;
 		}
 
 		internal void Close()

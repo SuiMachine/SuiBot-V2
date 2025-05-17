@@ -137,10 +137,9 @@ namespace SuiBot_Core.Storage
 		[XmlElement]
 		public GenericUtilConfig GenericUtil { get; set; }
 		//bool AskCleverbot { get; set; }
-		[XmlElement]
-		public bool FilteringEnabled { get; set; }
-		[XmlElement]
-		public bool FilterLinks { get; set; }
+		[XmlElement] public bool FilteringEnabled { get; set; }
+		[XmlElement] public bool FilterLinks { get; set; }
+		[XmlElement] public bool FilterUsingAI { get; set; }
 		[XmlIgnore]
 		public ChatFilters Filters { get; set; }
 		[XmlElement]
@@ -165,6 +164,7 @@ namespace SuiBot_Core.Storage
 			GenericUtil = new GenericUtilConfig();
 			FilteringEnabled = false;
 			FilterLinks = false;
+			FilterUsingAI = false;
 			Filters = new ChatFilters();
 			IntervalMessageEnabled = false;
 			LeaderboardsEnabled = false;

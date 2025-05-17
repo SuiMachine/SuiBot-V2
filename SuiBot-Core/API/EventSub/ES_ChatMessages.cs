@@ -6,7 +6,6 @@ using System.Linq;
 namespace SuiBot_Core.API.EventSub
 {
 	[DebuggerDisplay(nameof(ES_ChatMessage) + " {chatter_user_name}: {message.text}")]
-	[Serializable]
 	public class ES_ChatMessage
 	{
 		/// <summary>

@@ -125,6 +125,7 @@
     <Compile Include="API\EventSub\ES_ChannelPoints.cs" />
     <Compile Include="API\EventSub\ES_ChatMessages.cs" />
     <Compile Include="API\EventSub\ES_Metadata.cs" />
+    <Compile Include="API\EventSub\ES_ReconnectSession.cs" />
     <Compile Include="API\EventSub\ES_ServerMessage.cs" />
     <Compile Include="API\EventSub\ES_SessionMessage.cs" />
     <Compile Include="API\EventSub\ES_StreamOnlineOffline.cs" />
