@@ -186,8 +186,8 @@ namespace SuiBot_Core.Components
 						string json = JsonConvert.SerializeObject(content);
 
 						string result = await HttpWebRequestHandlers.PerformPostAsync("https://generativelanguage.googleapis.com/", $"v1beta/{InstanceConfig.Model}:generateContent", $"?key={InstanceConfig.API_Key}",
-							new Dictionary<string, string>(),
-							json
+							json,
+							new Dictionary<string, string>()							
 						);
 
 						if (string.IsNullOrEmpty(result))
@@ -270,8 +270,8 @@ namespace SuiBot_Core.Components
 					string json = JsonConvert.SerializeObject(content, Formatting.Indented);
 
 					string result = await HttpWebRequestHandlers.PerformPostAsync("https://generativelanguage.googleapis.com/", $"v1beta/{InstanceConfig.Model}:generateContent", $"?key={InstanceConfig.API_Key}",
-						new Dictionary<string, string>(),
-						json
+						json,
+						new Dictionary<string, string>()						
 						);
 
 					if (string.IsNullOrEmpty(result))
@@ -334,8 +334,8 @@ namespace SuiBot_Core.Components
 					string json = JsonConvert.SerializeObject(content, Formatting.Indented);
 
 					string result = await HttpWebRequestHandlers.PerformPostAsync("https://generativelanguage.googleapis.com/", $"v1beta/{InstanceConfig.Model}:generateContent", $"?key={InstanceConfig.API_Key}",
-						new Dictionary<string, string>(),
-						json
+						json,
+						new Dictionary<string, string>()						
 						);
 
 					if (string.IsNullOrEmpty(result))

@@ -136,7 +136,7 @@ namespace SuiBot_Core.API
 					NullValueHandling = NullValueHandling.Ignore
 				});
 
-				var result = await HttpWebRequestHandlers.PerformPostAsync(BASE_URI, "moderation/bans", "", BuildDefaultHeaders(), serialize);
+				var result = await HttpWebRequestHandlers.PerformPostAsync(BASE_URI, "moderation/bans", "", serialize, BuildDefaultHeaders());
 
 			});
 		}
@@ -150,7 +150,7 @@ namespace SuiBot_Core.API
 					NullValueHandling = NullValueHandling.Ignore
 				});
 
-				var result = await HttpWebRequestHandlers.PerformPostAsync(BASE_URI, "moderation/bans", "", BuildDefaultHeaders(), serialize);
+				var result = await HttpWebRequestHandlers.PerformPostAsync(BASE_URI, "moderation/bans", "", serialize, BuildDefaultHeaders());
 
 			});
 		}
@@ -164,7 +164,7 @@ namespace SuiBot_Core.API
 					NullValueHandling = NullValueHandling.Ignore
 				});
 
-				var result = await HttpWebRequestHandlers.PerformPostAsync(BASE_URI, "moderation/bans", "", BuildDefaultHeaders(), serialize);
+				var result = await HttpWebRequestHandlers.PerformPostAsync(BASE_URI, "moderation/bans", "", serialize, BuildDefaultHeaders());
 
 			});
 		}
@@ -178,7 +178,7 @@ namespace SuiBot_Core.API
 					NullValueHandling = NullValueHandling.Ignore
 				});
 
-				var result = await HttpWebRequestHandlers.PerformPostAsync(BASE_URI, "moderation/bans", "", BuildDefaultHeaders(), serialize);
+				var result = await HttpWebRequestHandlers.PerformPostAsync(BASE_URI, "moderation/bans", "", serialize, BuildDefaultHeaders());
 
 			});
 		}
@@ -189,7 +189,7 @@ namespace SuiBot_Core.API
 				return userId;
 			else
 			{
-				var result = await HttpWebRequestHandlers.GetAsync("https://api.twitch.tv/helix/", $"users?login={userName}", "", BuildDefaultHeaders());
+				var result = await HttpWebRequestHandlers.PerformGetAsync("https://api.twitch.tv/helix/", $"users?login={userName}", "", BuildDefaultHeaders());
 				if (!string.IsNullOrEmpty(result))
 				{
 					var response = JObject.Parse(result);
@@ -231,7 +231,7 @@ namespace SuiBot_Core.API
 				NullValueHandling = NullValueHandling.Ignore
 			});
 
-			var result = await HttpWebRequestHandlers.PostAsync(BASE_URI, "eventsub/subscriptions", "", serialize, BuildDefaultHeaders());
+			var result = await HttpWebRequestHandlers.PerformPostAsync(BASE_URI, "eventsub/subscriptions", "", serialize, BuildDefaultHeaders());
 			if (!string.IsNullOrEmpty(result))
 			{
 				Response_SubscribeTo deserialize = JsonConvert.DeserializeObject<Response_SubscribeTo>(result);
@@ -261,7 +261,7 @@ namespace SuiBot_Core.API
 				NullValueHandling = NullValueHandling.Ignore
 			});
 
-			var result = await HttpWebRequestHandlers.PostAsync(BASE_URI, "eventsub/subscriptions", "", serialize, BuildDefaultHeaders());
+			var result = await HttpWebRequestHandlers.PerformPostAsync(BASE_URI, "eventsub/subscriptions", "", serialize, BuildDefaultHeaders());
 			if (result != null)
 			{
 				Response_SubscribeTo deserialize = JsonConvert.DeserializeObject<Response_SubscribeTo>(result);
@@ -286,7 +286,7 @@ namespace SuiBot_Core.API
 				NullValueHandling = NullValueHandling.Ignore
 			});
 
-			var result = await HttpWebRequestHandlers.PostAsync(BASE_URI, "eventsub/subscriptions", "", serialize, BuildDefaultHeaders());
+			var result = await HttpWebRequestHandlers.PerformPostAsync(BASE_URI, "eventsub/subscriptions", "", serialize, BuildDefaultHeaders());
 			if (result != null)
 			{
 				Response_SubscribeTo deserialize = JsonConvert.DeserializeObject<Response_SubscribeTo>(result);
@@ -311,7 +311,7 @@ namespace SuiBot_Core.API
 				NullValueHandling = NullValueHandling.Ignore
 			});
 
-			var result = await HttpWebRequestHandlers.PostAsync(BASE_URI, "eventsub/subscriptions", "", serialize, BuildDefaultHeaders());
+			var result = await HttpWebRequestHandlers.PerformPostAsync(BASE_URI, "eventsub/subscriptions", "", serialize, BuildDefaultHeaders());
 			if (result != null)
 			{
 				Response_SubscribeTo deserialize = JsonConvert.DeserializeObject<Response_SubscribeTo>(result);
@@ -336,7 +336,7 @@ namespace SuiBot_Core.API
 				NullValueHandling = NullValueHandling.Ignore
 			});
 
-			var result = await HttpWebRequestHandlers.PostAsync(BASE_URI, "eventsub/subscriptions", "", serialize, BuildDefaultHeaders());
+			var result = await HttpWebRequestHandlers.PerformPostAsync(BASE_URI, "eventsub/subscriptions", "", serialize, BuildDefaultHeaders());
 			if (result != null)
 			{
 				Response_SubscribeTo deserialize = JsonConvert.DeserializeObject<Response_SubscribeTo>(result);
@@ -362,7 +362,7 @@ namespace SuiBot_Core.API
 				NullValueHandling = NullValueHandling.Ignore
 			});
 
-			var result = await HttpWebRequestHandlers.PostAsync(BASE_URI, "eventsub/subscriptions", "", serialize, BuildDefaultHeaders());
+			var result = await HttpWebRequestHandlers.PerformPostAsync(BASE_URI, "eventsub/subscriptions", "", serialize, BuildDefaultHeaders());
 			if (result != null)
 			{
 				Response_SubscribeTo deserialize = JsonConvert.DeserializeObject<Response_SubscribeTo>(result);
@@ -389,7 +389,7 @@ namespace SuiBot_Core.API
 					NullValueHandling = NullValueHandling.Ignore
 				});
 
-				var result = await HttpWebRequestHandlers.PostAsync(BASE_URI, "chat/messages", "", serialize, BuildDefaultHeaders());
+				var result = await HttpWebRequestHandlers.PerformPostAsync(BASE_URI, "chat/messages", "", serialize, BuildDefaultHeaders());
 
 			});
 		}
@@ -404,7 +404,7 @@ namespace SuiBot_Core.API
 					NullValueHandling = NullValueHandling.Ignore
 				});
 
-				var result = await HttpWebRequestHandlers.PostAsync(BASE_URI, "chat/messages", "", serialize, BuildDefaultHeaders());
+				var result = await HttpWebRequestHandlers.PerformPostAsync(BASE_URI, "chat/messages", "", serialize, BuildDefaultHeaders());
 
 			});
 		}
@@ -419,7 +419,7 @@ namespace SuiBot_Core.API
 
 		internal async Task<Response_SubscribeTo> GetCurrentSubscriptions()
 		{
-			var result = await HttpWebRequestHandlers.GetAsync(BASE_URI, "eventsub/subscriptions", "", BuildDefaultHeaders());
+			var result = await HttpWebRequestHandlers.PerformGetAsync(BASE_URI, "eventsub/subscriptions", "", BuildDefaultHeaders());
 			if (result != null)
 			{
 				Response_SubscribeTo deserialize = JsonConvert.DeserializeObject<Response_SubscribeTo>(result);
