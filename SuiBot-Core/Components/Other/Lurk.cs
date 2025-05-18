@@ -79,7 +79,7 @@ namespace SuiBot_Core.Components.Other
 				}
 
 				string dropWord = lastMessage.message.text.StripSingleWord();
-				if (channelInstance.ConfigInstance.MemeComponents.AskAILurk && dropWord != "")
+				if (channelInstance.ConfigInstance.MemeComponents.AskAILurk && dropWord != "" && channelInstance.GeminiAI.IsConfigured())
 				{
 					var aiComponent = channelInstance.GeminiAI;
 					if (aiComponent == null)

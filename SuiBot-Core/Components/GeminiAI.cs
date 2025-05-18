@@ -271,7 +271,8 @@ namespace SuiBot_Core.Components
 
 					string result = await HttpWebRequestHandlers.PerformPostAsync("https://generativelanguage.googleapis.com/", $"v1beta/{InstanceConfig.Model}:generateContent", $"?key={InstanceConfig.API_Key}",
 						json,
-						new Dictionary<string, string>()						
+						new Dictionary<string, string>(),
+						timeout: 15000
 						);
 
 					if (string.IsNullOrEmpty(result))

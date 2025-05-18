@@ -70,7 +70,7 @@ namespace SuiBot_Core
 			}
 		}
 
-		public static async Task<string> PerformGetAsync(string baseUrl, string scope, string parameters, Dictionary<string, string> requestHeaders)
+		public static async Task<string> PerformGetAsync(string baseUrl, string scope, string parameters, Dictionary<string, string> requestHeaders, int timeout = 5000)
 		{
 			HttpWebRequest request = (HttpWebRequest)WebRequest.Create(baseUrl + scope + parameters);
 
@@ -79,7 +79,7 @@ namespace SuiBot_Core
 				foreach (var requestHeader in requestHeaders)
 					request.Headers[requestHeader.Key] = requestHeader.Value;
 
-				request.Timeout = 5000;
+				request.Timeout = timeout;
 				request.Method = "GET";
 
 				var webResponse = await request.GetResponseAsync();
@@ -98,7 +98,7 @@ namespace SuiBot_Core
 			}
 		}
 
-		public static async Task<string> PerformDeleteAsync(string baseUrl, string scope, string parameters, Dictionary<string, string> headers, string contentType = "application/json")
+		public static async Task<string> PerformDeleteAsync(string baseUrl, string scope, string parameters, Dictionary<string, string> headers, string contentType = "application/json", int timeout = 8000)
 		{
 			HttpWebRequest request = (HttpWebRequest)WebRequest.Create(baseUrl + scope + parameters);
 
@@ -109,7 +109,7 @@ namespace SuiBot_Core
 					request.Headers[header.Key] = header.Value;
 				}
 				request.Method = "DELETE";
-				request.Timeout = 5000;
+				request.Timeout = timeout;
 				request.ContentType = contentType;
 
 				using (var response = await request.GetResponseAsync())
@@ -128,7 +128,7 @@ namespace SuiBot_Core
 			}
 		}
 
-		public static async Task<string> PerformPostAsync(string baseUrl, string scope, string parameters, string postData, Dictionary<string, string> headers, string contentType = "application/json")
+		public static async Task<string> PerformPostAsync(string baseUrl, string scope, string parameters, string postData, Dictionary<string, string> headers, string contentType = "application/json", int timeout = 8000)
 		{
 			HttpWebRequest request = (HttpWebRequest)WebRequest.Create(baseUrl + scope + parameters);
 
@@ -141,7 +141,7 @@ namespace SuiBot_Core
 
 				byte[] encodedPostData = Encoding.UTF8.GetBytes(postData);
 
-				request.Timeout = 5000;
+				request.Timeout = timeout;
 				request.Method = "POST";
 				request.ContentType = contentType;
 				request.ContentLength = encodedPostData.Length;
