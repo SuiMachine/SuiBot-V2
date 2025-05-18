@@ -205,7 +205,7 @@ namespace SuiBot_Core
 			//"user_intro"
 			if (msg.message_type == "user_intro")
 			{
-				Debug.WriteLine("Verify this?");
+				ErrorLogging.WriteLine($"Verify this potential first message:\n{dbg}");
 			}
 
 			if (!BotInstance.ChannelInstances.TryGetValue(msg.broadcaster_user_login, out SuiBot_ChannelInstance instance))
@@ -269,6 +269,9 @@ namespace SuiBot_Core
 
 		private void ProcessAutomodMessageHold(JToken payload)
 		{
+			//We actually don't do anything with them for now
+			//cause technically you are supposed to have them handled by a human
+			//and not a bot... but maybe in the future...
 			var eventText = payload["event"];
 			if (eventText == null)
 				return;

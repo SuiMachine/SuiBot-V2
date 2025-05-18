@@ -60,6 +60,12 @@ namespace SuiBot_Core.API.EventSub
 			public string info;
 		}
 
+		[DebuggerDisplay(nameof(Cheer) + " {bits}")]
+		public class Cheer
+		{
+			public int bits;
+		}
+
 		public class Event_Reply
 		{
 			public string parent_message_id;
@@ -85,7 +91,7 @@ namespace SuiBot_Core.API.EventSub
 		public string color;
 		public Badge[] badges = new Badge[0];
 		public string message_type;
-		public string cheer;
+		public Cheer cheer;
 		public Event_Reply reply;
 		public string channel_points_custom_reward_id;
 		public string channel_points_animation_id;
