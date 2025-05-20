@@ -63,7 +63,7 @@ namespace SuiBot_Core
 				Interval = delay,
 				Enabled = true
 			};
-			DelayConnectionTimer.Elapsed += ((sender,e) =>
+			DelayConnectionTimer.Elapsed += ((sender, e) =>
 			{
 				Socket.ConnectAsync();
 			});
@@ -376,8 +376,7 @@ namespace SuiBot_Core
 		internal void Close()
 		{
 			AutoReconnect = false;
-			if (Socket != null)
-				Socket.Close();
+			Socket?.Close();
 			DelayConnectionTimer?.Dispose();
 		}
 
