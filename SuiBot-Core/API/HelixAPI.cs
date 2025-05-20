@@ -15,6 +15,13 @@ namespace SuiBot_Core.API
 {
 	public class HelixAPI
 	{
+		public enum ValidationResult
+		{
+			NoResponse,
+			Successful,
+			Failed
+		}
+
 		public Dictionary<string, Response_GetUserInfo> UserNameToInfo = new Dictionary<string, Response_GetUserInfo>();
 		public string BotLoginName { get; private set; }
 		public ulong BotUserId { get; private set; }
@@ -33,15 +40,15 @@ namespace SuiBot_Core.API
 			};
 		}
 
-		public bool ValidateToken()
+		public ValidationResult ValidateToken()
 		{
 			var res = HttpWebRequestHandlers.GetSync("https://id.twitch.tv/oauth2/", "validate", "", BuildDefaultHeaders());
 			if (string.IsNullOrEmpty(res))
-				return false;
+				return ValidationResult.NoResponse;
 
 			Response_ValidateToken obj = JsonConvert.DeserializeObject<Response_ValidateToken>(res);
 			if (obj == null)
-				return false;
+				return ValidationResult.Failed;
 
 			BotLoginName = obj.login;
 			BotUserId = obj.user_id;
@@ -53,10 +60,10 @@ namespace SuiBot_Core.API
 			if (obj.client_id != CLIENT_ID)
 			{
 				ErrorLogging.WriteLine("Invalid client ID for this token!");
-				return false;
+				return ValidationResult.Failed;
 			}
 
-			return true;
+			return ValidationResult.Successful;
 		}
 
 		public Response_ValidateToken GetValidation()

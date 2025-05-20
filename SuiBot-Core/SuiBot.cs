@@ -120,18 +120,32 @@ namespace SuiBot_Core
 				throw new Exception("At least 1 channel is required to join.");
 
 			HelixAPI = new API.HelixAPI(this, BotConnectionConfig.Password);
-			if (!HelixAPI.ValidateToken())
+			var validationResult = HelixAPI.ValidateToken();
+			if (validationResult != API.HelixAPI.ValidationResult.Successful)
 			{
-				ErrorLogging.WriteLine("Invalid token!");
-				throw new Exception("Invalid token");
+				if (validationResult == API.HelixAPI.ValidationResult.Failed)
+				{
+					ShouldRun = false;
+					ErrorLogging.WriteLine("Invalid token!");
+					throw new Exception("Invalid token");
+				}
+				else
+				{
+					Task.Factory.StartNew(async () =>
+					{
+						await Task.Delay(10000);
+						if (!IsDisposed)
+							Connect();
+					});
+					return;
+				}
 			}
 
+			ShouldRun = true;
 			TwitchSocket = new TwitchSocket(this);
 
 			IntervalTimer.Elapsed += IntervalTimer_Elapsed;
 			StatusUpdateTimer.Elapsed += StatusUpdateTimer_Elapsed;
-
-			ShouldRun = true;
 		}
 
 		internal void TwitchSocket_Connected()

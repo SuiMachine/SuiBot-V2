@@ -20,7 +20,7 @@ namespace SuiBot_Core
 		internal TwitchSocket(SuiBot botInstance)
 		{
 			this.BotInstance = botInstance;
-			CreateSessionAndSocket();
+			CreateSessionAndSocket(0);
 		}
 
 		private Task SubscribingTask;
@@ -34,10 +34,10 @@ namespace SuiBot_Core
 		public volatile bool AutoReconnect;
 		public DateTime LastMessageAt { get; private set; }
 		public WebSocket Socket { get; private set; }
-
+		private System.Timers.Timer DelayConnectionTimer;
 		private System.Timers.Timer KeepAliveCheck;
 
-		private void CreateSessionAndSocket()
+		private void CreateSessionAndSocket(int delay)
 		{
 			if (!m_ExternalReconnect)
 				BotInstance?.TwitchSocket_Disconnected();
@@ -50,8 +50,28 @@ namespace SuiBot_Core
 			Socket.OnMessage += Socket_OnMessage;
 			Socket.OnOpen += Socket_OnOpen;
 			Socket.OnClose += Socket_OnClose;
+			Socket.OnError += Socket_OnError;
 			Socket.EmitOnPing = true;
-			Socket.ConnectAsync();
+			DelayConnectionTimer?.Dispose();
+
+			if (delay <= 0)
+				delay = 1;
+
+			DelayConnectionTimer = new System.Timers.Timer
+			{
+				AutoReset = false,
+				Interval = delay,
+				Enabled = true
+			};
+			DelayConnectionTimer.Elapsed += ((sender,e) =>
+			{
+				Socket.ConnectAsync();
+			});
+		}
+
+		private void Socket_OnError(object sender, ErrorEventArgs e)
+		{
+			ErrorLogging.WriteLine($"Got error: {e}");
 		}
 
 		private void ReconnectWithUrl(string reconnect_url)
@@ -67,7 +87,7 @@ namespace SuiBot_Core
 			m_Connected = true;
 			m_Connecting = false;
 			Debug.WriteLine("Opened Twitch socket");
-			KeepAliveCheck = new System.Timers.Timer(30 * 1000);
+			KeepAliveCheck = new System.Timers.Timer(5 * 1000);
 			KeepAliveCheck.Elapsed += KeepAliveCheck_Elapsed;
 			KeepAliveCheck.Start();
 		}
@@ -75,10 +95,8 @@ namespace SuiBot_Core
 		private void KeepAliveCheck_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
 		{
 			var currentTime = DateTime.UtcNow;
-			if (LastMessageAt + TimeSpan.FromSeconds(31) < currentTime)
-			{
-				Debug.WriteLine("Should reconnect?");
-			}
+			if (LastMessageAt + TimeSpan.FromSeconds(45) < currentTime)
+				Socket.Close();
 		}
 
 		private void Socket_OnClose(object sender, CloseEventArgs e)
@@ -87,13 +105,44 @@ namespace SuiBot_Core
 			m_Connected = false;
 			m_Connecting = false;
 			KeepAliveCheck?.Stop();
+			ErrorLogging.WriteLine($"Closed due to code {e.Code} - {e.Reason}");
 			Socket.OnMessage -= Socket_OnMessage;
 			Socket.OnOpen -= Socket_OnOpen;
 			Socket.OnClose -= Socket_OnClose;
+			Socket.OnError -= Socket_OnError;
 
 			if (AutoReconnect)
 			{
-				CreateSessionAndSocket();
+				int delay = 0;
+				switch (e.Code)
+				{
+					case (ushort)CloseStatusCode.Normal:
+						delay = 0;
+						break;
+					case (ushort)CloseStatusCode.Away:
+					case (ushort)CloseStatusCode.UnsupportedData:
+						delay = 1_000;
+						break;
+					case (ushort)CloseStatusCode.ProtocolError:
+					case (ushort)CloseStatusCode.Undefined:
+					case (ushort)CloseStatusCode.Abnormal:
+					case (ushort)CloseStatusCode.TooBig:
+					case (ushort)CloseStatusCode.ServerError:
+					case (ushort)CloseStatusCode.TlsHandshakeFailure:
+						delay = 60_000;
+						break;
+					case (ushort)CloseStatusCode.InvalidData:
+					case (ushort)CloseStatusCode.PolicyViolation:
+					case (ushort)CloseStatusCode.MandatoryExtension:
+						AutoReconnect = false;
+						BotInstance?.ClosedViaSocket();
+						return;
+					default:
+						delay = 10_000;
+						break;
+				}
+
+				CreateSessionAndSocket(delay);
 			}
 			else
 			{
@@ -329,6 +378,7 @@ namespace SuiBot_Core
 			AutoReconnect = false;
 			if (Socket != null)
 				Socket.Close();
+			DelayConnectionTimer?.Dispose();
 		}
 
 		internal void ProvideAuthentication(ConnectionConfig botConnectionConfig) => this.botConnectionConfig = botConnectionConfig;
