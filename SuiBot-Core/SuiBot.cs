@@ -119,6 +119,11 @@ namespace SuiBot_Core
 			if (BotCoreConfig.ChannelsToJoin.Count == 0)
 				throw new Exception("At least 1 channel is required to join.");
 
+#if LOCAL_API
+
+			HelixAPI = new API.HelixAPI(this, "2ae883f289a6106");
+			//var validationResult = HelixAPI.ValidateToken();
+#else
 			HelixAPI = new API.HelixAPI(this, BotConnectionConfig.Password);
 			var validationResult = HelixAPI.ValidateToken();
 			if (validationResult != API.HelixAPI.ValidationResult.Successful)
@@ -140,6 +145,8 @@ namespace SuiBot_Core
 					return;
 				}
 			}
+#endif
+
 
 			ShouldRun = true;
 			TwitchSocket = new TwitchSocket(this);

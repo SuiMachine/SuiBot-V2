@@ -25,8 +25,17 @@ namespace SuiBot_Core.API
 		public Dictionary<string, Response_GetUserInfo> UserNameToInfo = new Dictionary<string, Response_GetUserInfo>();
 		public string BotLoginName { get; private set; }
 		public ulong BotUserId { get; private set; }
-		private const string BASE_URI = "https://api.twitch.tv/helix/";
 		private const string CLIENT_ID = "rmi9m0sheo4pp5882o8s24zu7h09md";
+
+#if LOCAL_API
+		//Local user - 92987419
+		//Authentication - 2ae883f289a6106
+		//Local secret - 1f078371035dec7aaef27b955fabbe
+		private const string BASE_URI = "http://localhost:8080/";
+#else
+		private const string BASE_URI = "https://api.twitch.tv/helix/";
+#endif
+
 		private readonly string OAUTH = "";
 		//private readonly DateTime LastRequest = DateTime.MinValue;
 		private SuiBot botInstance;
@@ -42,7 +51,11 @@ namespace SuiBot_Core.API
 
 		public ValidationResult ValidateToken()
 		{
+#if LOCAL_API
+			var res = HttpWebRequestHandlers.GetSync("http://localhost:8080/mock", "validate", "", BuildDefaultHeaders());
+#else
 			var res = HttpWebRequestHandlers.GetSync("https://id.twitch.tv/oauth2/", "validate", "", BuildDefaultHeaders());
+#endif
 			if (string.IsNullOrEmpty(res))
 				return ValidationResult.NoResponse;
 
@@ -80,6 +93,9 @@ namespace SuiBot_Core.API
 		{
 			this.botInstance = bot;
 			this.OAUTH = aouth;
+#if LOCAL_API
+			this.BotLoginName = "fishershepard595";
+#endif
 		}
 
 		public void GetStatus(SuiBot_ChannelInstance instance)
