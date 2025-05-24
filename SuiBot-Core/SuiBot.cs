@@ -94,6 +94,7 @@ namespace SuiBot_Core
 					"moderator:manage:announcements",
 					"moderator:manage:automod",
 					"moderator:read:banned_users",
+					"moderator:manage:banned_users",
 					"moderator:read:chat_messages",
 					"moderator:manage:chat_messages",
 					"moderator:manage:chat_settings",

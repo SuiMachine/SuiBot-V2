@@ -4,9 +4,14 @@ namespace SuiBot_Core.API.Helix.Request
 {
 	public class Request_Ban
 	{
-		public ulong user_id;
-		public int? duration;
-		public string reason;
+		public Request_Ban_Data data;
+
+		public class Request_Ban_Data
+		{
+			public ulong user_id;
+			public int? duration;
+			public string reason;
+		}		
 
 		private Request_Ban() { }
 
@@ -14,9 +19,12 @@ namespace SuiBot_Core.API.Helix.Request
 		{
 			return new Request_Ban()
 			{
-				user_id = user_id,
-				reason = reason,
-				duration = null
+				data = new Request_Ban_Data
+				{
+					user_id = user_id,
+					reason = reason,
+					duration = null
+				}
 			};
 		}
 
@@ -27,9 +35,12 @@ namespace SuiBot_Core.API.Helix.Request
 
 			return new Request_Ban()
 			{
-				user_id = user_id,
-				reason = reason,
-				duration = duration_in_seconds
+				data = new Request_Ban_Data
+				{
+					user_id = user_id,
+					reason = reason,
+					duration = duration_in_seconds
+				}
 			};
 		}
 
@@ -40,9 +51,12 @@ namespace SuiBot_Core.API.Helix.Request
 
 			return new Request_Ban()
 			{
-				user_id = user_id,
-				reason = reason,
-				duration = (int)duration.TotalSeconds
+				data = new Request_Ban_Data
+				{
+					user_id = user_id,
+					reason = reason,
+					duration = (int)duration.TotalSeconds
+				}
 			};
 		}
 	}
