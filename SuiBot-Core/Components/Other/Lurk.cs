@@ -38,10 +38,10 @@ namespace SuiBot_Core.Components.Other
 							{
 								Responses.Add(split);
 								SaveResponses(channelInstance);
-								channelInstance.SendChatMessage($"Added a new response. e.g.: {string.Format(split, lastMessage.chatter_user_name)}");
+								channelInstance.SendChatMessageResponse(lastMessage, $"Added a new response. e.g.: {string.Format(split, lastMessage.chatter_user_name)}");
 							}
 							else
-								channelInstance.SendChatMessage("Added response must contain {0}");
+								channelInstance.SendChatMessageResponse(lastMessage, "Added response must contain {0}");
 							return false;
 						}
 						else if (split.StartsWithWordLazy("get"))
@@ -49,9 +49,9 @@ namespace SuiBot_Core.Components.Other
 							split = split.StripSingleWord();
 							int id = GetIdFromMessage(split);
 							if (id >= 0)
-								channelInstance.SendChatMessage($"Response at {id} is: {Responses[id]}");
+								channelInstance.SendChatMessageResponse(lastMessage, $"Response at {id} is: {Responses[id]}");
 							else
-								channelInstance.SendChatMessage("Incorrect id!");
+								channelInstance.SendChatMessageResponse(lastMessage, "Incorrect id!");
 							return false;
 						}
 						else if (split.StartsWithWordLazy("remove"))
@@ -65,14 +65,14 @@ namespace SuiBot_Core.Components.Other
 								{
 									var response = Responses[id];
 									Responses.RemoveAt(id);
-									channelInstance.SendChatMessage($"Removed response: {response}");
+									channelInstance.SendChatMessageResponse(lastMessage, $"Removed response: {response}");
 									SaveResponses(channelInstance);
 								}
 								else
-									channelInstance.SendChatMessage("There has to be at least one response. Add one response with !lurk add RESPONSE_TEXT and then remove other one using !lurk remove 0");
+									channelInstance.SendChatMessageResponse(lastMessage, "There has to be at least one response. Add one response with !lurk add RESPONSE_TEXT and then remove other one using !lurk remove 0");
 							}
 							else
-								channelInstance.SendChatMessage("Incorrect id!");
+								channelInstance.SendChatMessageResponse(lastMessage, "Incorrect id!");
 							return false;
 						}
 					}
@@ -85,7 +85,7 @@ namespace SuiBot_Core.Components.Other
 					if (aiComponent == null)
 					{
 						var randomResponse = Responses[rng.Next(Responses.Count)];
-						channelInstance.SendChatMessage(string.Format(randomResponse, lastMessage.broadcaster_user_name));
+						channelInstance.SendChatMessageResponse(lastMessage, string.Format(randomResponse, lastMessage.broadcaster_user_name));
 						return true;
 					}
 					else
@@ -99,7 +99,7 @@ namespace SuiBot_Core.Components.Other
 				{
 					var randomResponse = Responses[rng.Next(Responses.Count)];
 					UsersLurking[lastMessage.chatter_user_id] = DateTime.UtcNow;
-					channelInstance.SendChatMessage(string.Format(randomResponse, lastMessage.chatter_user_name));
+					channelInstance.SendChatMessageResponse(lastMessage, string.Format(randomResponse, lastMessage.chatter_user_name));
 					return true;
 				}
 			}
@@ -107,7 +107,7 @@ namespace SuiBot_Core.Components.Other
 			{
 				var randomResponse = Responses[rng.Next(Responses.Count)];
 				UsersLurking[lastMessage.chatter_user_id] = DateTime.UtcNow;
-				channelInstance.SendChatMessage(string.Format(randomResponse, lastMessage.chatter_user_name));
+				channelInstance.SendChatMessageResponse(lastMessage, string.Format(randomResponse, lastMessage.chatter_user_name));
 				return true;
 			}
 		}

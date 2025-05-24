@@ -159,7 +159,7 @@ namespace SuiBot_Core.API
 					NullValueHandling = NullValueHandling.Ignore
 				});
 
-				var result = await HttpWebRequestHandlers.PerformPostAsync(BASE_URI, "moderation/bans", "", serialize, BuildDefaultHeaders());
+				var result = await HttpWebRequestHandlers.PerformPostAsync(BASE_URI, "moderation/bans", $"?broadcaster_id={message.broadcaster_user_id}&moderator_id={botInstance.HelixAPI.BotUserId}", serialize, BuildDefaultHeaders());
 
 			});
 		}
@@ -173,21 +173,7 @@ namespace SuiBot_Core.API
 					NullValueHandling = NullValueHandling.Ignore
 				});
 
-				var result = await HttpWebRequestHandlers.PerformPostAsync(BASE_URI, "moderation/bans", "", serialize, BuildDefaultHeaders());
-
-			});
-		}
-
-		public void RequestBan(ulong user_id, string reason)
-		{
-			Task.Run(async () =>
-			{
-				var serialize = JsonConvert.SerializeObject(Request_Ban.CreateBan(user_id, reason), Formatting.Indented, new JsonSerializerSettings()
-				{
-					NullValueHandling = NullValueHandling.Ignore
-				});
-
-				var result = await HttpWebRequestHandlers.PerformPostAsync(BASE_URI, "moderation/bans", "", serialize, BuildDefaultHeaders());
+				var result = await HttpWebRequestHandlers.PerformPostAsync(BASE_URI, "moderation/bans", $"?broadcaster_id={message.broadcaster_user_id}&moderator_id={botInstance.HelixAPI.BotUserId}", serialize, BuildDefaultHeaders());
 
 			});
 		}
@@ -201,7 +187,7 @@ namespace SuiBot_Core.API
 					NullValueHandling = NullValueHandling.Ignore
 				});
 
-				var result = await HttpWebRequestHandlers.PerformPostAsync(BASE_URI, "moderation/bans", "", serialize, BuildDefaultHeaders());
+				var result = await HttpWebRequestHandlers.PerformPostAsync(BASE_URI, "moderation/bans", $"?broadcaster_id={message.broadcaster_user_id}&moderator_id={botInstance.HelixAPI.BotUserId}", serialize, BuildDefaultHeaders());
 
 			});
 		}
