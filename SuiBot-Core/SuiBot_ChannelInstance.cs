@@ -39,7 +39,7 @@ namespace SuiBot_Core
 		public Response_StreamStatus StreamStatus
 		{
 			get => m_StreamStatus;
-			set => throw new Exception("Do not set it using the property, use !");
+			set => m_StreamStatus = value;
 		}
 		private Dictionary<string, DateTime> UserCooldowns { get; set; }
 		private Dictionary<string, DateTime> LastUserActivity { get; set; }

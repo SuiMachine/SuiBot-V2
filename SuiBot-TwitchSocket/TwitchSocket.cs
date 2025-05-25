@@ -19,7 +19,6 @@ namespace SuiBot_Core
 #endif
 
 		private IBotInstance BotInstance;
-		private ConnectionConfig botConnectionConfig;
 
 		public TwitchSocket(IBotInstance botInstance)
 		{
@@ -441,7 +440,5 @@ namespace SuiBot_Core
 			Socket?.Close();
 			DelayConnectionTimer?.Dispose();
 		}
-
-		internal void ProvideAuthentication(ConnectionConfig botConnectionConfig) => this.botConnectionConfig = botConnectionConfig;
 	}
 }
