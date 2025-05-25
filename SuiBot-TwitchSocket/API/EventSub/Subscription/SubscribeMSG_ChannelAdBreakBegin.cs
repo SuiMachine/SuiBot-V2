@@ -9,7 +9,7 @@
 
 		public SubscribeMSG_ChannelAdBreakBegin() { }
 
-		public SubscribeMSG_ChannelAdBreakBegin(ulong channelId, ulong botid, string sessionID)
+		public SubscribeMSG_ChannelAdBreakBegin(string channelId, string botid, string sessionID)
 		{
 			condition = ES_Subscribe_Condition.CreateBroadcasterAndModerator(channelId, botid);
 			transport = new ES_Subscribe_Transport_Websocket(sessionID);

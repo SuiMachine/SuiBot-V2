@@ -69,6 +69,10 @@
       <Project>{68c846e5-fcb2-4993-804b-0773c2366d4b}</Project>
       <Name>SuiBot-Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\SuiBot-TwitchSocket\SuiBot-TwitchSocket.csproj">
+      <Project>{EEFD4D67-FA06-4A2A-804F-31851CB06A3E}</Project>
+      <Name>SuiBot-TwitchSocket</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="suibot_cmd.ico" />

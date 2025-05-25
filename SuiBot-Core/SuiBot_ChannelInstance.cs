@@ -1,6 +1,7 @@
 ﻿using SuiBot_Core.API.EventSub;
 using SuiBot_Core.API.Helix.Responses;
 using SuiBot_Core.Extensions.SuiStringExtension;
+using SuiBot_TwitchSocket.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -9,16 +10,15 @@ using static SuiBot_Core.API.EventSub.ES_ChatMessage;
 namespace SuiBot_Core
 {
 	[DebuggerDisplay(nameof(SuiBot_ChannelInstance) + " {Channel}")]
-	public class SuiBot_ChannelInstance
+	public class SuiBot_ChannelInstance : IChannelInstance
 	{
 		private const int DefaultCooldown = 30;
 		public static string CommandPrefix = "!";
-		public string Channel { get; private set; }
-		public ulong ChannelID { get; private set; }
+		public string Channel { get; set; }
+		public string ChannelID { get; set; }
 
 		public Storage.ChannelConfig ConfigInstance { get; set; }
 		private Storage.CoreConfig CoreConfigInstance { get; set; }
-		public string BotName => SuiBotInstance.BotName;
 		private SuiBot SuiBotInstance { get; set; }
 		#region Components
 		internal Components.Quotes QuotesInstance { get; private set; }
@@ -35,11 +35,16 @@ namespace SuiBot_Core
 		internal Components.Other._MemeComponents MemeComponents { get; set; }
 		#endregion
 		#endregion
-		public Response_StreamStatus StreamStatus { get; internal set; }
+		private Response_StreamStatus m_StreamStatus;
+		public Response_StreamStatus StreamStatus
+		{
+			get => m_StreamStatus;
+			set => throw new Exception("Do not set it using the property, use !");
+		}
 		private Dictionary<string, DateTime> UserCooldowns { get; set; }
 		private Dictionary<string, DateTime> LastUserActivity { get; set; }
 
-		public SuiBot_ChannelInstance(string Channel, ulong ChannelID, SuiBot SuiBotInstance, Storage.ChannelConfig ConfigInstance)
+		public SuiBot_ChannelInstance(string Channel, string ChannelID, SuiBot SuiBotInstance, Storage.ChannelConfig ConfigInstance)
 		{
 			this.Channel = Channel;
 			this.ChannelID = ChannelID;
@@ -363,7 +368,7 @@ namespace SuiBot_Core
 				return ChatFiltering.FilterOutMessages(message, false);
 		}
 
-		internal bool IsSuperMod(string username)
+		public bool IsSuperMod(string username)
 		{
 			if (Channel == username)
 				return true;

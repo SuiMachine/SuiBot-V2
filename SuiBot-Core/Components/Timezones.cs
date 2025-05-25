@@ -30,7 +30,7 @@ namespace SuiBot_Core.Components
 				var estTimeConverted = TimeZoneInfo.ConvertTime(result, GetTimeZoneWrapped("Eastern Standard Time", "America/New_York"));
 				var calishitTime = TimeZoneInfo.ConvertTime(result, GetTimeZoneWrapped("Pacific Standard Time", "America/Los_Angeles"));
 
-				var text = $"{result.ToShortTimeString()} ({GetUTCMark(result)}) is {japsTimeConverted.ToShortTimeString()} in Tokyo Time, {sydneyTimeConverted.ToShortTimeString()} in Sedney (East Australia), {europeanTimeConverted.ToShortTimeString()} in Central Europe (CET), {estTimeConverted.ToShortTimeString()} on Eastern Coast of US (EST) and {calishitTime.ToShortTimeString()} on the Western Coast of US (PT).";
+				var text = $"{result.ToShortTimeString()} ({GetUTCMark(result)}) is {japsTimeConverted.ToShortTimeString()} in Tokyo Time, {sydneyTimeConverted.ToShortTimeString()} in Sydney (East Australia), {europeanTimeConverted.ToShortTimeString()} in Central Europe (CET), {estTimeConverted.ToShortTimeString()} on Eastern Coast of US (EST) and {calishitTime.ToShortTimeString()} on the Western Coast of US (PT).";
 				ChannelInstance.SendChatMessageResponse(lastMessage, text);
 			}
 			else

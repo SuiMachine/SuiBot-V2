@@ -15,65 +15,7 @@ namespace SuiBot_Core.Storage
      * Comparing to first iteration one of the fundamental changes planned from get-go was offloading the login information
      * to a separate config file and using more of a "high" level syntax. Thus serialized XML was chosen in place of custom
      * and quite frankly pointless syntax.
-    */
-
-	/// <summary>
-	/// Config struct storing essential information for joining the IRC server (Twitch). New settings require creating new object.
-	/// </summary>
-	[Serializable]
-	public class ConnectionConfig
-	{
-		[XmlElement] public string Username { get; set; }
-		[XmlElement] public string Password { get; set; }
-
-		public ConnectionConfig()
-		{
-			this.Username = "";
-			this.Password = "";
-		}
-
-		public ConnectionConfig(string Username, string Password)
-		{
-			this.Username = Username;
-			this.Password = Password;
-		}
-
-		public bool IsValidConfig() => !string.IsNullOrEmpty(Username) && !string.IsNullOrEmpty(Password);
-
-		public static bool ConfigExists()
-		{
-			return File.Exists("Bot/ConnectionConfig.suixml");
-		}
-
-		/// <summary>
-		/// Loads config from Bot/Config.suixml.
-		/// </summary>
-		/// <returns>SuiBot_Config object</returns>
-		public static ConnectionConfig Load()
-		{
-			var obj = XML_Utils.Load("Bot/ConnectionConfig.suixml", new ConnectionConfig());
-			obj.FillEmpty();
-			return obj;
-		}
-
-		/// <summary>
-		/// Filling is needed in case of bot updates, since it would be a pain to write checks each time a bot function is used after bot update.
-		/// </summary>
-		private void FillEmpty()
-		{
-			if (Username == null)
-				Username = "";
-			if (Password == null)
-				Password = "";
-		}
-
-
-		/// <summary>
-		/// Saves config to Bot/Config.suixml.
-		/// </summary>
-		/// <param name="obj">Instance of SuiBot_Config object.</param>
-		public void Save() => XML_Utils.Save("Bot/ConnectionConfig.suixml", this);
-	}
+    */	
 
 	/// <summary>
 	/// Config storing universal settings shared between all channels. This also serves as a way of isolating login information for set property functions.

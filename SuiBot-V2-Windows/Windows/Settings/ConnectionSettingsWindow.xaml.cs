@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SuiBot_TwitchSocket;
+using System;
 using System.Windows;
 
 namespace SuiBot_V2_Windows.Windows.Settings
@@ -8,9 +9,9 @@ namespace SuiBot_V2_Windows.Windows.Settings
 	/// </summary>
 	public partial class ConnectionSettingsWindow : Window
 	{
-		public SuiBot_Core.Storage.ConnectionConfig ConnectionConfig { get; private set; }
+		public ConnectionConfig ConnectionConfig { get; private set; }
 
-		public ConnectionSettingsWindow(SuiBot_Core.Storage.ConnectionConfig connectionConfig)
+		public ConnectionSettingsWindow(ConnectionConfig connectionConfig)
 		{
 			InitializeComponent();
 			this.ConnectionConfig = connectionConfig;

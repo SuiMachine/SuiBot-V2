@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SuiBot_Core.Extensions.SuiStringExtension
 {
-	static class SuiStringExtension
+	public static class SuiStringExtension
 	{
 		/// <summary>
 		/// This is a string provider for formatting DateTime obtained from Twitch
@@ -75,9 +75,7 @@ namespace SuiBot_Core.Extensions.SuiStringExtension
 		public static string StripSingleWord(this string v)
 		{
 			if (v.Contains(' '))
-			{
 				return v.Split(new char[] { ' ' }, 2)[1].Trim();
-			}
 			else
 				return "";
 		}

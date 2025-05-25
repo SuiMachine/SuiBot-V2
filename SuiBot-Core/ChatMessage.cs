@@ -1,4 +1,0 @@
-﻿namespace SuiBot_Core
-{
-
-}

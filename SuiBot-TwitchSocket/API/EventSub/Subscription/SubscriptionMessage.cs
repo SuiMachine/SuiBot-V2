@@ -1,6 +1,4 @@
-﻿using System.Collections.Specialized;
-
-namespace SuiBot_Core.API.EventSub.Subscription
+﻿namespace SuiBot_Core.API.EventSub.Subscription
 {
 	public class ES_Subscribe_Condition
 	{
@@ -9,32 +7,32 @@ namespace SuiBot_Core.API.EventSub.Subscription
 		public string moderator_user_id = null;
 		private ES_Subscribe_Condition() { }
 
-		public static ES_Subscribe_Condition CreateBroadcaster(ulong broadcaster_user_id)
+		public static ES_Subscribe_Condition CreateBroadcaster(string broadcaster_user_id)
 		{
 			return new ES_Subscribe_Condition()
 			{
-				broadcaster_user_id = broadcaster_user_id.ToString(),
+				broadcaster_user_id = broadcaster_user_id,
 				user_id = null,
 				moderator_user_id = null
 			};
 		}
 
-		public static ES_Subscribe_Condition CreateBroadcasterAndUser(ulong broadcaster_user_id, ulong userID)
+		public static ES_Subscribe_Condition CreateBroadcasterAndUser(string broadcaster_user_id, string userID)
 		{
 			return new ES_Subscribe_Condition()
 			{
-				broadcaster_user_id = broadcaster_user_id.ToString(),
+				broadcaster_user_id = broadcaster_user_id,
 				user_id = userID.ToString(),
 				moderator_user_id = null,
 			};
 		}
 
-		public static ES_Subscribe_Condition CreateBroadcasterAndModerator(ulong broadcaster_user_id, ulong moderator_id)
+		public static ES_Subscribe_Condition CreateBroadcasterAndModerator(string broadcaster_user_id, string moderator_id)
 		{
 			return new ES_Subscribe_Condition()
 			{
-				broadcaster_user_id = broadcaster_user_id.ToString(),
-				moderator_user_id = moderator_id.ToString(),
+				broadcaster_user_id = broadcaster_user_id,
+				moderator_user_id = moderator_id,
 				user_id = null
 			};
 		}

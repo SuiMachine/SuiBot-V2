@@ -4,9 +4,9 @@ using System.IO;
 
 namespace SuiBot_Core
 {
-	internal static class ErrorLogging
+	static class ErrorLoggingSocket
 	{
-		const string FILENAME = "SuiBot-Core.log";
+		const string FILENAME = "SuiBot-TwitchSocket.log";
 
 		public static void WriteLine(string text)
 		{

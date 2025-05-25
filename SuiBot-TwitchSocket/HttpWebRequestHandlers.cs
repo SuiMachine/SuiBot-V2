@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SuiBot_Core
 {
-	internal static class HttpWebRequestHandlers
+	public static class HttpWebRequestHandlers
 	{
 		/// <summary>
 		/// Does a request and gets a Json response.
@@ -64,8 +64,8 @@ namespace SuiBot_Core
 			}
 			catch (Exception e)
 			{
-				ErrorLogging.WriteLine($"Failed to perform get: {e}");
-				ErrorLogging.WriteLine($"Url and scope were: to perform get: {baseUrl+scope}");
+				ErrorLoggingSocket.WriteLine($"Failed to perform get: {e}");
+				ErrorLoggingSocket.WriteLine($"Url and scope were: to perform get: {baseUrl+scope}");
 				return "";
 			}
 		}
@@ -92,8 +92,8 @@ namespace SuiBot_Core
 			}
 			catch (Exception e)
 			{
-				ErrorLogging.WriteLine($"Failed to perform get: {e}");
-				ErrorLogging.WriteLine($"Url and scope were: to perform get: {baseUrl + scope}");
+				ErrorLoggingSocket.WriteLine($"Failed to perform get: {e}");
+				ErrorLoggingSocket.WriteLine($"Url and scope were: to perform get: {baseUrl + scope}");
 				return "";
 			}
 		}
@@ -122,8 +122,8 @@ namespace SuiBot_Core
 			}
 			catch (Exception ex)
 			{
-				ErrorLogging.WriteLine($"Failed to perform delete: {ex}");
-				ErrorLogging.WriteLine($"Url and scope were: to perform get: {baseUrl + scope + parameters}");
+				ErrorLoggingSocket.WriteLine($"Failed to perform delete: {ex}");
+				ErrorLoggingSocket.WriteLine($"Url and scope were: to perform get: {baseUrl + scope + parameters}");
 				return "";
 			}
 		}
@@ -162,9 +162,9 @@ namespace SuiBot_Core
 			}
 			catch (Exception e)
 			{
-				ErrorLogging.WriteLine($"Failed to perform post: {e}");
-				ErrorLogging.WriteLine($"Url and scope were: to perform get: {baseUrl + scope + parameters}");
-				ErrorLogging.WriteLine($"Content was: {postData}");
+				ErrorLoggingSocket.WriteLine($"Failed to perform post: {e}");
+				ErrorLoggingSocket.WriteLine($"Url and scope were: to perform get: {baseUrl + scope + parameters}");
+				ErrorLoggingSocket.WriteLine($"Content was: {postData}");
 				return "";
 			}
 		}
@@ -176,7 +176,7 @@ namespace SuiBot_Core
 		/// <param name="BaseURI">Base of URL</param>
 		/// <param name="variables">Parameters to build on</param>
 		/// <returns>Combined URL</returns>
-		internal static Uri BuildRequestUri(string BaseURI, string[] variables)
+		public static Uri BuildRequestUri(string BaseURI, string[] variables)
 		{
 			string uri = BaseURI;
 			for (int i = 0; i < variables.Length; i++)
@@ -199,7 +199,7 @@ namespace SuiBot_Core
 		/// <param name="header">Header</param>
 		/// <param name="variable">Variable</param>
 		/// <returns>Formatted parameter</returns>
-		internal static string FormatParameter(string header, string variable)
+		public static string FormatParameter(string header, string variable)
 		{
 			return header + "=" + Uri.EscapeDataString(variable);
 		}

@@ -129,31 +129,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="API\EventSub\Enums.cs" />
-    <Compile Include="API\EventSub\ES_AutomodMessageHold.cs" />
-    <Compile Include="API\EventSub\ES_ChannelPoints.cs" />
-    <Compile Include="API\EventSub\ES_ChatMessages.cs" />
-    <Compile Include="API\EventSub\ES_Metadata.cs" />
-    <Compile Include="API\EventSub\ES_ReconnectSession.cs" />
-    <Compile Include="API\EventSub\ES_ServerMessage.cs" />
-    <Compile Include="API\EventSub\ES_SessionMessage.cs" />
-    <Compile Include="API\EventSub\ES_StreamOnlineOffline.cs" />
-    <Compile Include="API\EventSub\ES_Suspicious UserMessage.cs" />
-    <Compile Include="API\EventSub\Subscription\SubscribeMSG_AutomodMessageHold.cs" />
-    <Compile Include="API\EventSub\Subscription\SubscribeMSG_ChannelAdBreakBegin.cs" />
-    <Compile Include="API\EventSub\Subscription\SubscribeMSG_ChannelSuspeciousUserMessage.cs" />
-    <Compile Include="API\EventSub\Subscription\SubscribeMSG_ReadChannelMessage.cs" />
-    <Compile Include="API\EventSub\Subscription\SubscribeMSG_StreamOffline.cs" />
-    <Compile Include="API\EventSub\Subscription\SubscribeMSG_StreamOnline.cs" />
-    <Compile Include="API\EventSub\Subscription\SubscriptionMessage.cs" />
-    <Compile Include="API\Helix\Request\Request_Ban.cs" />
-    <Compile Include="API\Helix\Request\Request_SendMessage.cs" />
-    <Compile Include="API\Helix\Responses\Response_StreamStatus.cs" />
-    <Compile Include="API\Helix\Responses\Response_ValidateToken.cs" />
-    <Compile Include="API\Helix\Responses\UniversalResponse_Transport.cs" />
-    <Compile Include="API\Helix\API_Timeout.cs" />
-    <Compile Include="API\Helix\Responses\Response_GetUserInfo.cs" />
-    <Compile Include="API\EventSub\Subscription\Response\Response_SubscribeTo.cs" />
     <Compile Include="Components\ChatFiltering.cs" />
     <Compile Include="Components\CustomCvars.cs" />
     <Compile Include="Components\GenericUtil.cs" />
@@ -178,9 +153,6 @@
     <Compile Include="Components\Timezones.cs" />
     <Compile Include="ErrorLogging.cs" />
     <Compile Include="Events\BotEvents.cs" />
-    <Compile Include="Extensions\SuiStringExtansions.cs" />
-    <Compile Include="HttpWebRequestHandlers.cs" />
-    <Compile Include="ChatMessage.cs" />
     <Compile Include="Components\RNG.cs" />
     <Compile Include="Storage\ChatFilters.cs" />
     <Compile Include="Storage\ChatFilterUsersDB.cs" />
@@ -193,14 +165,15 @@
     <Compile Include="SuiBot_ChannelInstance.cs" />
     <Compile Include="Storage\Config.cs" />
     <Compile Include="Storage\IntervalMessages.cs" />
-    <Compile Include="API\HelixAPI.cs" />
-    <Compile Include="TwitchSocket.cs" />
-    <Compile Include="XML_Utils.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SpeedrunComSharp\SpeedrunComSharp\SpeedrunComSharp.csproj">
       <Project>{924aaffe-5b89-49e2-99ad-ec9373cc838d}</Project>
       <Name>SpeedrunComSharp</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SuiBot-TwitchSocket\SuiBot-TwitchSocket.csproj">
+      <Project>{eefd4d67-fa06-4a2a-804f-31851cb06a3e}</Project>
+      <Name>SuiBot-TwitchSocket</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

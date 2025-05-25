@@ -1,16 +1,17 @@
 ﻿using SuiBot_Core.API.EventSub;
 using SuiBot_Core.API.EventSub.Subscription.Responses;
+using SuiBot_TwitchSocket;
+using SuiBot_TwitchSocket.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.Remoting.Channels;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace SuiBot_Core
 {
-	public class SuiBot : IDisposable
+	public class SuiBot : IDisposable, IBotInstance
 	{
 		private static SuiBot m_Instance;
 		internal TwitchSocket TwitchSocket { get; private set; }
@@ -19,11 +20,11 @@ namespace SuiBot_Core
 		public static SuiBot GetInstance()
 		{
 			if (m_Instance == null || m_Instance.IsDisposed)
-				m_Instance = new SuiBot(Storage.ConnectionConfig.Load(), Storage.CoreConfig.Load());
+				m_Instance = new SuiBot(ConnectionConfig.Load(), Storage.CoreConfig.Load());
 			return m_Instance;
 		}
 
-		public static SuiBot GetInstance(Storage.ConnectionConfig BotConnectionConfig, Storage.CoreConfig BotCoreConfig)
+		public static SuiBot GetInstance(ConnectionConfig BotConnectionConfig, Storage.CoreConfig BotCoreConfig)
 		{
 			if (m_Instance == null || m_Instance.IsDisposed)
 				m_Instance = new SuiBot(BotConnectionConfig, BotCoreConfig);
@@ -34,10 +35,9 @@ namespace SuiBot_Core
 		/// Creates a new instance of SuiBot.
 		/// </summary>
 		/// <param name="BotConfig">Config struct object. SuiBot_Config.Load() may be used to load it from config file.</param>
-		private SuiBot(Storage.ConnectionConfig BotConnectionConfig, Storage.CoreConfig BotCoreConfig)
+		private SuiBot(ConnectionConfig BotConnectionConfig, Storage.CoreConfig BotCoreConfig)
 		{
 			this.BotConnectionConfig = BotConnectionConfig;
-			this.BotName = BotConnectionConfig.Username;
 			this.BotCoreConfig = BotCoreConfig;
 			this.IntervalTimer = new System.Timers.Timer(1000 * 60) { AutoReset = true };
 			this.StatusUpdateTimer = new System.Timers.Timer(5 * 1000 * 60) { AutoReset = true };
@@ -46,14 +46,14 @@ namespace SuiBot_Core
 
 		}
 
-		private Storage.ConnectionConfig BotConnectionConfig { get; set; }
+		private ConnectionConfig BotConnectionConfig { get; set; }
 		public Storage.CoreConfig BotCoreConfig { get; set; }
 		public Dictionary<string, SuiBot_ChannelInstance> ActiveChannels { get; set; }
 		public Dictionary<string, SuiBot_ChannelInstance> ChannelInstances { get; set; }
+		public string BotName => HelixAPI.BotLoginName;
 
 		public bool IsAfterFirstStatusUpdate = false;
 
-		public string BotName { get; set; }
 		public System.Timers.Timer IntervalTimer;
 		public System.Timers.Timer StatusUpdateTimer;
 		public bool ShouldRun;
@@ -156,17 +156,17 @@ namespace SuiBot_Core
 			StatusUpdateTimer.Elapsed += StatusUpdateTimer_Elapsed;
 		}
 
-		internal void TwitchSocket_Connected()
+		public void TwitchSocket_Connected()
 		{
 			ErrorLogging.WriteLine("Connected!");
 
 			Task.Factory.StartNew(async () =>
 			{
-				List<API.EventSub.Subscription.Responses.Response_SubscribeTo.Subscription_Response_Data> channelsToSubScribeAdditionalInformationTo = new List<API.EventSub.Subscription.Responses.Response_SubscribeTo.Subscription_Response_Data>();
+				List<Response_SubscribeTo.Subscription_Response_Data> channelsToSubScribeAdditionalInformationTo = new List<Response_SubscribeTo.Subscription_Response_Data>();
 
 				foreach (var channel in BotCoreConfig.ChannelsToJoin)
 				{
-					API.EventSub.Subscription.Responses.Response_SubscribeTo.Subscription_Response_Data result = await HelixAPI.SubscribeTo_ChatMessage(channel, TwitchSocket.SessionID);
+					Response_SubscribeTo.Subscription_Response_Data result = await HelixAPI.SubscribeTo_ChatMessage(channel, TwitchSocket.SessionID);
 					if (result != null)
 					{
 						channelsToSubScribeAdditionalInformationTo.Add(result);
@@ -191,15 +191,15 @@ namespace SuiBot_Core
 				{
 					Console.WriteLine($"Subscribing to additional events for {channel.condition.broadcaster_user_id}");
 
-					var onLineSub = await HelixAPI.SubscribeToOnlineStatus(channel.condition.broadcaster_user_id.Value, TwitchSocket.SessionID);
+					var onLineSub = await HelixAPI.SubscribeToOnlineStatus(channel.condition.broadcaster_user_id.Value.ToString(), TwitchSocket.SessionID);
 					await Task.Delay(2000);
-					var offlineSub = await HelixAPI.SubscribeToOfflineStatus(channel.condition.broadcaster_user_id.Value, TwitchSocket.SessionID);
+					var offlineSub = await HelixAPI.SubscribeToOfflineStatus(channel.condition.broadcaster_user_id.Value.ToString(), TwitchSocket.SessionID);
 					await Task.Delay(2000);
 					/*					var adSub = await HelixAPI.SubscribeToChannelAdBreak(channel.condition.broadcaster_user_id, TwitchSocket.SessionID);
 										await Task.Delay(2000);*/
-					var automodHold = await HelixAPI.SubscribeToAutoModHold(channel.condition.broadcaster_user_id.Value, TwitchSocket.SessionID);
+					var automodHold = await HelixAPI.SubscribeToAutoModHold(channel.condition.broadcaster_user_id.Value.ToString(), TwitchSocket.SessionID);
 					await Task.Delay(2000);
-					var susMessage = await HelixAPI.SubscribeToChannelSuspiciousUserMessage(channel.condition.broadcaster_user_id.Value, TwitchSocket.SessionID);
+					var susMessage = await HelixAPI.SubscribeToChannelSuspiciousUserMessage(channel.condition.broadcaster_user_id.Value.ToString(), TwitchSocket.SessionID);
 					await Task.Delay(2000);
 				}
 				Console.WriteLine($"Done!");
@@ -210,7 +210,7 @@ namespace SuiBot_Core
 			StatusUpdateTimer.Start();
 		}
 
-		internal void TwitchSocket_Disconnected()
+		public void TwitchSocket_Disconnected()
 		{
 			IntervalTimer.Stop();
 			StatusUpdateTimer.Stop();
@@ -221,7 +221,7 @@ namespace SuiBot_Core
 			ActiveChannels.Clear();
 		}
 
-		internal void TwitchSocket_ChatMessage(ES_ChatMessage newMessage)
+		public void TwitchSocket_ChatMessage(ES_ChatMessage newMessage)
 		{
 			if (ActiveChannels.TryGetValue(newMessage.broadcaster_user_login, out var channelToProcess))
 			{
@@ -258,7 +258,7 @@ namespace SuiBot_Core
 			}
 			else
 			{
-				var channelInstance = new SuiBot_ChannelInstance(channelToJoin, result.condition.broadcaster_user_id.Value, this, Storage.ChannelConfig.Load(channelToJoin));
+				var channelInstance = new SuiBot_ChannelInstance(channelToJoin, result.condition.broadcaster_user_id.Value.ToString(), this, Storage.ChannelConfig.Load(channelToJoin));
 				ActiveChannels.Add(channelToJoin, channelInstance);
 				ChannelInstances.Add(channelToJoin, channelInstance);
 				this.OnChannelJoining?.Invoke(channelToJoin);
@@ -279,7 +279,6 @@ namespace SuiBot_Core
 		{
 			ErrorLogging.WriteLine("Planned shutdown performed ");
 			Close();
-			ErrorLogging.Close();
 		}
 
 		public void Close()
@@ -304,7 +303,7 @@ namespace SuiBot_Core
 			Debug.WriteLine("Implement dispose?");
 		}
 
-		internal void ClosedViaSocket()
+		public void TwitchSocket_ClosedViaSocket()
 		{
 			if (!IsDisposed)
 				Dispose();
@@ -335,6 +334,71 @@ namespace SuiBot_Core
 						$"Expires in: {expiry.Days} days {expiry.Hours} hours {expiry.Minutes} minutes {expiry.Seconds} seconds\n";
 				}
 			}
+		}
+
+		public bool GetChannelInstanceUsingLogin(string channel_login_name, out IChannelInstance instance)
+		{
+			if (ActiveChannels.TryGetValue(channel_login_name, out var foundChannel))
+			{
+				instance = foundChannel;
+				return true;
+			}
+			else
+			{
+				instance = null;
+				return false;
+			}
+		}
+
+		public void TwitchSocket_SuspiciousMessageReceived(ES_Suspicious_UserMessage suspiciousMessage)
+		{
+			if (!ActiveChannels.TryGetValue(suspiciousMessage.broadcaster_user_login, out SuiBot_ChannelInstance channel))
+				return;
+
+			if (channel.ConfigInstance.FilteringEnabled)
+			{
+				var asMessage = suspiciousMessage.ConvertToChatMessage();
+
+				if (channel.ChatFiltering.FilterOutMessages(asMessage, true))
+				{
+					channel.UserBan(asMessage);
+					channel.SendChatMessage("Bam! Banned suspicious chatter!");
+					return;
+				}
+				else if (channel.ConfigInstance.FilterUsingAI)
+				{
+					if (channel.GeminiAI.IsConfigured())
+						channel.GeminiAI.PerformAIFiltering(channel, asMessage);
+				}
+			}
+		}
+
+		public void TwitchSocket_StreamWentOnline(ES_StreamOnline onlineData)
+		{
+			//Nothing!
+		}
+
+		public void TwitchSocket_StreamWentOffline(ES_StreamOffline offlineData)
+		{
+			if (!ChannelInstances.TryGetValue(offlineData.broadcaster_user_login, out var channelInstance))
+				return;
+
+			channelInstance.StreamStatus = new API.Helix.Responses.Response_StreamStatus()
+			{
+				IsOnline = false,
+				GameChangedSinceLastTime = true
+			};
+
+			if (channelInstance.ConfigInstance.LeaderboardsEnabled)
+			{
+				if (!channelInstance.Leaderboards.GameOverride)
+					channelInstance.Leaderboards.CurrentGame = channelInstance.StreamStatus.game_name;
+			}
+		}
+
+		public void TwitchSocket_AutoModMessageHold(ES_AutomodMessageHold messageHold)
+		{
+			//Nothing
 		}
 	}
 }

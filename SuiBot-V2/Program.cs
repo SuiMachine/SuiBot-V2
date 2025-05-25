@@ -1,4 +1,5 @@
 ﻿using SuiBot_Core;
+using SuiBot_TwitchSocket;
 using System;
 using System.IO;
 
@@ -22,7 +23,7 @@ namespace SuiBot_V2
 			}
 			else
 			{
-				var configFile = new SuiBot_Core.Storage.ConnectionConfig();
+				var configFile = new ConnectionConfig();
 				configFile.Save();
 				Console.WriteLine("No connection config was found, so a new file was created.");
 

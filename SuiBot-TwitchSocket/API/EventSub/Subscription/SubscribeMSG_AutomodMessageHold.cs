@@ -1,15 +1,15 @@
 ﻿namespace SuiBot_Core.API.EventSub.Subscription
 {
-	public class SubscribeMSG_ChannelSuspiciousUserMessage
+	internal class SubscribeMSG_AutomodMessageHold
 	{
-		public string type = "channel.suspicious_user.message";
-		public int version = 1;
+		public string type = "automod.message.hold";
+		public int version = 2;
 		public ES_Subscribe_Condition condition;
 		public ES_Subscribe_Transport_Websocket transport;
 
-		public SubscribeMSG_ChannelSuspiciousUserMessage() { }
+		public SubscribeMSG_AutomodMessageHold() {}
 
-		public SubscribeMSG_ChannelSuspiciousUserMessage(ulong channelId, ulong moderatorId, string sessionID)
+		public SubscribeMSG_AutomodMessageHold(string channelId, string moderatorId, string sessionID)
 		{
 			condition = ES_Subscribe_Condition.CreateBroadcasterAndModerator(channelId, moderatorId);
 			transport = new ES_Subscribe_Transport_Websocket(sessionID);

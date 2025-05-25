@@ -1,6 +1,5 @@
 ﻿using SuiBot_Core.API.EventSub;
 using System;
-using System.Diagnostics;
 
 namespace SuiBot_Core.Components.Other.Gemini.FunctionTypes
 {

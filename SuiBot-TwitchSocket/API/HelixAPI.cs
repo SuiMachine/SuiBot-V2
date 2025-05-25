@@ -5,6 +5,7 @@ using SuiBot_Core.API.EventSub.Subscription;
 using SuiBot_Core.API.EventSub.Subscription.Responses;
 using SuiBot_Core.API.Helix.Request;
 using SuiBot_Core.API.Helix.Responses;
+using SuiBot_TwitchSocket.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,8 +25,8 @@ namespace SuiBot_Core.API
 
 		public Dictionary<string, Response_GetUserInfo> UserNameToInfo = new Dictionary<string, Response_GetUserInfo>();
 		public string BotLoginName { get; private set; }
-		public ulong BotUserId { get; private set; }
-		private const string CLIENT_ID = "rmi9m0sheo4pp5882o8s24zu7h09md";
+		public ulong BotUserId { get; private set; } //This should be string :(
+		public readonly string CLIENT_ID = "rmi9m0sheo4pp5882o8s24zu7h09md";
 
 #if LOCAL_API
 		//Local user - 92987419
@@ -38,7 +39,7 @@ namespace SuiBot_Core.API
 
 		private readonly string OAUTH = "";
 		//private readonly DateTime LastRequest = DateTime.MinValue;
-		private SuiBot botInstance;
+		private IBotInstance m_BotInstance;
 
 		private Dictionary<string, string> BuildDefaultHeaders()
 		{
@@ -68,11 +69,11 @@ namespace SuiBot_Core.API
 			if (obj.expires_in < 60 * 60 * 24 * 7) //expires in less than 7 days
 			{
 				var ts = TimeSpan.FromSeconds(obj.expires_in);
-				ErrorLogging.WriteLine($"Token expires in: {ts}");
+				ErrorLoggingSocket.WriteLine($"Token expires in: {ts}");
 			}
 			if (obj.client_id != CLIENT_ID)
 			{
-				ErrorLogging.WriteLine("Invalid client ID for this token!");
+				ErrorLoggingSocket.WriteLine("Invalid client ID for this token!");
 				return ValidationResult.Failed;
 			}
 
@@ -89,16 +90,16 @@ namespace SuiBot_Core.API
 		}
 
 		//For testing
-		public HelixAPI(SuiBot bot, string aouth)
+		public HelixAPI(IBotInstance bot, string aouth)
 		{
-			this.botInstance = bot;
+			this.m_BotInstance = bot;
 			this.OAUTH = aouth;
 #if LOCAL_API
 			this.BotLoginName = "fishershepard595";
 #endif
 		}
 
-		public void GetStatus(SuiBot_ChannelInstance instance)
+		public void GetStatus(IChannelInstance instance)
 		{
 			var oldStatus = instance.StreamStatus;
 
@@ -131,7 +132,7 @@ namespace SuiBot_Core.API
 			}
 			else
 			{
-				ErrorLogging.WriteLine($"Error checking status for {instance.Channel}");
+				ErrorLoggingSocket.WriteLine($"Error checking status for {instance.Channel}");
 			}
 		}
 
@@ -145,7 +146,7 @@ namespace SuiBot_Core.API
 				}
 				catch (Exception e)
 				{
-					ErrorLogging.WriteLine($"Failed to remove message: {e}");
+					ErrorLoggingSocket.WriteLine($"Failed to remove message: {e}");
 				}
 			});
 		}
@@ -159,7 +160,7 @@ namespace SuiBot_Core.API
 					NullValueHandling = NullValueHandling.Ignore
 				});
 
-				var result = await HttpWebRequestHandlers.PerformPostAsync(BASE_URI, "moderation/bans", $"?broadcaster_id={message.broadcaster_user_id}&moderator_id={botInstance.HelixAPI.BotUserId}", serialize, BuildDefaultHeaders());
+				var result = await HttpWebRequestHandlers.PerformPostAsync(BASE_URI, "moderation/bans", $"?broadcaster_id={message.broadcaster_user_id}&moderator_id={BotUserId}", serialize, BuildDefaultHeaders());
 
 			});
 		}
@@ -173,7 +174,7 @@ namespace SuiBot_Core.API
 					NullValueHandling = NullValueHandling.Ignore
 				});
 
-				var result = await HttpWebRequestHandlers.PerformPostAsync(BASE_URI, "moderation/bans", $"?broadcaster_id={message.broadcaster_user_id}&moderator_id={botInstance.HelixAPI.BotUserId}", serialize, BuildDefaultHeaders());
+				var result = await HttpWebRequestHandlers.PerformPostAsync(BASE_URI, "moderation/bans", $"?broadcaster_id={message.broadcaster_user_id}&moderator_id={BotUserId}", serialize, BuildDefaultHeaders());
 
 			});
 		}
@@ -187,7 +188,7 @@ namespace SuiBot_Core.API
 					NullValueHandling = NullValueHandling.Ignore
 				});
 
-				var result = await HttpWebRequestHandlers.PerformPostAsync(BASE_URI, "moderation/bans", $"?broadcaster_id={message.broadcaster_user_id}&moderator_id={botInstance.HelixAPI.BotUserId}", serialize, BuildDefaultHeaders());
+				var result = await HttpWebRequestHandlers.PerformPostAsync(BASE_URI, "moderation/bans", $"?broadcaster_id={message.broadcaster_user_id}&moderator_id={BotUserId}", serialize, BuildDefaultHeaders());
 
 			});
 		}
@@ -214,7 +215,7 @@ namespace SuiBot_Core.API
 			return null;
 		}
 
-		public void RequestUpdate(SuiBot_ChannelInstance instance)
+		public void RequestUpdate(IChannelInstance instance)
 		{
 			//var oldStatus = instance.StreamStatus;
 			GetStatus(instance);
@@ -228,13 +229,13 @@ namespace SuiBot_Core.API
 			}
 		}
 
-		internal async Task<Subscription_Response_Data> SubscribeTo_ChatMessage(string channel, string sessionId)
+		public async Task<Subscription_Response_Data> SubscribeTo_ChatMessage(string channel, string sessionId)
 		{
 			Response_GetUserInfo channelInfo = await GetUserInfo(channel);
 			if (channelInfo == null)
 				return null;
 
-			var content = new SubscribeMSG_ReadChannelMessage(channelInfo.id, BotUserId, sessionId);
+			var content = new SubscribeMSG_ReadChannelMessage(channelInfo.id, BotUserId.ToString(), sessionId);
 			var serialize = JsonConvert.SerializeObject(content, Formatting.Indented, new JsonSerializerSettings()
 			{
 				NullValueHandling = NullValueHandling.Ignore
@@ -249,7 +250,7 @@ namespace SuiBot_Core.API
 					deserialize.PerformCostCheck();
 					if (deserialize.data.Length > 0)
 					{
-						return deserialize.data.FirstOrDefault(x => x.condition.broadcaster_user_id == channelInfo.id);
+						return deserialize.data.FirstOrDefault(x => x.condition.broadcaster_user_id?.ToString() == channelInfo.id);
 					}
 					else
 						return null;
@@ -262,7 +263,7 @@ namespace SuiBot_Core.API
 		}
 
 		//Too much code repetition - should at least be seperate
-		internal async Task<bool> SubscribeToOnlineStatus(ulong channelID, string sessionID)
+		public async Task<bool> SubscribeToOnlineStatus(string channelID, string sessionID)
 		{
 			var request = new SubscribeMSG_StreamOnline(channelID, sessionID);
 			var serialize = JsonConvert.SerializeObject(request, Formatting.Indented, new JsonSerializerSettings()
@@ -277,7 +278,7 @@ namespace SuiBot_Core.API
 				if (deserialize != null)
 				{
 					deserialize.PerformCostCheck();
-					var channel = deserialize.data.FirstOrDefault(x => x.condition.broadcaster_user_id == channelID);
+					var channel = deserialize.data.FirstOrDefault(x => x.condition.broadcaster_user_id?.ToString() == channelID);
 					return channel != null;
 				}
 				else
@@ -287,7 +288,7 @@ namespace SuiBot_Core.API
 			return false;
 		}
 
-		internal async Task<bool> SubscribeToOfflineStatus(ulong channelID, string sessionID)
+		public async Task<bool> SubscribeToOfflineStatus(string channelID, string sessionID)
 		{
 			var request = new SubscribeMSG_StreamOffline(channelID, sessionID);
 			var serialize = JsonConvert.SerializeObject(request, Formatting.Indented, new JsonSerializerSettings()
@@ -302,7 +303,7 @@ namespace SuiBot_Core.API
 				if (deserialize != null)
 				{
 					deserialize.PerformCostCheck();
-					var channel = deserialize.data.FirstOrDefault(x => x.condition.broadcaster_user_id == channelID);
+					var channel = deserialize.data.FirstOrDefault(x => x.condition.broadcaster_user_id?.ToString() == channelID);
 					return channel != null;
 				}
 				else
@@ -312,9 +313,9 @@ namespace SuiBot_Core.API
 			return false;
 		}
 
-		internal async Task<bool> SubscribeToAutoModHold(ulong channelID, string sessionID)
+		public async Task<bool> SubscribeToAutoModHold(string channelID, string sessionID)
 		{
-			var request = new SubscribeMSG_AutomodMessageHold(channelID, BotUserId, sessionID);
+			var request = new SubscribeMSG_AutomodMessageHold(channelID, BotUserId.ToString(), sessionID);
 			var serialize = JsonConvert.SerializeObject(request, Formatting.Indented, new JsonSerializerSettings()
 			{
 				NullValueHandling = NullValueHandling.Ignore
@@ -327,7 +328,7 @@ namespace SuiBot_Core.API
 				if (deserialize != null)
 				{
 					deserialize.PerformCostCheck();
-					var channel = deserialize.data.FirstOrDefault(x => x.condition.broadcaster_user_id == channelID);
+					var channel = deserialize.data.FirstOrDefault(x => x.condition.broadcaster_user_id?.ToString() == channelID);
 					return channel != null;
 				}
 				else
@@ -337,9 +338,9 @@ namespace SuiBot_Core.API
 			return false;
 		}
 
-		internal async Task<bool> SubscribeToChannelSuspiciousUserMessage(ulong channelID, string sessionID)
+		public async Task<bool> SubscribeToChannelSuspiciousUserMessage(string channelID, string sessionID)
 		{
-			var request = new SubscribeMSG_ChannelSuspiciousUserMessage(channelID, BotUserId, sessionID);
+			var request = new SubscribeMSG_ChannelSuspiciousUserMessage(channelID, BotUserId.ToString(), sessionID);
 			var serialize = JsonConvert.SerializeObject(request, Formatting.Indented, new JsonSerializerSettings()
 			{
 				NullValueHandling = NullValueHandling.Ignore
@@ -352,7 +353,7 @@ namespace SuiBot_Core.API
 				if (deserialize != null)
 				{
 					deserialize.PerformCostCheck();
-					var channel = deserialize.data.FirstOrDefault(x => x.condition.broadcaster_user_id == channelID);
+					var channel = deserialize.data.FirstOrDefault(x => x.condition.broadcaster_user_id?.ToString() == channelID);
 					return channel != null;
 				}
 				else
@@ -362,10 +363,10 @@ namespace SuiBot_Core.API
 			return false;
 		}
 
-		internal async Task<bool> SubscribeToChannelAdBreak(ulong channelID, string sessionID)
+		public async Task<bool> SubscribeToChannelAdBreak(string channelID, string sessionID)
 		{
 			//Idk... why this breaks with 403
-			var request = new SubscribeMSG_ChannelAdBreakBegin(channelID, BotUserId, sessionID);
+			var request = new SubscribeMSG_ChannelAdBreakBegin(channelID, BotUserId.ToString(), sessionID);
 			var serialize = JsonConvert.SerializeObject(request, Formatting.Indented, new JsonSerializerSettings()
 			{
 				NullValueHandling = NullValueHandling.Ignore
@@ -378,7 +379,7 @@ namespace SuiBot_Core.API
 				if (deserialize != null)
 				{
 					deserialize.PerformCostCheck();
-					var channel = deserialize.data.FirstOrDefault(x => x.condition.broadcaster_user_id == channelID);
+					var channel = deserialize.data.FirstOrDefault(x => x.condition.broadcaster_user_id?.ToString() == channelID);
 					return channel != null;
 				}
 				else
@@ -388,11 +389,11 @@ namespace SuiBot_Core.API
 			return false;
 		}
 
-		public void SendMessage(SuiBot_ChannelInstance instance, string text)
+		public void SendMessage(IChannelInstance instance, string text)
 		{
 			Task.Run(async () =>
 			{
-				var content = Request_SendChatMessage.CreateMessage(instance.ChannelID, BotUserId, text);
+				var content = Request_SendChatMessage.CreateMessage(instance.ChannelID, BotUserId.ToString(), text);
 				var serialize = JsonConvert.SerializeObject(content, Formatting.Indented, new JsonSerializerSettings()
 				{
 					NullValueHandling = NullValueHandling.Ignore
@@ -407,7 +408,7 @@ namespace SuiBot_Core.API
 		{
 			Task.Run(async () =>
 			{
-				var content = Request_SendChatMessage.CreateResponse(messageToRespondTo.broadcaster_user_id, BotUserId, messageToRespondTo.message_id, message);
+				var content = Request_SendChatMessage.CreateResponse(messageToRespondTo.broadcaster_user_id.ToString(), BotUserId.ToString(), messageToRespondTo.message_id, message);
 				var serialize = JsonConvert.SerializeObject(content, Formatting.Indented, new JsonSerializerSettings()
 				{
 					NullValueHandling = NullValueHandling.Ignore
@@ -418,7 +419,7 @@ namespace SuiBot_Core.API
 			});
 		}
 
-		internal void RequestShoutout(ES_ChatMessage lastMessage, string username)
+		public void RequestShoutout(ES_ChatMessage lastMessage, string username)
 		{
 			Task.Run(async () =>
 			{
@@ -426,7 +427,7 @@ namespace SuiBot_Core.API
 			});
 		}
 
-		internal async Task<Response_SubscribeTo> GetCurrentSubscriptions()
+		public async Task<Response_SubscribeTo> GetCurrentSubscriptions()
 		{
 			var result = await HttpWebRequestHandlers.PerformGetAsync(BASE_URI, "eventsub/subscriptions", "", BuildDefaultHeaders());
 			if (result != null)
@@ -443,7 +444,7 @@ namespace SuiBot_Core.API
 			return null;
 		}
 
-		internal async Task CloseSubscription(Subscription_Response_Data subscription)
+		public async Task CloseSubscription(Subscription_Response_Data subscription)
 		{
 			await HttpWebRequestHandlers.PerformDeleteAsync(BASE_URI, "eventsub/subscriptions", $"?id={subscription.id}", BuildDefaultHeaders());
 		}

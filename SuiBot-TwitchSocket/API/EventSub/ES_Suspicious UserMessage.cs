@@ -24,7 +24,7 @@ namespace SuiBot_Core.API.EventSub
 		public string ban_evasion_evaluation;
 		public Message message;
 
-		internal ES_ChatMessage ConvertToChatMessage()
+		public ES_ChatMessage ConvertToChatMessage()
 		{
 			return new ES_ChatMessage()
 			{

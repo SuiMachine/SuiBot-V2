@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using SuiBot_TwitchSocket.Interfaces;
 using System;
 using System.Diagnostics;
 using System.Linq;
@@ -79,10 +80,10 @@ namespace SuiBot_Core.API.EventSub
 			public string thread_user_login;
 		}
 
-		public ulong broadcaster_user_id;
+		public ulong broadcaster_user_id; //This should be string
 		public string broadcaster_user_login;
 		public string broadcaster_user_name;
-		public ulong chatter_user_id;
+		public ulong chatter_user_id; //This should be string
 		public string chatter_user_login;
 		public string chatter_user_name;
 		public string message_id;
@@ -97,7 +98,7 @@ namespace SuiBot_Core.API.EventSub
 		public string channel_points_animation_id;
 		[NonSerialized][JsonIgnore] public Role UserRole = Role.User;
 
-		internal void SetupRole(SuiBot_ChannelInstance channel)
+		internal void SetupRole(IChannelInstance channel)
 		{
 			if (broadcaster_user_id == chatter_user_id)
 			{
@@ -126,7 +127,7 @@ namespace SuiBot_Core.API.EventSub
 
 			if (channel != null)
 			{
-				if (channel.ConfigInstance.SuperMods.Contains(broadcaster_user_login))
+				if (channel.IsSuperMod(broadcaster_user_login))
 				{
 					UserRole = Role.SuperMod;
 					return;

@@ -1,8 +1,8 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SuiBot_Core.API.EventSub;
-using SuiBot_Core.Extensions.SuiStringExtension;
-using SuiBot_Core.Storage;
+using SuiBot_TwitchSocket;
+using SuiBot_TwitchSocket.Interfaces;
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -18,10 +18,10 @@ namespace SuiBot_Core
 		private string WEBSOCKET_URI = "wss://eventsub.wss.twitch.tv/ws?keepalive_timeout_seconds=30";
 #endif
 
-		private SuiBot BotInstance;
+		private IBotInstance BotInstance;
 		private ConnectionConfig botConnectionConfig;
 
-		internal TwitchSocket(SuiBot botInstance)
+		public TwitchSocket(IBotInstance botInstance)
 		{
 			this.BotInstance = botInstance;
 			CreateSessionAndSocket(0);
@@ -76,9 +76,9 @@ namespace SuiBot_Core
 		private void Socket_OnError(object sender, ErrorEventArgs e)
 		{
 			if (sender == Socket)
-				ErrorLogging.WriteLine($"Got error: {e}");
+				ErrorLoggingSocket.WriteLine($"Got error: {e}");
 			else
-				ErrorLogging.WriteLine($"Auxiliary socket error: {e}");
+				ErrorLoggingSocket.WriteLine($"Auxiliary socket error: {e}");
 		}
 
 		private void ReconnectWithUrl(string reconnect_url)
@@ -128,7 +128,7 @@ namespace SuiBot_Core
 			var socketToClose = (WebSocket)sender;
 			if (sender != Socket)
 			{
-				ErrorLogging.WriteLine($"Secondary socket closed with code {e.Code} - {e?.Reason ?? "None"}");
+				ErrorLoggingSocket.WriteLine($"Secondary socket closed with code {e.Code} - {e?.Reason ?? "None"}");
 				socketToClose.OnMessage -= Socket_OnMessage;
 				socketToClose.OnOpen -= Socket_OnOpen;
 				socketToClose.OnClose -= Socket_OnClose;
@@ -140,7 +140,7 @@ namespace SuiBot_Core
 			m_Connected = false;
 			m_Connecting = false;
 			KeepAliveCheck?.Stop();
-			ErrorLogging.WriteLine($"Closed due to code {e.Code} - {e?.Reason ?? "None"}");
+			ErrorLoggingSocket.WriteLine($"Closed due to code {e.Code} - {e?.Reason ?? "None"}");
 			socketToClose.OnMessage -= Socket_OnMessage;
 			socketToClose.OnOpen -= Socket_OnOpen;
 			socketToClose.OnClose -= Socket_OnClose;
@@ -173,24 +173,24 @@ namespace SuiBot_Core
 					case (ushort)CloseStatusCode.PolicyViolation:
 					case (ushort)CloseStatusCode.MandatoryExtension:
 					case 4002:
-						ErrorLogging.WriteLine("Failed ping-pong!");
+						ErrorLoggingSocket.WriteLine("Failed ping-pong!");
 						AutoReconnect = false;
 						return;
 					case 4003:
-						ErrorLogging.WriteLine("Connection unused - no subscriptions!");
+						ErrorLoggingSocket.WriteLine("Connection unused - no subscriptions!");
 						AutoReconnect = false;
 						return;
 					case 4004: //Reconnect grace time expired
-						ErrorLogging.WriteLine("Grace period expired!");
+						ErrorLoggingSocket.WriteLine("Grace period expired!");
 						AutoReconnect = false;
-						BotInstance?.ClosedViaSocket();
+						BotInstance?.TwitchSocket_ClosedViaSocket();
 						return;
 					case 4007: //Invalid reconnect
 						AutoReconnect = false;
-						BotInstance?.ClosedViaSocket();
+						BotInstance?.TwitchSocket_ClosedViaSocket();
 						return;
 					case 4001:
-						ErrorLogging.WriteLine("Data send via websocket!");
+						ErrorLoggingSocket.WriteLine("Data send via websocket!");
 						delay = 10_000; //Send something via webscocket?!
 						break;
 					case (ushort)CloseStatusCode.NoStatus:
@@ -207,7 +207,7 @@ namespace SuiBot_Core
 
 				if (BotInstance != null)
 				{
-					BotInstance.ClosedViaSocket();
+					BotInstance.TwitchSocket_ClosedViaSocket();
 				}
 			}
 		}
@@ -269,24 +269,24 @@ namespace SuiBot_Core
 			var sessionField = payload["session"];
 			if (sessionField == null)
 			{
-				ErrorLogging.WriteLine($"Something when wrong with reconnect, debug this message:\n{payload}");
+				ErrorLoggingSocket.WriteLine($"Something when wrong with reconnect, debug this message:\n{payload}");
 				return;
 			}
 
 			var reconnect = sessionField.ToObject<ES_ReconnectSession>();
 			if (reconnect == null)
 			{
-				ErrorLogging.WriteLine($"Something went wrong with reconnect, debug this message:\n{sessionField}");
+				ErrorLoggingSocket.WriteLine($"Something went wrong with reconnect, debug this message:\n{sessionField}");
 				return;
 			}
 
 			if (reconnect.id != SessionID)
 			{
-				ErrorLogging.WriteLine("Wrong session ID?!");
+				ErrorLoggingSocket.WriteLine("Wrong session ID?!");
 				return;
 			}
 
-			ErrorLogging.WriteLine($"Received reconnect with: {reconnect.reconnect_url}");
+			ErrorLoggingSocket.WriteLine($"Received reconnect with: {reconnect.reconnect_url}");
 			this.ReconnectWithUrl(reconnect.reconnect_url);
 		}
 
@@ -334,11 +334,9 @@ namespace SuiBot_Core
 			//"power_ups_gigantified_emote"
 			//"user_intro"
 			if (msg.message_type == "user_intro")
-			{
-				ErrorLogging.WriteLine($"Verify this potential first message:\n{dbg}");
-			}
+				ErrorLoggingSocket.WriteLine($"Verify this potential first message:\n{dbg}");
 
-			if (!BotInstance.ChannelInstances.TryGetValue(msg.broadcaster_user_login, out SuiBot_ChannelInstance instance))
+			if(BotInstance.GetChannelInstanceUsingLogin(msg.broadcaster_user_login, out IChannelInstance instance))
 				instance = null; //Not needed, but makes VS shutup
 			msg.SetupRole(instance);
 			BotInstance.TwitchSocket_ChatMessage(msg);
@@ -366,8 +364,7 @@ namespace SuiBot_Core
 			if (msg == null)
 				return;
 
-			if (!BotInstance.ChannelInstances.TryGetValue(msg.broadcaster_user_login, out var channelInstance))
-				return;
+			BotInstance?.TwitchSocket_StreamWentOnline(msg);
 		}
 
 		private void ProcessStreamOffline(JToken payload)
@@ -381,20 +378,7 @@ namespace SuiBot_Core
 			if (msg == null)
 				return;
 
-			if (!BotInstance.ChannelInstances.TryGetValue(msg.broadcaster_user_login, out var channelInstance))
-				return;
-
-			channelInstance.StreamStatus = new API.Helix.Responses.Response_StreamStatus()
-			{
-				IsOnline = false,
-				GameChangedSinceLastTime = true
-			};
-
-			if (channelInstance.ConfigInstance.LeaderboardsEnabled)
-			{
-				if (!channelInstance.Leaderboards.GameOverride)
-					channelInstance.Leaderboards.CurrentGame = channelInstance.StreamStatus.game_name;
-			}
+			BotInstance?.TwitchSocket_StreamWentOffline(msg);
 		}
 
 		private void ProcessAutomodMessageHold(JToken payload)
@@ -410,6 +394,8 @@ namespace SuiBot_Core
 			var msg = eventText.ToObject<ES_AutomodMessageHold>();
 			if (msg == null)
 				return;
+
+			BotInstance?.TwitchSocket_AutoModMessageHold(msg);
 		}
 
 		private void ProcessSuspiciousUserMessage(JToken payload)
@@ -423,25 +409,7 @@ namespace SuiBot_Core
 			if (msg == null)
 				return;
 
-			if (!BotInstance.ActiveChannels.TryGetValue(msg.broadcaster_user_login, out SuiBot_ChannelInstance channel))
-				return;
-
-			if (channel.ConfigInstance.FilteringEnabled)
-			{
-				var asMessage = msg.ConvertToChatMessage();
-
-				if (channel.ChatFiltering.FilterOutMessages(asMessage, true))
-				{
-					channel.UserBan(asMessage);
-					channel.SendChatMessage("Bam! Banned suspicious chatter!");
-					return;
-				}
-				else if (channel.ConfigInstance.FilterUsingAI)
-				{
-					if (channel.GeminiAI.IsConfigured())
-						channel.GeminiAI.PerformAIFiltering(channel, asMessage);
-				}
-			}
+			BotInstance?.TwitchSocket_SuspiciousMessageReceived(msg);
 		}
 
 		private void ProcessWelcome(JToken payload, WebSocket socket)
@@ -450,7 +418,7 @@ namespace SuiBot_Core
 			if (socket != Socket)
 			{
 				SessionID = content.id;
-				ErrorLogging.WriteLine("Closing primary socket and swapping secondary to be primary!");
+				ErrorLoggingSocket.WriteLine("Closing primary socket and swapping secondary to be primary!");
 				Socket.OnMessage -= Socket_OnMessage;
 				Socket.OnOpen -= Socket_OnOpen;
 				Socket.OnClose -= Socket_OnClose;

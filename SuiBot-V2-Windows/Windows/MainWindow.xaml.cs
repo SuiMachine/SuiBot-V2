@@ -1,5 +1,6 @@
 ﻿using SuiBot_Core;
 using SuiBot_Core.API.EventSub;
+using SuiBot_TwitchSocket;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -32,9 +33,9 @@ namespace SuiBot_V2_Windows.Windows
 
 
 			InitializeComponent();
-			if (!SuiBot_Core.Storage.ConnectionConfig.ConfigExists())
+			if (!ConnectionConfig.ConfigExists())
 			{
-				var tmpConfig = new SuiBot_Core.Storage.ConnectionConfig();
+				var tmpConfig = new ConnectionConfig();
 				tmpConfig.Save();
 			}
 			IsBotRunning = false;
@@ -49,7 +50,7 @@ namespace SuiBot_V2_Windows.Windows
 		#region ButtonEvents
 		private void MenuItem_ConnectionSettingsClick(object sender, RoutedEventArgs e)
 		{
-			Settings.ConnectionSettingsWindow csw = new Settings.ConnectionSettingsWindow(SuiBot_Core.Storage.ConnectionConfig.Load());
+			Settings.ConnectionSettingsWindow csw = new Settings.ConnectionSettingsWindow(ConnectionConfig.Load());
 			var result = csw.ShowDialog();
 			if (result != null && result == true)
 			{
@@ -77,7 +78,7 @@ namespace SuiBot_V2_Windows.Windows
 		{
 			if (!IsBotRunning)
 			{
-				var connectionConfig = SuiBot_Core.Storage.ConnectionConfig.Load();
+				var connectionConfig = ConnectionConfig.Load();
 				var coreConfig = SuiBot_Core.Storage.CoreConfig.Load();
 
 				if (!connectionConfig.IsValidConfig())
