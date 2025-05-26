@@ -167,13 +167,13 @@
     <Compile Include="Storage\IntervalMessages.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\SuiBot-TwitchSocket\SuiBot-TwitchSocket.csproj">
+      <Project>{eefd4d67-fa06-4a2a-804f-31851cb06a3e}</Project>
+      <Name>SuiBot-TwitchSocket</Name>
+    </ProjectReference>
     <ProjectReference Include="..\SpeedrunComSharp\SpeedrunComSharp\SpeedrunComSharp.csproj">
       <Project>{924aaffe-5b89-49e2-99ad-ec9373cc838d}</Project>
       <Name>SpeedrunComSharp</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\SuiBot-TwitchSocket\SuiBot-TwitchSocket.csproj">
-      <Project>{eefd4d67-fa06-4a2a-804f-31851cb06a3e}</Project>
-      <Name>SuiBot-TwitchSocket</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

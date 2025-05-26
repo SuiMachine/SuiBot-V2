@@ -218,13 +218,13 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\SuiBot-TwitchSocket\SuiBot-TwitchSocket.csproj">
+      <Project>{eefd4d67-fa06-4a2a-804f-31851cb06a3e}</Project>
+      <Name>SuiBot-TwitchSocket</Name>
+    </ProjectReference>
     <ProjectReference Include="..\SuiBot-Core\SuiBot-Core.csproj">
       <Project>{68c846e5-fcb2-4993-804b-0773c2366d4b}</Project>
       <Name>SuiBot-Core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\SuiBot-TwitchSocket\SuiBot-TwitchSocket.csproj">
-      <Project>{eefd4d67-fa06-4a2a-804f-31851cb06a3e}</Project>
-      <Name>SuiBot-TwitchSocket</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

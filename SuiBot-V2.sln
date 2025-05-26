@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SuiBot-V2-Windows", "SuiBot
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpeedrunComSharp", "SpeedrunComSharp\SpeedrunComSharp\SpeedrunComSharp.csproj", "{924AAFFE-5B89-49E2-99AD-EC9373CC838D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SuiBot-TwitchSocket", "SuiBot-TwitchSocket\SuiBot-TwitchSocket.csproj", "{EEFD4D67-FA06-4A2A-804F-31851CB06A3E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SuiBot-TwitchSocket", "..\SuiBot-TwitchSocket\SuiBot-TwitchSocket.csproj", "{EEFD4D67-FA06-4A2A-804F-31851CB06A3E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
