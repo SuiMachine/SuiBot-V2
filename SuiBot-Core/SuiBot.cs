@@ -125,7 +125,7 @@ namespace SuiBot_Core
 			HelixAPI = new API.HelixAPI(this, "2ae883f289a6106");
 			//var validationResult = HelixAPI.ValidateToken();
 #else
-			HelixAPI = new API.HelixAPI(this, BotConnectionConfig.Password);
+			HelixAPI = new API.HelixAPI("rmi9m0sheo4pp5882o8s24zu7h09md", this, BotConnectionConfig.Password);
 			var validationResult = HelixAPI.ValidateToken();
 			if (validationResult != API.HelixAPI.ValidationResult.Successful)
 			{
@@ -311,7 +311,7 @@ namespace SuiBot_Core
 
 		public string VerifyAuthy()
 		{
-			HelixAPI = new API.HelixAPI(this, BotConnectionConfig.Password);
+			HelixAPI = new API.HelixAPI("rmi9m0sheo4pp5882o8s24zu7h09md", this, BotConnectionConfig.Password);
 			var validation = HelixAPI.GetValidation();
 			if (validation == null)
 				return "";
@@ -399,6 +399,11 @@ namespace SuiBot_Core
 		public void TwitchSocket_AutoModMessageHold(ES_AutomodMessageHold messageHold)
 		{
 			//Nothing
+		}
+
+		public void TwitchSocket_ChannelPointsRedeem(ES_ChannelPoints redeemInfo)
+		{
+			throw new NotImplementedException();
 		}
 	}
 }
