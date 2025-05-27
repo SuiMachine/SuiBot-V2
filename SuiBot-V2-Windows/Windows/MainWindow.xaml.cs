@@ -1,5 +1,6 @@
 ﻿using SuiBot_Core;
 using SuiBot_Core.API.EventSub;
+using SuiBot_Core.Storage;
 using SuiBot_TwitchSocket;
 using System;
 using System.Collections.Generic;

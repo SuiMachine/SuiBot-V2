@@ -1,4 +1,4 @@
-﻿using SuiBot_TwitchSocket;
+﻿using SuiBot_Core.Storage;
 using System;
 using System.Windows;
 

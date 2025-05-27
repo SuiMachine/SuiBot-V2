@@ -1,5 +1,5 @@
 ﻿using SuiBot_Core;
-using SuiBot_TwitchSocket;
+using SuiBot_Core.Storage;
 using System;
 using System.IO;
 

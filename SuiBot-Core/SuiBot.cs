@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace SuiBot_Core
 {
-	public class SuiBot : IDisposable, IBotInstance
+	public class SuiBot : IBotInstance, IDisposable
 	{
 		private static SuiBot m_Instance;
 		internal TwitchSocket TwitchSocket { get; private set; }
@@ -20,11 +20,11 @@ namespace SuiBot_Core
 		public static SuiBot GetInstance()
 		{
 			if (m_Instance == null || m_Instance.IsDisposed)
-				m_Instance = new SuiBot(ConnectionConfig.Load(), Storage.CoreConfig.Load());
+				m_Instance = new SuiBot(Storage.ConnectionConfig.Load(), Storage.CoreConfig.Load());
 			return m_Instance;
 		}
 
-		public static SuiBot GetInstance(ConnectionConfig BotConnectionConfig, Storage.CoreConfig BotCoreConfig)
+		public static SuiBot GetInstance(Storage.ConnectionConfig BotConnectionConfig, Storage.CoreConfig BotCoreConfig)
 		{
 			if (m_Instance == null || m_Instance.IsDisposed)
 				m_Instance = new SuiBot(BotConnectionConfig, BotCoreConfig);
@@ -35,7 +35,7 @@ namespace SuiBot_Core
 		/// Creates a new instance of SuiBot.
 		/// </summary>
 		/// <param name="BotConfig">Config struct object. SuiBot_Config.Load() may be used to load it from config file.</param>
-		private SuiBot(ConnectionConfig BotConnectionConfig, Storage.CoreConfig BotCoreConfig)
+		private SuiBot(Storage.ConnectionConfig BotConnectionConfig, Storage.CoreConfig BotCoreConfig)
 		{
 			this.BotConnectionConfig = BotConnectionConfig;
 			this.BotCoreConfig = BotCoreConfig;
@@ -43,10 +43,9 @@ namespace SuiBot_Core
 			this.StatusUpdateTimer = new System.Timers.Timer(5 * 1000 * 60) { AutoReset = true };
 			this.ActiveChannels = new Dictionary<string, SuiBot_ChannelInstance>();
 			this.ChannelInstances = new Dictionary<string, SuiBot_ChannelInstance>();
-
 		}
 
-		private ConnectionConfig BotConnectionConfig { get; set; }
+		private Storage.ConnectionConfig BotConnectionConfig { get; set; }
 		public Storage.CoreConfig BotCoreConfig { get; set; }
 		public Dictionary<string, SuiBot_ChannelInstance> ActiveChannels { get; set; }
 		public Dictionary<string, SuiBot_ChannelInstance> ChannelInstances { get; set; }
