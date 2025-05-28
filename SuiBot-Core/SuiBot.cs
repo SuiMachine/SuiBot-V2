@@ -1,6 +1,6 @@
-﻿using SuiBot_Core.API.EventSub;
+﻿using SuiBot_Core.API;
+using SuiBot_Core.API.EventSub;
 using SuiBot_Core.API.EventSub.Subscription.Responses;
-using SuiBot_TwitchSocket;
 using SuiBot_TwitchSocket.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -11,12 +11,15 @@ using System.Threading.Tasks;
 
 namespace SuiBot_Core
 {
-	public class SuiBot : IBotInstance, IDisposable
+	public class SuiBot : IBotInstance
 	{
+		public const string CLIENT_ID = "rmi9m0sheo4pp5882o8s24zu7h09md";
 		private static SuiBot m_Instance;
 		internal TwitchSocket TwitchSocket { get; private set; }
 		internal API.HelixAPI HelixAPI { get; private set; }
-		public bool IsDisposed { get; private set; }
+		public bool ShouldRun { get; set; }
+		private bool m_IsDisposed;
+		public bool IsDisposed => m_IsDisposed;
 		public static SuiBot GetInstance()
 		{
 			if (m_Instance == null || m_Instance.IsDisposed)
@@ -55,7 +58,6 @@ namespace SuiBot_Core
 
 		public System.Timers.Timer IntervalTimer;
 		public System.Timers.Timer StatusUpdateTimer;
-		public bool ShouldRun;
 
 		#region BotEventsDeclraration
 		public event Events.OnChatMessageReceivedHandler OnChatMessageReceived;
@@ -71,10 +73,7 @@ namespace SuiBot_Core
 		/// Returns an authentication url that is used to obtain an oauth from Twitch.
 		/// </summary>
 		/// <returns>Authy url.</returns>
-		public static string GetAuthenticationURL()
-		{
-			return new Uri(string.Format("https://id.twitch.tv/oauth2/authorize?client_id=rmi9m0sheo4pp5882o8s24zu7h09md&redirect_uri=https://suimachine.github.io/twitchauthy/&response_type=token&scope={0}",
-				string.Join(" ", new string[]
+		public static string GetAuthenticationURL() => HelixAPI.GenerateAuthenticationURL(CLIENT_ID, "https://suimachine.github.io/twitchauthy/", new string[]
 				{
 					"bits:read",
 					"channel:bot",
@@ -109,9 +108,7 @@ namespace SuiBot_Core
 					"user:read:chat",
 					"user:read:subscriptions",
 					"user:write:chat",
-				}))).ToString();
-		}
-
+				});
 		public void Connect()
 		{
 			if (!BotConnectionConfig.IsValidConfig())
@@ -124,7 +121,7 @@ namespace SuiBot_Core
 			HelixAPI = new API.HelixAPI(this, "2ae883f289a6106");
 			//var validationResult = HelixAPI.ValidateToken();
 #else
-			HelixAPI = new API.HelixAPI("rmi9m0sheo4pp5882o8s24zu7h09md", this, BotConnectionConfig.Password);
+			HelixAPI = new API.HelixAPI(CLIENT_ID, this, BotConnectionConfig.Password);
 			var validationResult = HelixAPI.ValidateToken();
 			if (validationResult != API.HelixAPI.ValidationResult.Successful)
 			{
@@ -190,15 +187,15 @@ namespace SuiBot_Core
 				{
 					Console.WriteLine($"Subscribing to additional events for {channel.condition.broadcaster_user_id}");
 
-					var onLineSub = await HelixAPI.SubscribeToOnlineStatus(channel.condition.broadcaster_user_id.Value.ToString(), TwitchSocket.SessionID);
+					var onLineSub = await HelixAPI.SubscribeToOnlineStatus(channel.condition.broadcaster_user_id, TwitchSocket.SessionID);
 					await Task.Delay(2000);
-					var offlineSub = await HelixAPI.SubscribeToOfflineStatus(channel.condition.broadcaster_user_id.Value.ToString(), TwitchSocket.SessionID);
+					var offlineSub = await HelixAPI.SubscribeToOfflineStatus(channel.condition.broadcaster_user_id, TwitchSocket.SessionID);
 					await Task.Delay(2000);
 					/*					var adSub = await HelixAPI.SubscribeToChannelAdBreak(channel.condition.broadcaster_user_id, TwitchSocket.SessionID);
 										await Task.Delay(2000);*/
-					var automodHold = await HelixAPI.SubscribeToAutoModHold(channel.condition.broadcaster_user_id.Value.ToString(), TwitchSocket.SessionID);
+					var automodHold = await HelixAPI.SubscribeToAutoModHold(channel.condition.broadcaster_user_id, TwitchSocket.SessionID);
 					await Task.Delay(2000);
-					var susMessage = await HelixAPI.SubscribeToChannelSuspiciousUserMessage(channel.condition.broadcaster_user_id.Value.ToString(), TwitchSocket.SessionID);
+					var susMessage = await HelixAPI.SubscribeToChannelSuspiciousUserMessage(channel.condition.broadcaster_user_id, TwitchSocket.SessionID);
 					await Task.Delay(2000);
 				}
 				Console.WriteLine($"Done!");
@@ -257,7 +254,7 @@ namespace SuiBot_Core
 			}
 			else
 			{
-				var channelInstance = new SuiBot_ChannelInstance(channelToJoin, result.condition.broadcaster_user_id.Value.ToString(), this, Storage.ChannelConfig.Load(channelToJoin));
+				var channelInstance = new SuiBot_ChannelInstance(channelToJoin, result.condition.broadcaster_user_id, this, Storage.ChannelConfig.Load(channelToJoin));
 				ActiveChannels.Add(channelToJoin, channelInstance);
 				ChannelInstances.Add(channelToJoin, channelInstance);
 				this.OnChannelJoining?.Invoke(channelToJoin);
