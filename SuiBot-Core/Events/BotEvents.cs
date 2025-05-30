@@ -1,4 +1,4 @@
-﻿using SuiBot_Core.API.EventSub;
+﻿using SuiBot_TwitchSocket.API.EventSub;
 
 namespace SuiBot_Core.Events
 {

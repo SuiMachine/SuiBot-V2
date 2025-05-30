@@ -1,6 +1,6 @@
-﻿using SuiBot_Core.API;
-using SuiBot_Core.API.EventSub;
-using SuiBot_Core.API.EventSub.Subscription.Responses;
+﻿using SuiBot_TwitchSocket;
+using SuiBot_TwitchSocket.API.EventSub;
+using SuiBot_TwitchSocket.API.EventSub.Subscription.Responses;
 using SuiBot_TwitchSocket.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -16,7 +16,7 @@ namespace SuiBot_Core
 		public const string CLIENT_ID = "rmi9m0sheo4pp5882o8s24zu7h09md";
 		private static SuiBot m_Instance;
 		internal TwitchSocket TwitchSocket { get; private set; }
-		internal API.HelixAPI HelixAPI { get; private set; }
+		internal SuiBot_TwitchSocket.API.HelixAPI HelixAPI { get; private set; }
 		public bool ShouldRun { get; set; }
 		private bool m_IsDisposed;
 		public bool IsDisposed => m_IsDisposed;
@@ -73,7 +73,7 @@ namespace SuiBot_Core
 		/// Returns an authentication url that is used to obtain an oauth from Twitch.
 		/// </summary>
 		/// <returns>Authy url.</returns>
-		public static string GetAuthenticationURL() => HelixAPI.GenerateAuthenticationURL(CLIENT_ID, "https://suimachine.github.io/twitchauthy/", new string[]
+		public static string GetAuthenticationURL() => SuiBot_TwitchSocket.API.HelixAPI.GenerateAuthenticationURL(CLIENT_ID, "https://suimachine.github.io/twitchauthy/", new string[]
 				{
 					"bits:read",
 					"channel:bot",
@@ -121,11 +121,11 @@ namespace SuiBot_Core
 			HelixAPI = new API.HelixAPI(this, "2ae883f289a6106");
 			//var validationResult = HelixAPI.ValidateToken();
 #else
-			HelixAPI = new API.HelixAPI(CLIENT_ID, this, BotConnectionConfig.Password);
+			HelixAPI = new SuiBot_TwitchSocket.API.HelixAPI(CLIENT_ID, this, BotConnectionConfig.Password);
 			var validationResult = HelixAPI.ValidateToken();
-			if (validationResult != API.HelixAPI.ValidationResult.Successful)
+			if (validationResult != SuiBot_TwitchSocket.API.HelixAPI.ValidationResult.Successful)
 			{
-				if (validationResult == API.HelixAPI.ValidationResult.Failed)
+				if (validationResult == SuiBot_TwitchSocket.API.HelixAPI.ValidationResult.Failed)
 				{
 					ShouldRun = false;
 					ErrorLogging.WriteLine("Invalid token!");
@@ -162,7 +162,7 @@ namespace SuiBot_Core
 
 				foreach (var channel in BotCoreConfig.ChannelsToJoin)
 				{
-					Response_SubscribeTo.Subscription_Response_Data result = await HelixAPI.SubscribeTo_ChatMessage(channel, TwitchSocket.SessionID);
+					Response_SubscribeTo.Subscription_Response_Data result = await HelixAPI.SubscribeToChatMessage(channel, TwitchSocket.SessionID);
 					if (result != null)
 					{
 						channelsToSubScribeAdditionalInformationTo.Add(result);
@@ -244,7 +244,7 @@ namespace SuiBot_Core
 			}
 		}
 
-		private void StartedReadingChannel(string channelToJoin, API.EventSub.Subscription.Responses.Response_SubscribeTo.Subscription_Response_Data result)
+		private void StartedReadingChannel(string channelToJoin, Response_SubscribeTo.Subscription_Response_Data result)
 		{
 			ErrorLogging.WriteLine($"Subscribed to read: {channelToJoin}");
 			if (ChannelInstances.TryGetValue(channelToJoin, out var channel))
@@ -307,7 +307,7 @@ namespace SuiBot_Core
 
 		public string VerifyAuthy()
 		{
-			HelixAPI = new API.HelixAPI("rmi9m0sheo4pp5882o8s24zu7h09md", this, BotConnectionConfig.Password);
+			HelixAPI = new SuiBot_TwitchSocket.API.HelixAPI("rmi9m0sheo4pp5882o8s24zu7h09md", this, BotConnectionConfig.Password);
 			var validation = HelixAPI.GetValidation();
 			if (validation == null)
 				return "";
@@ -379,7 +379,7 @@ namespace SuiBot_Core
 			if (!ChannelInstances.TryGetValue(offlineData.broadcaster_user_login, out var channelInstance))
 				return;
 
-			channelInstance.StreamStatus = new API.Helix.Responses.Response_StreamStatus()
+			channelInstance.StreamStatus = new SuiBot_TwitchSocket.API.Helix.Responses.Response_StreamStatus()
 			{
 				IsOnline = false,
 				GameChangedSinceLastTime = true
@@ -397,9 +397,9 @@ namespace SuiBot_Core
 			//Nothing
 		}
 
-		public void TwitchSocket_ChannelPointsRedeem(ES_ChannelPoints redeemInfo)
+		public void TwitchSocket_ChannelPointsRedeem(ES_ChannelPoints.ES_ChannelPointRedeemRequest redeemInfo)
 		{
-			throw new NotImplementedException();
+			//Nothing?
 		}
 	}
 }

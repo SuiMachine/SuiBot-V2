@@ -1,11 +1,11 @@
-﻿using SuiBot_Core.API.EventSub;
-using SuiBot_Core.API.Helix.Responses;
-using SuiBot_Core.Extensions.SuiStringExtension;
+﻿using SuiBot_Core.Extensions.SuiStringExtension;
+using SuiBot_TwitchSocket.API.EventSub;
+using SuiBot_TwitchSocket.API.Helix.Responses;
 using SuiBot_TwitchSocket.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using static SuiBot_Core.API.EventSub.ES_ChatMessage;
+using static SuiBot_TwitchSocket.API.EventSub.ES_ChatMessage;
 
 namespace SuiBot_Core
 {

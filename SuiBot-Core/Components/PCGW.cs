@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json.Linq;
-using SuiBot_Core.API.EventSub;
 using SuiBot_Core.Extensions.SuiStringExtension;
+using SuiBot_TwitchSocket;
+using SuiBot_TwitchSocket.API.EventSub;
 using System;
 using System.Linq;
 

@@ -1,7 +1,6 @@
 ﻿using SuiBot_Core;
-using SuiBot_Core.API.EventSub;
 using SuiBot_Core.Storage;
-using SuiBot_TwitchSocket;
+using SuiBot_TwitchSocket.API.EventSub;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -214,17 +213,17 @@ namespace SuiBot_V2_Windows.Windows
 			}
 		}
 
-		private Brush GetBrush(SuiBot_Core.API.EventSub.ES_ChatMessage.Role userRole)
+		private Brush GetBrush(SuiBot_TwitchSocket.API.EventSub.ES_ChatMessage.Role userRole)
 		{
 			switch (userRole)
 			{
-				case (SuiBot_Core.API.EventSub.ES_ChatMessage.Role.SuperMod):
+				case (SuiBot_TwitchSocket.API.EventSub.ES_ChatMessage.Role.SuperMod):
 					return new SolidColorBrush(Colors.Red);
-				case (SuiBot_Core.API.EventSub.ES_ChatMessage.Role.Mod):
+				case (SuiBot_TwitchSocket.API.EventSub.ES_ChatMessage.Role.Mod):
 					return new SolidColorBrush(Colors.Green);
-				case (SuiBot_Core.API.EventSub.ES_ChatMessage.Role.VIP):
+				case (SuiBot_TwitchSocket.API.EventSub.ES_ChatMessage.Role.VIP):
 					return new SolidColorBrush(Colors.MediumPurple);
-				case (SuiBot_Core.API.EventSub.ES_ChatMessage.Role.Subscriber):
+				case (SuiBot_TwitchSocket.API.EventSub.ES_ChatMessage.Role.Subscriber):
 					return new SolidColorBrush(Colors.Purple);
 				default:
 					return new SolidColorBrush(Colors.Black);

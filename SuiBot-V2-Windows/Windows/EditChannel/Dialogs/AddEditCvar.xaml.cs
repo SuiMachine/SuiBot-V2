@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Windows;
-using static SuiBot_Core.API.EventSub.ES_ChatMessage;
+using static SuiBot_TwitchSocket.API.EventSub.ES_ChatMessage;
 
 namespace SuiBot_V2_Windows.Windows.EditChannel.Dialogs
 {

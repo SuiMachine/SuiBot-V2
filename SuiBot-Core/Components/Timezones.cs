@@ -1,7 +1,6 @@
-﻿using SuiBot_Core.API.EventSub;
-using SuiBot_Core.Extensions.SuiStringExtension;
+﻿using SuiBot_Core.Extensions.SuiStringExtension;
+using SuiBot_TwitchSocket.API.EventSub;
 using System;
-using System.Text;
 
 namespace SuiBot_Core.Components
 {
