@@ -381,7 +381,6 @@ namespace SuiBot_Core
 			QuotesInstance.Dispose();
 			ChatFiltering.Dispose();
 			Cvars.Dispose();
-			//SuiBotInstance.LeaveChannel(Channel);
 		}
 	}
 }

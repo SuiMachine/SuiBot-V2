@@ -21,7 +21,7 @@ namespace SuiBot_V2_Windows.Windows
 
 		internal SuiBot_Core.SuiBot SuiBotInstance;
 		private Thread SuiBotSlaveThread { get; set; }
-		private bool IsBotRunning { get; set; }
+		public bool IsBotRunning => SuiBotInstance?.ShouldRun ?? false;
 		public bool MinimizeToTray { get; set; }
 		private Dictionary<string, RichTextBox> ChannelTabs { get; set; }
 
@@ -38,9 +38,8 @@ namespace SuiBot_V2_Windows.Windows
 				var tmpConfig = new ConnectionConfig();
 				tmpConfig.Save();
 			}
-			IsBotRunning = false;
 			MinimizeToTray = false;
-			SuiBotInstance = SuiBot_Core.SuiBot.GetInstance();
+			SuiBotInstance = SuiBot.GetInstance();
 
 			ReloadActiveChannels();
 			RichBox_Log.IsReadOnly = true;
@@ -96,7 +95,6 @@ namespace SuiBot_V2_Windows.Windows
 				SuiBotInstance.OnChatSendMessage += SuiBotInstance_OnChatSendMessage;
 				SuiBotInstance.OnModerationActionPerformed += SuiBotInstance_OnModerationActionPerformed;
 				SuiBotInstance.OnShutdown += SuiBotInstance_OnShutdown;
-				IsBotRunning = true;
 				MenuItem_BotIsRunning.IsChecked = IsBotRunning;
 				UpdateChannelsBranchEnable();
 				SuiBotSlaveThread = new Thread(SuiBotInstance.Connect);
@@ -105,6 +103,7 @@ namespace SuiBot_V2_Windows.Windows
 			else
 			{
 				SuiBotInstance.Shutdown();
+				SuiBotInstance = null;
 			}
 		}
 
@@ -140,7 +139,6 @@ namespace SuiBot_V2_Windows.Windows
 			SuiBotInstance.OnChatSendMessage -= SuiBotInstance_OnChatSendMessage;
 			SuiBotInstance.OnModerationActionPerformed -= SuiBotInstance_OnModerationActionPerformed;
 			SuiBotInstance.OnShutdown -= SuiBotInstance_OnShutdown;
-			IsBotRunning = false;
 			MenuItem_BotIsRunning.IsChecked = IsBotRunning;
 			UpdateChannelsBranchEnable();
 			if (SuiBotSlaveThread.IsAlive)

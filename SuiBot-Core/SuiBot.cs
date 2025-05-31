@@ -273,8 +273,12 @@ namespace SuiBot_Core
 
 		public void Shutdown()
 		{
+			ShouldRun = false;
 			ErrorLogging.WriteLine("Planned shutdown performed ");
 			Close();
+			ActiveChannels = null;
+			ChannelInstances = null;
+			m_IsDisposed = true;
 		}
 
 		public void Close()
