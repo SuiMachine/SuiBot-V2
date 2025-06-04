@@ -5,6 +5,7 @@ using SuiBot_TwitchSocket.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using static SuiBot_TwitchSocket.API.EventSub.ES_ChatMessage;
 
 namespace SuiBot_Core
@@ -102,28 +103,36 @@ namespace SuiBot_Core
 
 		public void SendChatMessage(string message)
 		{
-			if (message.Length <= 500)
+			Task.Run(async () =>
 			{
-				SuiBotInstance.SendChatMessageFeedback("#" + Channel, message);
-				SuiBotInstance.HelixAPI.SendMessage(this, message);
-			}
-			else
-			{
-				var messages = message.SplitMessage(500);
-				foreach (var subMessage in messages)
+				if (message.Length <= 500)
 				{
-					SuiBotInstance.SendChatMessageFeedback("#" + Channel, subMessage);
-					SuiBotInstance.HelixAPI.SendMessage(this, subMessage);
+					SuiBotInstance.SendChatMessageFeedback("#" + Channel, message);
+					await SuiBotInstance.HelixAPI.SendMessageAsync(this, message);
 				}
-			}
+				else
+				{
+					var messages = message.SplitMessage(500);
+					foreach (var subMessage in messages)
+					{
+						SuiBotInstance.SendChatMessageFeedback("#" + Channel, subMessage);
+						await SuiBotInstance.HelixAPI.SendMessageAsync(this, subMessage);
+					}
+				}
+			});
+
 		}
 
 		public void SendChatMessageResponse(ES_ChatMessage messageToRespondTo, string message)
 		{
 			SetUserCooldown(messageToRespondTo, DefaultCooldown);
 
-			string msgResponse = $"@{messageToRespondTo.chatter_user_name}: {message}";
-			SuiBotInstance.HelixAPI.SendResponse(messageToRespondTo, message);
+
+			//string msgResponse = $"@{messageToRespondTo.chatter_user_name}: {message}";
+			Task.Run(async () =>
+			{
+				await SuiBotInstance.HelixAPI.SendResponseAsync(messageToRespondTo, message);
+			});
 
 			SuiBotInstance.SendChatMessageFeedback("#" + Channel, $"{messageToRespondTo.reply} -> {message}");
 		}

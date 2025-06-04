@@ -405,5 +405,10 @@ namespace SuiBot_Core
 		{
 			//Nothing?
 		}
+
+		public void TwitchSocket_OnChannelGoalEnd(ES_ChannelGoal channelGoalEnded)
+		{
+			//Nothing?
+		}
 	}
 }
