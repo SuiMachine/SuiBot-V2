@@ -1,7 +1,9 @@
 ﻿using SuiBot_TwitchSocket.API.EventSub;
 using System;
+using static SuiBot_Core.Components.Other.Gemini.Parameters;
+using static SuiBotAI.Components.Other.Gemini.GeminiTools;
 
-namespace SuiBot_Core.Components.Other.Gemini.FunctionTypes
+namespace SuiBot_Core.Components.Other.Gemini
 {
 	public abstract class FunctionCall
 	{
@@ -35,5 +37,11 @@ namespace SuiBot_Core.Components.Other.Gemini.FunctionTypes
 				channelInstance.UserBan(message, response);
 			}
 		}
+	}
+
+	public static class GeminiFunctionCall
+	{
+		public static GeminiFunction CreateBanFunction() => new GeminiFunction("ban", "bans a user", new BanParameters());
+		public static GeminiFunction CreateTimeoutFunction() => new GeminiFunction("timeout", "time outs a user in the chat", new TimeOutParameters());
 	}
 }

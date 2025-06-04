@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpeedrunComSharp", "Speedru
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SuiBot-TwitchSocket", "..\SuiBot-TwitchSocket\SuiBot-TwitchSocket.csproj", "{EEFD4D67-FA06-4A2A-804F-31851CB06A3E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SuiBot-AI", "..\SuiBot-AI\SuiBot-AI.csproj", "{22F63E69-76D9-451E-8329-46A8B41C12CB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug with API Calls|Any CPU = Debug with API Calls|Any CPU
@@ -61,6 +63,14 @@ Global
 		{EEFD4D67-FA06-4A2A-804F-31851CB06A3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EEFD4D67-FA06-4A2A-804F-31851CB06A3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EEFD4D67-FA06-4A2A-804F-31851CB06A3E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{22F63E69-76D9-451E-8329-46A8B41C12CB}.Debug with API Calls|Any CPU.ActiveCfg = Debug|Any CPU
+		{22F63E69-76D9-451E-8329-46A8B41C12CB}.Debug with API Calls|Any CPU.Build.0 = Debug|Any CPU
+		{22F63E69-76D9-451E-8329-46A8B41C12CB}.Debug_LocalAPI|Any CPU.ActiveCfg = Debug|Any CPU
+		{22F63E69-76D9-451E-8329-46A8B41C12CB}.Debug_LocalAPI|Any CPU.Build.0 = Debug|Any CPU
+		{22F63E69-76D9-451E-8329-46A8B41C12CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{22F63E69-76D9-451E-8329-46A8B41C12CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{22F63E69-76D9-451E-8329-46A8B41C12CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{22F63E69-76D9-451E-8329-46A8B41C12CB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

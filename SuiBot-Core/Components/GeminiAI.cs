@@ -1,8 +1,8 @@
-﻿using Newtonsoft.Json;
-using SuiBot_Core.Components.Other.Gemini;
+﻿using SuiBot_Core.Components.Other.Gemini;
 using SuiBot_Core.Extensions.SuiStringExtension;
-using SuiBot_TwitchSocket;
 using SuiBot_TwitchSocket.API.EventSub;
+using SuiBotAI.Components;
+using SuiBotAI.Components.Other.Gemini;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +13,7 @@ namespace SuiBot_Core.Components
 {
 	public class GeminiAI
 	{
+		private SuiBotAIProcessor m_AI_Instance;
 		public class Config
 		{
 			public string API_Key { get; set; } = "";
@@ -143,7 +144,7 @@ namespace SuiBot_Core.Components
 			}
 
 			StreamerPath = $"Bot/Channels/{m_ChannelInstance.Channel}/MemeComponents/AI_History.xml";
-			StreamerContent = XML_Utils.Load(StreamerPath, new Other.Gemini.GeminiContent()
+			StreamerContent = XML_Utils.Load(StreamerPath, new GeminiContent()
 			{
 				contents = new List<GeminiMessage>(),
 				generationConfig = new GeminiContent.GenerationConfig(),
@@ -160,6 +161,7 @@ namespace SuiBot_Core.Components
 				}
 			});
 
+			m_AI_Instance = new SuiBotAIProcessor(InstanceConfig.API_Key, InstanceConfig.Model);
 			return true;
 		}
 
@@ -171,64 +173,46 @@ namespace SuiBot_Core.Components
 				{
 					try
 					{
-						GeminiContent content = null;
-						content = StreamerContent;
 						var info = m_ChannelInstance.StreamStatus;
-						content.systemInstruction = InstanceConfig.GetSystemInstruction(m_ChannelInstance.Channel, info.IsOnline, info.game_name, info.title);
+						var systemInstruction = InstanceConfig.GetSystemInstruction(m_ChannelInstance.Channel, info.IsOnline, info.game_name, info.title);
+						GeminiResponse result = await m_AI_Instance.GetAIResponse(StreamerContent, systemInstruction, lastMessage.message.text.StripSingleWord());
 
-						if (content == null)
-						{
-							m_ChannelInstance.SendChatMessageResponse(lastMessage, "Sorry, no history for the user is setup");
-							return;
-						}
-
-						content.contents.Add(GeminiMessage.CreateUserResponse(lastMessage.message.text.StripSingleWord()));
-
-						string json = JsonConvert.SerializeObject(content);
-
-						string result = await HttpWebRequestHandlers.PerformPostAsync("https://generativelanguage.googleapis.com/", $"v1beta/{InstanceConfig.Model}:generateContent", $"?key={InstanceConfig.API_Key}",
-							json,
-							new Dictionary<string, string>()
-						);
-
-						if (string.IsNullOrEmpty(result))
+						if (result == null)
 						{
 							m_ChannelInstance.SendChatMessageResponse(lastMessage, "Failed to get a response. Please debug me, Sui :(");
 						}
 						else
 						{
-							GeminiResponse response = JsonConvert.DeserializeObject<GeminiResponse>(result);
-							content.generationConfig.TokenCount = response.usageMetadata.totalTokenCount;
-
-							if (response.candidates.Length > 0 && response.candidates.Last().content.parts.Length > 0)
+							if (result.candidates.Length > 0 && result.candidates.Last().content.parts.Length > 0)
 							{
-								var lastResponse = response.candidates.Last().content;
-								content.contents.Add(lastResponse);
+								var lastResponse = result.candidates.Last().content;
+								StreamerContent.generationConfig.TokenCount = result.usageMetadata.totalTokenCount;
+								StreamerContent.contents.Add(lastResponse);
 								var text = lastResponse.parts.Last().text;
 								if (text != null)
 								{
-									CleanupResponse(ref text);
+									SuiBotAIProcessor.CleanupResponse(ref text);
 
 									m_ChannelInstance.SendChatMessageResponse(lastMessage, text);
 
-									while (content.generationConfig.TokenCount > InstanceConfig.TokenLimit)
+									while (StreamerContent.generationConfig.TokenCount > InstanceConfig.TokenLimit)
 									{
-										if (content.contents.Count > 2)
+										if (StreamerContent.contents.Count > 2)
 										{
 											//This isn't weird - we want to make sure we start from user message
-											if (content.contents[0].role == Role.user)
+											if (StreamerContent.contents[0].role == Role.user)
 											{
-												content.contents.RemoveAt(0);
+												StreamerContent.contents.RemoveAt(0);
 											}
 
-											if (content.contents[0].role == Role.model)
+											if (StreamerContent.contents[0].role == Role.model)
 											{
-												content.contents.RemoveAt(0);
+												StreamerContent.contents.RemoveAt(0);
 											}
 										}
 									}
 
-									XML_Utils.Save(StreamerPath, content);
+									XML_Utils.Save(StreamerPath, StreamerContent);
 								}
 							}
 							else
@@ -236,6 +220,11 @@ namespace SuiBot_Core.Components
 								m_ChannelInstance.SendChatMessageResponse(lastMessage, "Failed to get a response. Please debug me, Sui :(");
 							}
 						}
+					}
+					catch (SuiBotAIProcessor.FailedToGetResponseException ex)
+					{
+						m_ChannelInstance.SendChatMessageResponse(lastMessage, ex.PublicMessage);
+						ErrorLogging.WriteLine($"Private exception was: {ex.Private}");
 					}
 					catch (Exception ex)
 					{
@@ -261,44 +250,45 @@ namespace SuiBot_Core.Components
 					content = new GeminiContent()
 					{
 						contents = new List<GeminiMessage>(),
-						tools = GeminiContent.GetTools(),
+						tools = new List<GeminiTools>()
+						{
+							new GeminiTools()
+							{
+								functionDeclarations = new List<GeminiTools.GeminiFunction>()
+								{
+									GeminiFunctionCall.CreateTimeoutFunction(),
+									GeminiFunctionCall.CreateBanFunction(),
+								}
+							}
+						},
 						generationConfig = new GeminiContent.GenerationConfig(),
-						systemInstruction = InstanceConfig.GetLurkSystemInstruction(channelInstance.Channel, lastMessage.chatter_user_name, streamInfo.IsOnline, streamInfo.game_name, streamInfo.title)
 					};
 
-					content.contents.Add(GeminiMessage.CreateUserResponse(lastMessage.message.text));
+					var instruction = InstanceConfig.GetLurkSystemInstruction(channelInstance.Channel, lastMessage.chatter_user_name, streamInfo.IsOnline, streamInfo.game_name, streamInfo.title);
+					var result = await m_AI_Instance.GetAIResponse(content, instruction, lastMessage.message.text);
 
-					string json = JsonConvert.SerializeObject(content, Formatting.Indented);
-
-					string result = await HttpWebRequestHandlers.PerformPostAsync("https://generativelanguage.googleapis.com/", $"v1beta/{InstanceConfig.Model}:generateContent", $"?key={InstanceConfig.API_Key}",
-						json,
-						new Dictionary<string, string>(),
-						timeout: 15000
-						);
-
-					if (string.IsNullOrEmpty(result))
+					if (result == null)
 					{
 						channelInstance.SendChatMessageResponse(lastMessage, "Failed to get a response. Please debug me, Sui :(");
 					}
 					else
 					{
-						GeminiResponse response = JsonConvert.DeserializeObject<GeminiResponse>(result);
-						content.generationConfig.TokenCount = response.usageMetadata.totalTokenCount;
+						content.generationConfig.TokenCount = result.usageMetadata.totalTokenCount;
 
-						if (response.candidates.Length > 0 && response.candidates.Last().content.parts.Length > 0)
+						if (result.candidates.Length > 0 && result.candidates.Last().content.parts.Length > 0)
 						{
-							var lastResponse = response.candidates.Last().content;
+							var lastResponse = result.candidates.Last().content;
 							content.contents.Add(lastResponse);
 							var text = lastResponse.parts.Last().text;
 							if (text != null)
 							{
-								CleanupResponse(ref text);
+								SuiBotAIProcessor.CleanupResponse(ref text);
 								channelInstance.SendChatMessageResponse(lastMessage, text);
 							}
 							var func = lastResponse.parts.Last().functionCall;
 							if (func != null)
 							{
-								HandleFunctionCall(channelInstance, lastMessage, func);
+								HandleChatFunctionCall(channelInstance, lastMessage, func);
 							}
 						}
 						else
@@ -326,39 +316,38 @@ namespace SuiBot_Core.Components
 					content = new GeminiContent()
 					{
 						contents = new List<GeminiMessage>(),
-						tools = GeminiContent.GetTools(),
+						tools = new List<GeminiTools>()
+						{
+							new GeminiTools()
+							{
+								functionDeclarations = new List<GeminiTools.GeminiFunction>()
+								{
+									GeminiFunctionCall.CreateTimeoutFunction(),
+									GeminiFunctionCall.CreateBanFunction(),
+								}
+							}
+						},
 						generationConfig = new GeminiContent.GenerationConfig(),
-						systemInstruction = InstanceConfig.GetFilterInstruction(lastMessage)
 					};
 
-					content.contents.Add(GeminiMessage.CreateUserResponse(lastMessage.message.text));
+					GeminiResponse result = await m_AI_Instance.GetAIResponse(content, InstanceConfig.GetFilterInstruction(lastMessage), lastMessage.message.text);
 
-					string json = JsonConvert.SerializeObject(content, Formatting.Indented);
-
-					string result = await HttpWebRequestHandlers.PerformPostAsync("https://generativelanguage.googleapis.com/", $"v1beta/{InstanceConfig.Model}:generateContent", $"?key={InstanceConfig.API_Key}",
-						json,
-						new Dictionary<string, string>()
-						);
-
-					if (string.IsNullOrEmpty(result))
+					if (result == null)
 					{
 						return;
 					}
 					else
 					{
-						GeminiResponse response = JsonConvert.DeserializeObject<GeminiResponse>(result);
-						content.generationConfig.TokenCount = response.usageMetadata.totalTokenCount;
-
-						if (response.candidates.Length > 0 && response.candidates.Last().content.parts.Length > 0)
+						if (result.candidates.Length > 0 && result.candidates.Last().content.parts.Length > 0)
 						{
-							var lastResponse = response.candidates.Last().content;
+							var lastResponse = result.candidates.Last().content;
 							if (lastResponse.parts.Last().text != null)
 								return;
 
 							var func = lastResponse.parts.Last().functionCall;
 							if (func != null)
 							{
-								HandleFunctionCall(channelInstance, lastMessage, func);
+								HandleChatFunctionCall(channelInstance, lastMessage, func);
 							}
 						}
 						else
@@ -375,74 +364,12 @@ namespace SuiBot_Core.Components
 			});
 		}
 
-		private void HandleFunctionCall(SuiBot_ChannelInstance channelInstance, ES_ChatMessage message, GeminiResponseFunctionCall func)
+		private void HandleChatFunctionCall(SuiBot_ChannelInstance channelInstance, ES_ChatMessage message, GeminiResponseFunctionCall func)
 		{
 			if (func.name == "timeout")
-				func.args.ToObject<Other.Gemini.FunctionTypes.TimeOutUser>().Perform(channelInstance, message);
+				func.args.ToObject<TimeOutUser>().Perform(channelInstance, message);
 			else if (func.name == "ban")
-				func.args.ToObject<Other.Gemini.FunctionTypes.BanUser>().Perform(channelInstance, message);
-		}
-
-		private void CleanupResponse(ref string text)
-		{
-			List<string> splitText = text.Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries).ToList();
-			for (int i = splitText.Count - 1; i >= 0; i--)
-			{
-				var line = splitText[i].Trim();
-				if (line.StartsWith("*") && line.StartsWith("*"))
-				{
-					var count = line.Count(x => x == '*');
-					if (count == 2)
-					{
-						splitText.RemoveAt(i);
-						continue;
-					}
-				}
-
-				if (line.Contains("*"))
-				{
-					line = CleanDescriptors(line);
-					splitText[i] = line;
-				}
-			}
-
-			text = string.Join(" ", splitText);
-		}
-
-		private string CleanDescriptors(string text)
-		{
-			int endIndex = text.Length;
-			bool isDescription = false;
-
-			for (int i = text.Length - 1; i >= 0; i--)
-			{
-				if (text[i] == '*')
-				{
-					if (!isDescription)
-					{
-						endIndex = i;
-						isDescription = true;
-					}
-					else
-					{
-						var length = i - endIndex;
-						var substring = text.Substring(i + 1, endIndex - i - 1);
-						if (substring.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).Length > 5)
-						{
-							text = text.Remove(i, endIndex - i + 1);
-						}
-						isDescription = false;
-					}
-				}
-			}
-
-			while (text.Contains("  "))
-			{
-				text = text.Replace("  ", " ");
-			}
-
-			text = text.Trim();
-			return text;
+				func.args.ToObject<BanUser>().Perform(channelInstance, message);
 		}
 	}
 }

@@ -136,11 +136,8 @@
     <Compile Include="Components\Leaderboards.cs" />
     <Compile Include="Components\LeaderboardsProxyNames.cs" />
     <Compile Include="Components\GeminiAI.cs" />
-    <Compile Include="Components\Other\Gemini\FunctionTypes\FunctionCalls.cs" />
-    <Compile Include="Components\Other\Gemini\FunctionTypes\Parameters.cs" />
-    <Compile Include="Components\Other\Gemini\GeminiContent.cs" />
-    <Compile Include="Components\Other\Gemini\GeminiMessage.cs" />
-    <Compile Include="Components\Other\Gemini\GeminiTools.cs" />
+    <Compile Include="Components\Other\Gemini\FunctionCalls.cs" />
+    <Compile Include="Components\Other\Gemini\Parameters.cs" />
     <Compile Include="Components\Other\Hug.cs" />
     <Compile Include="Components\Other\MemeComponent.cs" />
     <Compile Include="Components\Other\Lurk.cs" />
@@ -167,6 +164,10 @@
     <Compile Include="Storage\IntervalMessages.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\SuiBot-AI\SuiBot-AI.csproj">
+      <Project>{22f63e69-76d9-451e-8329-46a8b41c12cb}</Project>
+      <Name>SuiBot-AI</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\SuiBot-TwitchSocket\SuiBot-TwitchSocket.csproj">
       <Project>{eefd4d67-fa06-4a2a-804f-31851cb06a3e}</Project>
       <Name>SuiBot-TwitchSocket</Name>
