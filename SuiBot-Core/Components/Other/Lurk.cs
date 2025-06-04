@@ -8,7 +8,7 @@ namespace SuiBot_Core.Components.Other
 {
 	class Lurk : MemeComponent
 	{
-		public Dictionary<ulong, DateTime> UsersLurking = new Dictionary<ulong, DateTime>();
+		public Dictionary<string, DateTime> UsersLurking = new Dictionary<string, DateTime>();
 		readonly Random rng = new Random();
 
 		List<string> Responses;
