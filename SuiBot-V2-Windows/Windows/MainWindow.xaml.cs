@@ -1,4 +1,6 @@
 ﻿using SuiBot_Core;
+using SuiBot_Core.Storage;
+using SuiBot_TwitchSocket.API.EventSub;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -15,27 +17,29 @@ namespace SuiBot_V2_Windows.Windows
 	/// </summary>
 	public partial class MainWindow : Window
 	{
-		private SuiBot_Core.SuiBot SuiBotInstance { get; set; }
+		internal static MainWindow Instance { get; private set; }
+
+		internal SuiBot_Core.SuiBot SuiBotInstance;
 		private Thread SuiBotSlaveThread { get; set; }
-		private bool IsBotRunning { get; set; }
+		public bool IsBotRunning => SuiBotInstance?.ShouldRun ?? false;
 		public bool MinimizeToTray { get; set; }
 		private Dictionary<string, RichTextBox> ChannelTabs { get; set; }
 
 		public MainWindow()
 		{
+			Instance = this;
 			DataContext = this;
 			ChannelTabs = new Dictionary<string, RichTextBox>();
 
 
 			InitializeComponent();
-			if (!SuiBot_Core.Storage.ConnectionConfig.ConfigExists())
+			if (!ConnectionConfig.ConfigExists())
 			{
-				var tmpConfig = new SuiBot_Core.Storage.ConnectionConfig();
+				var tmpConfig = new ConnectionConfig();
 				tmpConfig.Save();
 			}
-			IsBotRunning = false;
 			MinimizeToTray = false;
-			SuiBotInstance = new SuiBot_Core.SuiBot();
+			SuiBotInstance = SuiBot.GetInstance();
 
 			ReloadActiveChannels();
 			RichBox_Log.IsReadOnly = true;
@@ -45,7 +49,7 @@ namespace SuiBot_V2_Windows.Windows
 		#region ButtonEvents
 		private void MenuItem_ConnectionSettingsClick(object sender, RoutedEventArgs e)
 		{
-			Settings.ConnectionSettingsWindow csw = new Settings.ConnectionSettingsWindow(SuiBot_Core.Storage.ConnectionConfig.Load());
+			Settings.ConnectionSettingsWindow csw = new Settings.ConnectionSettingsWindow(ConnectionConfig.Load());
 			var result = csw.ShowDialog();
 			if (result != null && result == true)
 			{
@@ -73,7 +77,7 @@ namespace SuiBot_V2_Windows.Windows
 		{
 			if (!IsBotRunning)
 			{
-				var connectionConfig = SuiBot_Core.Storage.ConnectionConfig.Load();
+				var connectionConfig = ConnectionConfig.Load();
 				var coreConfig = SuiBot_Core.Storage.CoreConfig.Load();
 
 				if (!connectionConfig.IsValidConfig())
@@ -83,16 +87,14 @@ namespace SuiBot_V2_Windows.Windows
 				}
 
 				RemoveNonLogTabs();
-				SuiBotInstance = new SuiBot(connectionConfig, coreConfig);
+				SuiBotInstance = SuiBot.GetInstance(connectionConfig, coreConfig);
 				SuiBotInstance.OnChannelJoining += SuiBotInstance_OnChannelJoining;
 				SuiBotInstance.OnChannelLeaving += SuiBotInstance_OnChannelLeaving;
 				SuiBotInstance.OnChannelStatusUpdate += SuiBotInstance_OnChannelStatusUpdate;
 				SuiBotInstance.OnChatMessageReceived += SuiBotInstance_OnChatMessageReceived;
 				SuiBotInstance.OnChatSendMessage += SuiBotInstance_OnChatSendMessage;
-				SuiBotInstance.OnIrcFeedback += SuiBotInstance_OnIrcFeedback;
 				SuiBotInstance.OnModerationActionPerformed += SuiBotInstance_OnModerationActionPerformed;
 				SuiBotInstance.OnShutdown += SuiBotInstance_OnShutdown;
-				IsBotRunning = true;
 				MenuItem_BotIsRunning.IsChecked = IsBotRunning;
 				UpdateChannelsBranchEnable();
 				SuiBotSlaveThread = new Thread(SuiBotInstance.Connect);
@@ -101,6 +103,7 @@ namespace SuiBot_V2_Windows.Windows
 			else
 			{
 				SuiBotInstance.Shutdown();
+				SuiBotInstance = null;
 			}
 		}
 
@@ -134,10 +137,8 @@ namespace SuiBot_V2_Windows.Windows
 			SuiBotInstance.OnChannelStatusUpdate -= SuiBotInstance_OnChannelStatusUpdate;
 			SuiBotInstance.OnChatMessageReceived -= SuiBotInstance_OnChatMessageReceived;
 			SuiBotInstance.OnChatSendMessage -= SuiBotInstance_OnChatSendMessage;
-			SuiBotInstance.OnIrcFeedback -= SuiBotInstance_OnIrcFeedback;
 			SuiBotInstance.OnModerationActionPerformed -= SuiBotInstance_OnModerationActionPerformed;
 			SuiBotInstance.OnShutdown -= SuiBotInstance_OnShutdown;
-			IsBotRunning = false;
 			MenuItem_BotIsRunning.IsChecked = IsBotRunning;
 			UpdateChannelsBranchEnable();
 			if (SuiBotSlaveThread.IsAlive)
@@ -150,18 +151,6 @@ namespace SuiBot_V2_Windows.Windows
 		private void SuiBotInstance_OnModerationActionPerformed(string channel, string user, string response, string duration)
 		{
 			channel = channel.Trim(new char[] { '#' });
-		}
-
-		private void SuiBotInstance_OnIrcFeedback(SuiBot_Core.Events.IrcFeedback feedback, string message)
-		{
-			if (this.Dispatcher.Thread != System.Threading.Thread.CurrentThread)
-			{
-				this.Dispatcher.Invoke(() =>
-				SuiBotInstance_OnIrcFeedback(feedback, message));
-				return;
-			}
-
-			LogRB_AppendLine(feedback.ToString() + " " + message);
 		}
 
 		private void LogRB_AppendLine(string text)
@@ -199,7 +188,7 @@ namespace SuiBot_V2_Windows.Windows
 			}
 		}
 
-		private void SuiBotInstance_OnChatMessageReceived(string channel, ChatMessage message)
+		private void SuiBotInstance_OnChatMessageReceived(string channel, ES_ChatMessage message)
 		{
 			channel = channel.Trim(new char[] { '#' });
 
@@ -215,24 +204,24 @@ namespace SuiBot_V2_Windows.Windows
 				var rb = ChannelTabs[channel];
 
 				Paragraph p = new Paragraph();
-				p.Inlines.Add(new Run(message.Username + ":") { Foreground = GetBrush(message.UserRole), FontWeight = FontWeights.Bold });
-				p.Inlines.Add(new Run(" " + message.Message) { Foreground = new SolidColorBrush(Colors.Black) });
+				p.Inlines.Add(new Run(message.chatter_user_name + ":") { Foreground = GetBrush(message.UserRole), FontWeight = FontWeights.Bold });
+				p.Inlines.Add(new Run(" " + message.message.text) { Foreground = new SolidColorBrush(Colors.Black) });
 				rb.Document.Blocks.Add(p);
 				rb.ScrollToEnd();
 			}
 		}
 
-		private Brush GetBrush(Role userRole)
+		private Brush GetBrush(SuiBot_TwitchSocket.API.EventSub.ES_ChatMessage.Role userRole)
 		{
 			switch (userRole)
 			{
-				case (Role.SuperMod):
+				case (SuiBot_TwitchSocket.API.EventSub.ES_ChatMessage.Role.SuperMod):
 					return new SolidColorBrush(Colors.Red);
-				case (Role.Mod):
+				case (SuiBot_TwitchSocket.API.EventSub.ES_ChatMessage.Role.Mod):
 					return new SolidColorBrush(Colors.Green);
-				case (Role.VIP):
+				case (SuiBot_TwitchSocket.API.EventSub.ES_ChatMessage.Role.VIP):
 					return new SolidColorBrush(Colors.MediumPurple);
-				case (Role.Subscriber):
+				case (SuiBot_TwitchSocket.API.EventSub.ES_ChatMessage.Role.Subscriber):
 					return new SolidColorBrush(Colors.Purple);
 				default:
 					return new SolidColorBrush(Colors.Black);

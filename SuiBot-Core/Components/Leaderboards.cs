@@ -1,5 +1,6 @@
 ﻿using SpeedrunComSharp;
 using SuiBot_Core.Extensions.SuiStringExtension;
+using SuiBot_TwitchSocket.API.EventSub;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -14,7 +15,7 @@ namespace SuiBot_Core.Components
 	{
 		public const string PROXYFILENAMESURL = "https://raw.githubusercontent.com/SuiMachine/SuiBot-V2/master/Release/Bot/SpeedrunProxyNames.xml";
 		public const string PROXYNAMESFILE = "Bot/SpeedrunProxyNames.xml";
-		public SuiBot_ChannelInstance channelInstance;
+		private SuiBot_ChannelInstance m_ChannelInstance;
 		const string RegexSyntaxGame = "game(:|=)\".+?\"";
 		const string RegexSyntaxCategory = "category(:|=)\".+?\"";
 		const string RegexSyntaxLevel = "level(:|=)\".+?\"";
@@ -25,11 +26,11 @@ namespace SuiBot_Core.Components
 		public string CurrentGame { get; set; }
 		public string LevelOverride { get; set; }
 		public string CategoryOverride { get; set; }
-		public string PreferedCategory { get; set; }
+		public string PreferredCategory { get; set; }
 		public Dictionary<string, string> SubcategoriesOverride { get; set; }
 		public Dictionary<string, string> VariablesOverride { get; set; }
 
-		private string Speedrunusername => channelInstance.ConfigInstance.LeaderboardsUsername;
+		private string SpeedrunUsername => m_ChannelInstance.ConfigInstance.LeaderboardsUsername;
 		public bool LastUpdateSuccessful { get; private set; }
 
 
@@ -49,12 +50,12 @@ namespace SuiBot_Core.Components
 
 		public Leaderboards(SuiBot_ChannelInstance channelInstance)
 		{
-			this.channelInstance = channelInstance;
+			this.m_ChannelInstance = channelInstance;
 			GameOverride = false;
 			CurrentGame = "";
 			LevelOverride = "";
 			CategoryOverride = "";
-			PreferedCategory = "";
+			PreferredCategory = "";
 			SubcategoriesOverride = new Dictionary<string, string>();
 
 
@@ -66,7 +67,7 @@ namespace SuiBot_Core.Components
 					PROXYNAMES = LoadProxyNamesFromFile(PROXYNAMESFILE);
 				}
 
-				if (this.channelInstance.ConfigInstance.LeaderboardsUpdateProxyNames)
+				if (this.m_ChannelInstance.ConfigInstance.LeaderboardsUpdateProxyNames)
 					UpdateProxyNamesAsync();
 			}
 
@@ -86,7 +87,7 @@ namespace SuiBot_Core.Components
 			}
 			catch (Exception e)
 			{
-				ErrorLogging.WriteLine("Error checking Proxyname XML on Github " + e.Message);
+				ErrorLogging.WriteLine($"Error checking Proxyname XML on Github {e.Message}");
 			}
 		}
 
@@ -142,7 +143,7 @@ namespace SuiBot_Core.Components
 
 		}
 
-		public void SetPreferedCategory(string StreamTitle, bool isAfterFirstUpdate, bool vocal)
+		public void SetPreferredCategory(string StreamTitle, bool isAfterFirstUpdate, bool vocal)
 		{
 			var currentTitleLC = StreamTitle.ToLower();
 
@@ -159,25 +160,25 @@ namespace SuiBot_Core.Components
 					{
 						if (currentTitleLC.Contains(category.Name.ToLower()))
 						{
-							if (PreferedCategory != category.Name || vocal)
+							if (PreferredCategory != category.Name || vocal)
 							{
-								PreferedCategory = category.Name;
+								PreferredCategory = category.Name;
 								LastUpdateSuccessful = true;
 								if (vocal || isAfterFirstUpdate)
-									channelInstance.SendChatMessage($"Set leaderboards category to: \"{PreferedCategory}\" based on stream title");
+									m_ChannelInstance.SendChatMessage($"Set leaderboards category to: \"{PreferredCategory}\" based on stream title");
 							}
 							return;
 						}
 					}
-					PreferedCategory = "";
+					PreferredCategory = "";
 					LastUpdateSuccessful = true;
 					if (vocal || isAfterFirstUpdate)
-						channelInstance.SendChatMessage("Haven't found the category in stream title.");
+						m_ChannelInstance.SendChatMessage("Haven't found the category in stream title.");
 					return;
 				}
 				LastUpdateSuccessful = true;
 				if (vocal)
-					channelInstance.SendChatMessage("Haven't found the game on speedrun.com. !leaderboards game %GAME TITLE% might be used to force the game.");
+					m_ChannelInstance.SendChatMessage("Haven't found the game on speedrun.com. !leaderboards game %GAME TITLE% might be used to force the game.");
 			}
 			catch (Exception e)
 			{
@@ -186,78 +187,78 @@ namespace SuiBot_Core.Components
 			}
 		}
 
-		public void DoModWork(ChatMessage lastMessage)
+		public void DoModWork(ES_ChatMessage lastMessage)
 		{
-			lastMessage.Message = lastMessage.Message.StripSingleWord();
+			var msg = lastMessage.message.text.StripSingleWord();
 
-			if (lastMessage.Message.StartsWithLazy("username"))
+			if (msg.StartsWithLazy("username"))
 			{
-				lastMessage.Message = lastMessage.Message.StripSingleWord();
-				if (lastMessage.Message != "")
+				msg = msg.StripSingleWord();
+				if (msg != "")
 				{
-					channelInstance.ConfigInstance.LeaderboardsUsername = lastMessage.Message;
-					channelInstance.ConfigInstance.Save();
-					channelInstance.SendChatMessageResponse(lastMessage, "Set Speedrun username to: " + Speedrunusername);
+					m_ChannelInstance.ConfigInstance.LeaderboardsUsername = msg;
+					m_ChannelInstance.ConfigInstance.Save();
+					m_ChannelInstance.SendChatMessageResponse(lastMessage, "Set Speedrun username to: " + SpeedrunUsername);
 				}
 				else
 				{
-					channelInstance.ConfigInstance.LeaderboardsUsername = lastMessage.Message;
-					channelInstance.ConfigInstance.Save();
-					channelInstance.SendChatMessageResponse(lastMessage, "Nulled out Speedrun username");
+					m_ChannelInstance.ConfigInstance.LeaderboardsUsername = msg;
+					m_ChannelInstance.ConfigInstance.Save();
+					m_ChannelInstance.SendChatMessageResponse(lastMessage, "Nulled out Speedrun username");
 				}
 			}
-			else if (lastMessage.Message.StartsWithLazy("game"))
+			else if (msg.StartsWithLazy("game"))
 			{
-				lastMessage.Message = lastMessage.Message.StripSingleWord();
-				if (lastMessage.Message != "")
+				msg = msg.StripSingleWord();
+				if (msg != "")
 				{
 					GameOverride = true;
-					CurrentGame = lastMessage.Message;
-					channelInstance.SendChatMessageResponse(lastMessage, "Set game override to: " + CurrentGame);
+					CurrentGame = msg;
+					m_ChannelInstance.SendChatMessageResponse(lastMessage, "Set game override to: " + CurrentGame);
 				}
 				else
 				{
 					GameOverride = false;
-					channelInstance.SendChatMessageResponse(lastMessage, "Disabled game override (game will be updated on next twitch status update).");
+					m_ChannelInstance.SendChatMessageResponse(lastMessage, "Disabled game override (game will be updated on next twitch status update).");
 				}
 			}
-			else if (lastMessage.Message.StartsWithLazy("level"))
+			else if (msg.StartsWithLazy("level"))
 			{
-				lastMessage.Message = lastMessage.Message.StripSingleWord();
-				if (lastMessage.Message != "")
+				msg = msg.StripSingleWord();
+				if (msg != "")
 				{
-					LevelOverride = lastMessage.Message;
-					channelInstance.SendChatMessageResponse(lastMessage, "Set level to: " + LevelOverride);
+					LevelOverride = msg;
+					m_ChannelInstance.SendChatMessageResponse(lastMessage, "Set level to: " + LevelOverride);
 				}
 				else
 				{
 					LevelOverride = "";
-					channelInstance.SendChatMessageResponse(lastMessage, "Disabled level override.");
+					m_ChannelInstance.SendChatMessageResponse(lastMessage, "Disabled level override.");
 				}
 			}
-			else if (lastMessage.Message.StartsWithLazy("category"))
+			else if (msg.StartsWithLazy("category"))
 			{
-				lastMessage.Message = lastMessage.Message.StripSingleWord();
-				if (lastMessage.Message != "")
+				msg = msg.StripSingleWord();
+				if (msg != "")
 				{
-					CategoryOverride = lastMessage.Message;
-					channelInstance.SendChatMessageResponse(lastMessage, "Set category to: " + CategoryOverride);
+					CategoryOverride = msg;
+					m_ChannelInstance.SendChatMessageResponse(lastMessage, "Set category to: " + CategoryOverride);
 				}
 				else
 				{
 					CategoryOverride = "";
-					channelInstance.SendChatMessageResponse(lastMessage, "Disabled category override.");
+					m_ChannelInstance.SendChatMessageResponse(lastMessage, "Disabled category override.");
 				}
 			}
-			else if (lastMessage.Message.StartsWithLazy("subcategory"))
+			else if (msg.StartsWithLazy("subcategory"))
 			{
-				lastMessage.Message = lastMessage.Message.StripSingleWord().ToLower();
-				if (lastMessage.Message != "")
+				msg = msg.StripSingleWord().ToLower();
+				if (msg != "")
 				{
 					//Precise separation
-					if (lastMessage.Message.Contains(":"))
+					if (msg.Contains(":"))
 					{
-						var split = lastMessage.Message.Split(new char[] { ':' }, 2);
+						var split = msg.Split(new char[] { ':' }, 2);
 						var key = split[0].Trim();
 						var value = split[1].Trim();
 						if (key != "")
@@ -267,57 +268,57 @@ namespace SuiBot_Core.Components
 								if (value == "")
 								{
 									SubcategoriesOverride.Remove(split[0]);
-									channelInstance.SendChatMessageResponse(lastMessage, $"Removed subcategory key \"{key}\"");
+									m_ChannelInstance.SendChatMessageResponse(lastMessage, $"Removed subcategory key \"{key}\"");
 								}
 								else
 								{
 									SubcategoriesOverride[key] = value;
-									channelInstance.SendChatMessageResponse(lastMessage, $"Set the subcategory key \"{key}\" to \"{value}\"");
+									m_ChannelInstance.SendChatMessageResponse(lastMessage, $"Set the subcategory key \"{key}\" to \"{value}\"");
 								}
 
 							}
 							else
 							{
 								if (value == "")
-									channelInstance.SendChatMessageResponse(lastMessage, "Nothing was deleted as such key doesn't exist");
+									m_ChannelInstance.SendChatMessageResponse(lastMessage, "Nothing was deleted as such key doesn't exist");
 								else
 								{
 									SubcategoriesOverride.Add(key, value);
-									channelInstance.SendChatMessageResponse(lastMessage, $"Added new subcategory override with key \"{key}\" and value \"{value}\"");
+									m_ChannelInstance.SendChatMessageResponse(lastMessage, $"Added new subcategory override with key \"{key}\" and value \"{value}\"");
 								}
 							}
 						}
 						else
 						{
-							channelInstance.SendChatMessageResponse(lastMessage, "Subcategory key can not be empty!");
+							m_ChannelInstance.SendChatMessageResponse(lastMessage, "Subcategory key can not be empty!");
 						}
 
 					}
 					else  //Lazy seperation
 					{
-						if (SubcategoriesOverride.ContainsKey(lastMessage.Message))
-							SubcategoriesOverride[lastMessage.Message] = "";
+						if (SubcategoriesOverride.ContainsKey(msg))
+							SubcategoriesOverride[msg] = "";
 						else
-							SubcategoriesOverride.Add(lastMessage.Message, "");
+							SubcategoriesOverride.Add(msg, "");
 
-						channelInstance.SendChatMessageResponse(lastMessage, $"Set the generic subcategory value to look for to \"{lastMessage.Message}\"");
+						m_ChannelInstance.SendChatMessageResponse(lastMessage, $"Set the generic subcategory value to look for to \"{msg}\"");
 					}
 				}
 				else
 				{
 					SubcategoriesOverride.Clear();
-					channelInstance.SendChatMessageResponse(lastMessage, "Cleared up subcategory overrides.");
+					m_ChannelInstance.SendChatMessageResponse(lastMessage, "Cleared up subcategory overrides.");
 				}
 			}
-			else if (lastMessage.Message.StartsWithLazy("variable"))
+			else if (msg.StartsWithLazy("variable"))
 			{
-				lastMessage.Message = lastMessage.Message.StripSingleWord().ToLower();
-				if (lastMessage.Message != "")
+				msg = msg.StripSingleWord().ToLower();
+				if (msg != "")
 				{
 					//Precise separation
-					if (lastMessage.Message.Contains(":"))
+					if (msg.Contains(":"))
 					{
-						var split = lastMessage.Message.Split(new char[] { ':' }, 2);
+						var split = msg.Split(new char[] { ':' }, 2);
 						var key = split[0].Trim();
 						var value = split[1].Trim();
 						if (key != "")
@@ -327,59 +328,59 @@ namespace SuiBot_Core.Components
 								if (value == "")
 								{
 									VariablesOverride.Remove(split[0]);
-									channelInstance.SendChatMessageResponse(lastMessage, $"Removed variable variable key \"{key}\"");
+									m_ChannelInstance.SendChatMessageResponse(lastMessage, $"Removed variable variable key \"{key}\"");
 								}
 								else
 								{
 									VariablesOverride[key] = value;
-									channelInstance.SendChatMessageResponse(lastMessage, $"Set the variable key \"{key}\" to \"{value}\"");
+									m_ChannelInstance.SendChatMessageResponse(lastMessage, $"Set the variable key \"{key}\" to \"{value}\"");
 								}
 							}
 							else
 							{
 								if (value == "")
-									channelInstance.SendChatMessageResponse(lastMessage, "Nothing was deleted as such key doesn't exist");
+									m_ChannelInstance.SendChatMessageResponse(lastMessage, "Nothing was deleted as such key doesn't exist");
 								else
 								{
 									VariablesOverride.Add(key, value);
-									channelInstance.SendChatMessageResponse(lastMessage, $"Added new variable with key \"{key}\" and value \"{value}\"");
+									m_ChannelInstance.SendChatMessageResponse(lastMessage, $"Added new variable with key \"{key}\" and value \"{value}\"");
 								}
 							}
 						}
 						else
 						{
-							channelInstance.SendChatMessageResponse(lastMessage, "Variable key can not be empty!");
+							m_ChannelInstance.SendChatMessageResponse(lastMessage, "Variable key can not be empty!");
 						}
 					}
-					else  //Doing lazy way would be stupid for fariables
+					else  //Doing lazy way would be stupid for variables
 					{
-						channelInstance.SendChatMessageResponse(lastMessage, "Setting variables requires key and value");
+						m_ChannelInstance.SendChatMessageResponse(lastMessage, "Setting variables requires key and value");
 					}
 				}
 				else
 				{
 					VariablesOverride.Clear();
-					channelInstance.SendChatMessageResponse(lastMessage, "Cleared up variable overrides.");
+					m_ChannelInstance.SendChatMessageResponse(lastMessage, "Cleared up variable overrides.");
 				}
 			}
 		}
 
-		public void DoWorkWR(ChatMessage lastMessage)
+		public void DoWorkWR(ES_ChatMessage lastMessage)
 		{
-			lastMessage.Message = lastMessage.Message.StripSingleWord();
+			var msg = lastMessage.message.text.StripSingleWord();
 
-			if (lastMessage.Message == "")
+			if (msg == "")
 			{
 				var currentGame = CurrentGame;
 				var category = "";
 				var level = "";
 				GetProxyName(ref currentGame, ref category, ref level);
-				channelInstance.SendChatMessageResponse(lastMessage, GetWR(currentGame, true, category, level, null, null));
+				m_ChannelInstance.SendChatMessageResponse(lastMessage, GetWR(currentGame, true, category, level, null, null));
 			}
 			else
 			{
 				bool isCurrentGame = false;
-				SeperateElements(lastMessage.Message, out string lookUpGame, out string lookUpCategory, out string lookUpLevel, out Dictionary<string, string> lookUpSubcategories, out Dictionary<string, string> lookUpVariables);
+				SeperateElements(msg, out string lookUpGame, out string lookUpCategory, out string lookUpLevel, out Dictionary<string, string> lookUpSubcategories, out Dictionary<string, string> lookUpVariables);
 
 				//Sort out game name
 				if (lookUpGame.ToLower() == "this")
@@ -392,7 +393,7 @@ namespace SuiBot_Core.Components
 				{
 					if (lookUpCategory == "" && lookUpLevel == "" && lookUpLevel == "" && lookUpSubcategories == null && lookUpVariables == null)
 					{
-						lookUpGame = lastMessage.Message;
+						lookUpGame = msg;
 					}
 					else
 					{
@@ -406,11 +407,11 @@ namespace SuiBot_Core.Components
 
 				if (lookUpGame == "")
 				{
-					channelInstance.SendChatMessageResponse(lastMessage, "No game name provided");
+					m_ChannelInstance.SendChatMessageResponse(lastMessage, "No game name provided");
 				}
 				else
 				{
-					channelInstance.SendChatMessageResponse(lastMessage, GetWR(lookUpGame, isCurrentGame, lookUpCategory, lookUpLevel, lookUpSubcategories, lookUpVariables));
+					m_ChannelInstance.SendChatMessageResponse(lastMessage, GetWR(lookUpGame, isCurrentGame, lookUpCategory, lookUpLevel, lookUpSubcategories, lookUpVariables));
 				}
 			}
 		}
@@ -523,18 +524,18 @@ namespace SuiBot_Core.Components
 			}
 		}
 
-		internal void DoWorkPB(ChatMessage lastMessage)
+		internal void DoWorkPB(ES_ChatMessage lastMessage)
 		{
-			lastMessage.Message = lastMessage.Message.StripSingleWord();
+			var msg = lastMessage.message.text.StripSingleWord();
 
-			if (lastMessage.Message == "")
+			if (msg == "")
 			{
-				channelInstance.SendChatMessageResponse(lastMessage, GetPB(CurrentGame, true, "", "", null, null));
+				m_ChannelInstance.SendChatMessageResponse(lastMessage, GetPB(CurrentGame, true, "", "", null, null));
 			}
 			else
 			{
 				bool isCurrentGame = false;
-				SeperateElements(lastMessage.Message, out string lookUpGame, out string lookUpCategory, out string lookUpLevel, out Dictionary<string, string> lookUpSubcategories, out Dictionary<string, string> lookUpVariables);
+				SeperateElements(msg, out string lookUpGame, out string lookUpCategory, out string lookUpLevel, out Dictionary<string, string> lookUpSubcategories, out Dictionary<string, string> lookUpVariables);
 
 				//Sort out game name
 				if (lookUpGame.ToLower() == "this")
@@ -547,7 +548,7 @@ namespace SuiBot_Core.Components
 				{
 					if (lookUpCategory == "" && lookUpLevel == "" && lookUpLevel == "" && lookUpSubcategories == null && lookUpVariables == null)
 					{
-						lookUpGame = lastMessage.Message;
+						lookUpGame = msg;
 					}
 				}
 
@@ -556,11 +557,11 @@ namespace SuiBot_Core.Components
 
 				if (lookUpGame == "")
 				{
-					channelInstance.SendChatMessageResponse(lastMessage, "No game name provided");
+					m_ChannelInstance.SendChatMessageResponse(lastMessage, "No game name provided");
 				}
 				else
 				{
-					channelInstance.SendChatMessageResponse(lastMessage, GetPB(lookUpGame, isCurrentGame, lookUpCategory, lookUpLevel, lookUpSubcategories, lookUpVariables));
+					m_ChannelInstance.SendChatMessageResponse(lastMessage, GetPB(lookUpGame, isCurrentGame, lookUpCategory, lookUpLevel, lookUpSubcategories, lookUpVariables));
 				}
 			}
 		}
@@ -594,7 +595,7 @@ namespace SuiBot_Core.Components
 						if (srLevel == null)
 							return "No level was found";
 
-						var pbs = srSearch.Users.GetPersonalBests(Speedrunusername, gameId: srGame.ID);
+						var pbs = srSearch.Users.GetPersonalBests(SpeedrunUsername, gameId: srGame.ID);
 
 						var levelPBs = pbs.Where(x => x.LevelID == srLevel.ID);
 						if (levelPBs.Count() > 0)
@@ -631,7 +632,7 @@ namespace SuiBot_Core.Components
 						if (srCategory == null)
 							return "No category was found";
 
-						var pbs = srSearch.Users.GetPersonalBests(Speedrunusername, gameId: srGame.ID);
+						var pbs = srSearch.Users.GetPersonalBests(SpeedrunUsername, gameId: srGame.ID);
 
 						if (pbs.Count > 0)
 						{
@@ -721,8 +722,8 @@ namespace SuiBot_Core.Components
 
 			if (category == "" && isCurrent)
 			{
-				if (PreferedCategory != "")
-					category = PreferedCategory;
+				if (PreferredCategory != "")
+					category = PreferredCategory;
 				if (CategoryOverride != "")
 					category = CategoryOverride;
 			}

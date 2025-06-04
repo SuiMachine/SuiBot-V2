@@ -1,9 +1,11 @@
-﻿namespace SuiBot_Core.Components.Other
+﻿using SuiBot_TwitchSocket.API.EventSub;
+
+namespace SuiBot_Core.Components.Other
 {
 	public abstract class MemeComponent
     {
         public MemeComponent() { }
 
-        public abstract bool DoWork(SuiBot_ChannelInstance channelInstance, ChatMessage lastMessage);
+        public abstract bool DoWork(SuiBot_ChannelInstance channelInstance, ES_ChatMessage lastMessage);
     }
 }

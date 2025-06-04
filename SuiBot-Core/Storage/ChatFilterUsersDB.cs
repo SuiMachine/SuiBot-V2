@@ -7,10 +7,8 @@ namespace SuiBot_Core.Storage
 	[Serializable]
 	public class ChatFilterUsersDB
 	{
-		[XmlIgnore]
-		private string Channel { get; set; }
-		[XmlElement]
-		public SerializableDictionary<string, uint> DB { get; set; }
+		[XmlIgnore]	private string Channel { get; set; }
+		[XmlElement] public SerializableDictionary<string, uint> DB { get; set; }
 
 		public ChatFilterUsersDB()
 		{

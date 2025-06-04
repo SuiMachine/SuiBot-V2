@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json.Linq;
+using SuiBot_TwitchSocket;
 using System;
 using System.Collections.Generic;
 

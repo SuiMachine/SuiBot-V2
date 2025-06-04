@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SuiBot_Core.Storage;
+using System;
 using System.Windows;
 
 namespace SuiBot_V2_Windows.Windows.Settings
@@ -8,9 +9,9 @@ namespace SuiBot_V2_Windows.Windows.Settings
 	/// </summary>
 	public partial class ConnectionSettingsWindow : Window
 	{
-		public SuiBot_Core.Storage.ConnectionConfig ConnectionConfig { get; private set; }
+		public ConnectionConfig ConnectionConfig { get; private set; }
 
-		public ConnectionSettingsWindow(SuiBot_Core.Storage.ConnectionConfig connectionConfig)
+		public ConnectionSettingsWindow(ConnectionConfig connectionConfig)
 		{
 			InitializeComponent();
 			this.ConnectionConfig = connectionConfig;
@@ -18,7 +19,6 @@ namespace SuiBot_V2_Windows.Windows.Settings
 
 			//For whatever reason (security?) you need to jump through hoops and loops to do binding on password, so here is plain old manual way
 			this.PassBox_Password.Password = ConnectionConfig.Password;
-			this.PassBox_ImgBBApiKey.Password = ConnectionConfig.ImgBBApiKey;
 		}
 
 		private void Window_Initialized(object sender, EventArgs e)
@@ -28,7 +28,6 @@ namespace SuiBot_V2_Windows.Windows.Settings
 		private void OKClicked(object sender, RoutedEventArgs e)
 		{
 			this.ConnectionConfig.Password = this.PassBox_Password.Password.Trim();
-			this.ConnectionConfig.ImgBBApiKey = this.PassBox_ImgBBApiKey.Password.Trim();
 			this.DialogResult = true;
 			this.Close();
 		}
@@ -43,23 +42,14 @@ namespace SuiBot_V2_Windows.Windows.Settings
 		{
 			this.ConnectionConfig.Password = this.PassBox_Password.Password.Trim();
 
-			SuiBot_Core.SuiBot sb = new SuiBot_Core.SuiBot(this.ConnectionConfig, SuiBot_Core.Storage.CoreConfig.Load());
-
-			var result = sb.PerformTest();
-
-			switch (result)
+			SuiBot_Core.SuiBot sb = SuiBot_Core.SuiBot.GetInstance(this.ConnectionConfig, SuiBot_Core.Storage.CoreConfig.Load());
+			var result = sb.VerifyAuthy();
+			if(string.IsNullOrEmpty(result))
+				MessageBox.Show("Failed to verify login!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+			else
 			{
-				case (0):
-					MessageBox.Show("Test performed successfully! You are good to go!", "Success!", MessageBoxButton.OK, MessageBoxImage.Information);
-					break;
-				case (1):
-					MessageBox.Show("Failed to connect to server", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-					break;
-				case (2):
-					MessageBox.Show("Incorrect login informaion", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-					break;
+				MessageBox.Show(result, "Result", MessageBoxButton.OK, MessageBoxImage.Information);
 			}
-
 		}
 
 		private void ObtainAuthy(object sender, RoutedEventArgs e)

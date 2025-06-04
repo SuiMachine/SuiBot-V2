@@ -1,4 +1,5 @@
 ﻿using SuiBot_Core;
+using SuiBot_Core.Storage;
 using System;
 using System.IO;
 
@@ -14,16 +15,15 @@ namespace SuiBot_V2
 
 			if (File.Exists("Bot/ConnectionConfig.suixml"))
 			{
-				bot = new SuiBot();
+				bot = SuiBot.GetInstance();
 				bot.Connect();
 
-
-				while (bot.IsRunning)
-					System.Threading.Thread.Sleep(1);
+				while (!bot.IsDisposed)
+					System.Threading.Thread.Sleep(15);
 			}
 			else
 			{
-				var configFile = new SuiBot_Core.Storage.ConnectionConfig();
+				var configFile = new ConnectionConfig();
 				configFile.Save();
 				Console.WriteLine("No connection config was found, so a new file was created.");
 

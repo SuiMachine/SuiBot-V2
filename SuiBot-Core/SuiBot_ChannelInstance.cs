@@ -1,55 +1,72 @@
 ﻿using SuiBot_Core.Extensions.SuiStringExtension;
+using SuiBot_TwitchSocket.API.EventSub;
+using SuiBot_TwitchSocket.API.Helix.Responses;
+using SuiBot_TwitchSocket.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Threading.Tasks;
+using static SuiBot_TwitchSocket.API.EventSub.ES_ChatMessage;
 
 namespace SuiBot_Core
 {
-	public class SuiBot_ChannelInstance
+	[DebuggerDisplay(nameof(SuiBot_ChannelInstance) + " {Channel}")]
+	public class SuiBot_ChannelInstance : IChannelInstance
 	{
 		private const int DefaultCooldown = 30;
 		public static string CommandPrefix = "!";
 		public string Channel { get; set; }
+		public string ChannelID { get; set; }
+
 		public Storage.ChannelConfig ConfigInstance { get; set; }
-		Storage.CoreConfig CoreConfigInstance { get; set; }
-		public string BotName => SuiBotInstance.BotName;
-		SuiBot SuiBotInstance { get; set; }
+		private Storage.CoreConfig CoreConfigInstance { get; set; }
+		private SuiBot SuiBotInstance { get; set; }
 		#region Components
-		Components.Quotes QuotesInstance { get; set; }
-		Components.IntervalMessages IntervalMessagesInstance { get; set; }
-		Components.ChatFiltering ChatFiltering { get; set; }
-		Components.Leaderboards Leaderboards { get; set; }
-		Components.CustomCvars Cvars { get; set; }
-		Components.GenericUtil GenericUtil { get; set; }
-		Components.PCGW PCGW { get; set; }
-		Components.Timezones Timezones { get; set; }
+		internal Components.Quotes QuotesInstance { get; private set; }
+		internal Components.IntervalMessages IntervalMessagesInstance { get; private set; }
+		internal Components.ChatFiltering ChatFiltering { get; private set; }
+		internal Components.Leaderboards Leaderboards { get; private set; }
+		internal Components.CustomCvars Cvars { get; private set; }
+		internal Components.GenericUtil GenericUtil { get; private set; }
+		internal Components.PCGW PCGW { get; private set; }
+		internal Components.Timezones Timezones { get; private set; }
+		internal Components.GeminiAI GeminiAI { get; private set; }
 
 		#region Other
 		internal Components.Other._MemeComponents MemeComponents { get; set; }
 		#endregion
 		#endregion
-		public TwitchAPI API { get; private set; }
-		Dictionary<string, DateTime> UserCooldowns { get; set; }
-		Dictionary<string, DateTime> LastUserActivity { get; set; }
+		private Response_StreamStatus m_StreamStatus;
+		public Response_StreamStatus StreamStatus
+		{
+			get => m_StreamStatus;
+			set => m_StreamStatus = value;
+		}
+		private Dictionary<string, DateTime> UserCooldowns { get; set; }
+		private Dictionary<string, DateTime> LastUserActivity { get; set; }
 
-
-		//Cause of course now you have to have Oauth
-		public SuiBot_ChannelInstance(string Channel, string Oauth, SuiBot SuiBotInstance, Storage.ChannelConfig ConfigInstance)
+		public SuiBot_ChannelInstance(string Channel, string ChannelID, SuiBot SuiBotInstance, Storage.ChannelConfig ConfigInstance)
 		{
 			this.Channel = Channel;
-			this.ConfigInstance = ConfigInstance;
+			this.ChannelID = ChannelID;
 			this.CoreConfigInstance = SuiBotInstance.BotCoreConfig;
 			this.SuiBotInstance = SuiBotInstance;
+			this.StreamStatus = new Response_StreamStatus();
+			this.SuiBotInstance.HelixAPI.GetStatus(this);
+
+			this.ConfigInstance = ConfigInstance;
+
 			this.QuotesInstance = new Components.Quotes(this);
 			this.IntervalMessagesInstance = new Components.IntervalMessages(this);
 			this.Leaderboards = new Components.Leaderboards(this);
 			this.ChatFiltering = new Components.ChatFiltering(this);
-			this.API = new TwitchAPI(this, Oauth);
 			this.Cvars = new Components.CustomCvars(this);
 			this.UserCooldowns = new Dictionary<string, DateTime>();
 			this.LastUserActivity = new Dictionary<string, DateTime>();
-			this.PCGW = new Components.PCGW(this, API);
-			this.GenericUtil = new Components.GenericUtil(this, API);
+			this.PCGW = new Components.PCGW(this);
+			this.GenericUtil = new Components.GenericUtil(this);
 			this.Timezones = new Components.Timezones(this);
+			this.GeminiAI = new Components.GeminiAI(this);
 
 			//Other
 			MemeComponents = new Components.Other._MemeComponents(this, ConfigInstance.MemeComponents);
@@ -57,65 +74,70 @@ namespace SuiBot_Core
 
 		internal void TimerTick()
 		{
-			if (ConfigInstance.IntervalMessageEnabled && API.IsOnline)
+			if (ConfigInstance.IntervalMessageEnabled && StreamStatus.IsOnline)
 				IntervalMessagesInstance.DoTickWork();
 		}
 
 		internal void UpdateTwitchStatus(bool vocal)
 		{
-			API.GetStatus();
+			SuiBotInstance.HelixAPI.GetStatus(this);
 
 			if (ConfigInstance.LeaderboardsEnabled && !Leaderboards.GameOverride)
-				Leaderboards.CurrentGame = API.Game;
+				Leaderboards.CurrentGame = StreamStatus.game_name;
 
-			if (ConfigInstance.LeaderboardsAutodetectCategory && API.IsOnline)
+			if (ConfigInstance.LeaderboardsAutodetectCategory && StreamStatus.IsOnline)
 			{
-				if (API.TitleHasChanged || !Leaderboards.LastUpdateSuccessful || vocal)
-					Leaderboards.SetPreferedCategory(API.StoredTitle, SuiBotInstance.IsAfterFirstStatusUpdate, vocal);
+				if (StreamStatus.GameChangedSinceLastTime || !Leaderboards.LastUpdateSuccessful || vocal)
+					Leaderboards.SetPreferredCategory(StreamStatus.title, SuiBotInstance.IsAfterFirstStatusUpdate, vocal);
 			}
 
 
 			if (vocal)
-				SendChatMessage(string.Format("New obtained stream status is {0}{1}.",
-					API.IsOnline == false ? "offline" : "online",
-					API.Game == "" ? "" : " and game is " + API.Game
-					));
+			{
+				var stream_status = StreamStatus.IsOnline == false ? "offline" : "online";
+				var game = StreamStatus.game_name == "" ? "" : " and game is " + StreamStatus.game_name;
+
+				SendChatMessage($"New obtained stream status is {stream_status}{game}.");
+			}
 		}
 
 		public void SendChatMessage(string message)
 		{
-			if (message.Length <= 500)
+			Task.Run(async () =>
 			{
-				SuiBotInstance.SendChatMessageFeedback("#" + Channel, message);
-				SuiBotInstance.MeebyIrcClient.SendMessage(Meebey.SmartIrc4net.SendType.Message, "#" + Channel, message);
-			}
-			else
-			{
-				var messages = message.SplitMessage(500);
-				foreach (var subMessage in messages)
+				if (message.Length <= 500)
 				{
-					SuiBotInstance.SendChatMessageFeedback("#" + Channel, subMessage);
-					SuiBotInstance.MeebyIrcClient.SendMessage(Meebey.SmartIrc4net.SendType.Message, "#" + Channel, subMessage);
+					SuiBotInstance.SendChatMessageFeedback("#" + Channel, message);
+					await SuiBotInstance.HelixAPI.SendMessageAsync(this, message);
 				}
-			}
+				else
+				{
+					var messages = message.SplitMessage(500);
+					foreach (var subMessage in messages)
+					{
+						SuiBotInstance.SendChatMessageFeedback("#" + Channel, subMessage);
+						await SuiBotInstance.HelixAPI.SendMessageAsync(this, subMessage);
+					}
+				}
+			});
+
 		}
 
-		public void SendChatMessageResponse(ChatMessage messageToRespondTo, string message, bool noPersonMention = false)
+		public void SendChatMessageResponse(ES_ChatMessage messageToRespondTo, string message)
 		{
 			SetUserCooldown(messageToRespondTo, DefaultCooldown);
-			if (!noPersonMention)
-			{
-				string msgResponse = $"@{messageToRespondTo.DisplayName}: {message}";
-				SendChatMessage(msgResponse);
 
-			}
-			else
+
+			//string msgResponse = $"@{messageToRespondTo.chatter_user_name}: {message}";
+			Task.Run(async () =>
 			{
-				SendChatMessage(message);
-			}
+				await SuiBotInstance.HelixAPI.SendResponseAsync(messageToRespondTo, message);
+			});
+
+			SuiBotInstance.SendChatMessageFeedback("#" + Channel, $"{messageToRespondTo.reply} -> {message}");
 		}
 
-		private void SetUserCooldown(ChatMessage messageToRespondTo, int cooldown)
+		private void SetUserCooldown(ES_ChatMessage messageToRespondTo, int cooldown)
 		{
 			if (messageToRespondTo.UserRole <= Role.Mod)
 				return;
@@ -132,78 +154,64 @@ namespace SuiBot_Core
 					break;
 			}
 
-			if (!UserCooldowns.ContainsKey(messageToRespondTo.Username))
-				UserCooldowns.Add(messageToRespondTo.Username, DateTime.UtcNow + TimeSpan.FromSeconds(cooldown));
+			if (!UserCooldowns.ContainsKey(messageToRespondTo.chatter_user_login))
+				UserCooldowns.Add(messageToRespondTo.chatter_user_login, DateTime.UtcNow + TimeSpan.FromSeconds(cooldown));
 			else
 			{
-				UserCooldowns[messageToRespondTo.Username] = DateTime.UtcNow + TimeSpan.FromSeconds(cooldown);
+				UserCooldowns[messageToRespondTo.chatter_user_login] = DateTime.UtcNow + TimeSpan.FromSeconds(cooldown);
 			}
 		}
 
-		public void SendChatMessage_NoDelays(string message)
+		public void UserShoutout(ES_ChatMessage lastMessage, string username) => SuiBotInstance.HelixAPI.RequestShoutout(lastMessage, username);
+		public void RemoveUserMessage(ES_ChatMessage lastMassage) => SuiBotInstance.HelixAPI.RequestRemoveMessage(lastMassage);
+		public void UserTimeout(ES_ChatMessage lastMassage, uint length, string reason = null) => SuiBotInstance.HelixAPI.RequestTimeout(lastMassage, length, reason);
+		public void UserTimeout(ES_ChatMessage lastMassage, TimeSpan length, string reason = null) => SuiBotInstance.HelixAPI.RequestTimeout(lastMassage, length, reason);
+		public void UserBan(ES_ChatMessage lastMassage, string reason = null) => SuiBotInstance.HelixAPI.RequestBan(lastMassage, reason);
+
+		internal void DoWork(ES_ChatMessage messageToProcess)
 		{
-			int originalDelay = SuiBotInstance.MeebyIrcClient.SendDelay;
-			SuiBotInstance.MeebyIrcClient.SendDelay = 0;
-			SuiBotInstance.MeebyIrcClient.SendMessage(Meebey.SmartIrc4net.SendType.Message, "#" + Channel, message);
-			SuiBotInstance.MeebyIrcClient.SendDelay = originalDelay;
-		}
-
-		public void UserShoutout(string username)
-		{
-			SuiBotInstance.MeebyIrcClient.WriteLine(string.Format(":{0}!{0}@{0}.tmi.twitch.tv PRIVMSG #{1} :.shoutout {2}", SuiBotInstance.BotName, Channel, username));
-		}
-
-		public void RemoveUserMessage(ChatMessage lastMassage) => API.RequestRemoveMessage(Channel, lastMassage.MessageID);
-
-		public void UserTimeout(ChatMessage lastMassage, uint length, string reason = null) => API.RequestTimeout(Channel, lastMassage.UserID, length, reason);
-		public void UserBan(ChatMessage lastMassage, string reason = null) => API.RequestBan(Channel, lastMassage.UserID, reason);
-		public void UserBan(string userID, string reason = null) => API.RequestBan(Channel, userID, reason);
-
-
-		internal void DoWork(ChatMessage lastMessage)
-		{
-			UpdateActiveUser(lastMessage.Username);
+			UpdateActiveUser(messageToProcess.chatter_user_login);
 
 			//If Filtering is enabled and timeouted or banned, we don't need to do anything else
-			if (ConfigInstance.FilteringEnabled && PerformActionFiltering(lastMessage))
+			if (ConfigInstance.FilteringEnabled && PerformActionFiltering(messageToProcess))
 				return;
 
 			//This is a useful optimisation trick, since commands all start with a one and the same prefix, we don't actually have to spend time comparing strings, if we know that prefix was wrong
-			if (!lastMessage.Message.StartsWith(CommandPrefix) || CoreConfigInstance.IgnoredUsers.Contains(lastMessage.Username))
+			if (!messageToProcess.message.text.StartsWith(CommandPrefix) || CoreConfigInstance.IgnoredUsers.Contains(messageToProcess.chatter_user_login))
 				return;
 
 			//Do not perform actions if user is on cooldown
-			if (UserCooldowns.ContainsKey(lastMessage.Username) && UserCooldowns[lastMessage.Username] > DateTime.UtcNow)
+			if (UserCooldowns.ContainsKey(messageToProcess.chatter_user_login) && UserCooldowns[messageToProcess.chatter_user_login] > DateTime.UtcNow)
 				return;
 
 			//All of the commands are declared with lower cases
-			var messageLazy = lastMessage.Message.ToLower();
+			var messageLazy = messageToProcess.message.text.ToLower();
 			messageLazy = messageLazy.Remove(0, 1);
 
 			//Properties
 			if (messageLazy.StartsWithLazy("getproperty"))
 			{
-				ConfigInstance.GetProperty(this, lastMessage);
+				ConfigInstance.GetProperty(this, messageToProcess);
 				return;
 			}
 
 			if (messageLazy.StartsWithLazy("setproperty"))
 			{
-				ConfigInstance.SetPropety(this, lastMessage);
+				ConfigInstance.SetPropety(this, messageToProcess);
 				return;
 			}
 
 			//Quotes
 			if (ConfigInstance.QuotesEnabled && (messageLazy.StartsWith("quote") || messageLazy.StartsWith("quotes")))
 			{
-				QuotesInstance.DoWork(lastMessage);
+				QuotesInstance.DoWork(messageToProcess);
 				return;
 			}
 
 			//Chat Filter
 			if (ConfigInstance.FilteringEnabled && (messageLazy.StartsWith("chatfilter") || messageLazy.StartsWith("filter")))
 			{
-				ChatFiltering.DoWork(lastMessage);
+				ChatFiltering.DoWork(messageToProcess);
 				return;
 			}
 
@@ -212,17 +220,17 @@ namespace SuiBot_Core
 			{
 				if (messageLazy == "wr" || messageLazy.StartsWithWordLazy("wr"))
 				{
-					Leaderboards.DoWorkWR(lastMessage);
+					Leaderboards.DoWorkWR(messageToProcess);
 					return;
 				}
 				else if (messageLazy == "pb" || messageLazy.StartsWithWordLazy("pb"))
 				{
-					Leaderboards.DoWorkPB(lastMessage);
+					Leaderboards.DoWorkPB(messageToProcess);
 					return;
 				}
-				else if (lastMessage.UserRole <= Role.Mod && messageLazy.StartsWithWordLazy(new string[] { "leaderboard", "leaderboards" }))
+				else if (messageToProcess.UserRole <= Role.Mod && messageLazy.StartsWithWordLazy(new string[] { "leaderboard", "leaderboards" }))
 				{
-					Leaderboards.DoModWork(lastMessage);
+					Leaderboards.DoModWork(messageToProcess);
 					return;
 				}
 			}
@@ -232,9 +240,9 @@ namespace SuiBot_Core
 			{
 				if (messageLazy.StartsWithWordLazy(new string[] { "intervalmessage", "intervalmessages" }))
 				{
-					if (lastMessage.UserRole <= Role.Mod)
+					if (messageToProcess.UserRole <= Role.Mod)
 					{
-						IntervalMessagesInstance.DoWork(lastMessage);
+						IntervalMessagesInstance.DoWork(messageToProcess);
 						return;
 					}
 					else
@@ -246,32 +254,32 @@ namespace SuiBot_Core
 			if (messageLazy.StartsWith("srl"))
 			{
 				Components.SRL.GetRaces(this);
-				SetUserCooldown(lastMessage, DefaultCooldown);
+				SetUserCooldown(messageToProcess, DefaultCooldown);
 				return;
 			}
 
 			//PCGW
 			if (messageLazy.StartsWith("pcgw"))
 			{
-				PCGW.DoWork(lastMessage);
+				PCGW.DoWork(messageToProcess);
 				return;
 			}
 
 			//Timezones
 			if (messageLazy.StartsWith("time"))
 			{
-				Timezones.DoWork(lastMessage);
+				Timezones.DoWork(messageToProcess);
 			}
 
 			//Twitch update
-			if (messageLazy.StartsWith("updatestatus") && lastMessage.UserRole <= Role.VIP)
+			if (messageLazy.StartsWith("updatestatus") && messageToProcess.UserRole <= Role.VIP)
 			{
 				UpdateTwitchStatus(true);
 				return;
 			}
 
 			//Killswitch
-			if (messageLazy.StartsWith("killbot") && lastMessage.UserRole == Role.SuperMod)
+			if (messageLazy.StartsWith("killbot") && messageToProcess.UserRole == Role.SuperMod)
 			{
 				ShutdownTask();
 				return;
@@ -282,12 +290,12 @@ namespace SuiBot_Core
 			{
 				if (ConfigInstance.GenericUtil.Shoutout && messageLazy.StartsWith("so"))
 				{
-					GenericUtil.Shoutout(lastMessage);
+					GenericUtil.Shoutout(messageToProcess);
 				}
 
 				if (ConfigInstance.GenericUtil.UptimeEnabled && messageLazy.StartsWith("uptime"))
 				{
-					GenericUtil.GetUpTime(lastMessage);
+					GenericUtil.GetUpTime(messageToProcess);
 					return;
 				}
 			}
@@ -296,28 +304,46 @@ namespace SuiBot_Core
 			//MemeCompoenents
 			if (ConfigInstance.MemeComponents.ENABLE)
 			{
-				if (MemeComponents.DoWork(lastMessage))
+				if (MemeComponents.DoWork(messageToProcess))
 				{
-					SetUserCooldown(lastMessage, DefaultCooldown);
+					SetUserCooldown(messageToProcess, DefaultCooldown);
+					return;
 				}
 			}
 
+			//Ask AI
+			if (ConfigInstance.AskAI)
+			{
+				if (messageLazy.StartsWithLazy(new string[] { "ai", "ask" }))
+				{
+					if (messageToProcess.UserRole <= Role.Mod)
+					{
+						if (!GeminiAI.IsConfigured())
+							SendChatMessageResponse(messageToProcess, "AI isn't configured properly");
+						else
+							GeminiAI.GetAIResponse(messageToProcess);
+						return;
+					}
+					else
+						return;
+				}
+			}
 
 			//Custom Cvars
 			if (ConfigInstance.CustomCvarsEnabled)
 			{
 				if (messageLazy.StartsWithLazy(new string[] { "cvar", "cvars" }))
 				{
-					if (lastMessage.UserRole <= Role.Mod)
+					if (messageToProcess.UserRole <= Role.Mod)
 					{
-						Cvars.DoWork(lastMessage);
+						Cvars.DoWork(messageToProcess);
 						return;
 					}
 					else
 						return;
 				}
 
-				if (Cvars.PerformCustomCvar(lastMessage))
+				if (Cvars.PerformCustomCvar(messageToProcess))
 					return;
 			}
 		}
@@ -326,8 +352,6 @@ namespace SuiBot_Core
 		{
 			if (string.IsNullOrEmpty(username))
 				return;
-
-			username = username.ToLower();
 
 			if (LastUserActivity.ContainsKey(username))
 				LastUserActivity[username] = DateTime.UtcNow;
@@ -345,15 +369,15 @@ namespace SuiBot_Core
 				return false;
 		}
 
-		private bool PerformActionFiltering(ChatMessage lastMessage)
+		private bool PerformActionFiltering(ES_ChatMessage message)
 		{
-			if (lastMessage.UserRole <= Role.VIP)
+			if (message.UserRole <= Role.VIP)
 				return false;
 			else
-				return ChatFiltering.FilterOutMessages(lastMessage);
+				return ChatFiltering.FilterOutMessages(message, false);
 		}
 
-		internal bool IsSuperMod(string username)
+		public bool IsSuperMod(string username)
 		{
 			if (Channel == username)
 				return true;
@@ -366,7 +390,6 @@ namespace SuiBot_Core
 			QuotesInstance.Dispose();
 			ChatFiltering.Dispose();
 			Cvars.Dispose();
-			SuiBotInstance.LeaveChannel(Channel);
 		}
 	}
 }

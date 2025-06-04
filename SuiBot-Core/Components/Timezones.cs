@@ -1,6 +1,6 @@
 ﻿using SuiBot_Core.Extensions.SuiStringExtension;
+using SuiBot_TwitchSocket.API.EventSub;
 using System;
-using System.Text;
 
 namespace SuiBot_Core.Components
 {
@@ -14,9 +14,9 @@ namespace SuiBot_Core.Components
 			this.ChannelInstance = ChannelInstance;
 		}
 
-		public void DoWork(ChatMessage lastMessage)
+		public void DoWork(ES_ChatMessage lastMessage)
 		{
-			string strip = lastMessage.Message.StripSingleWord();
+			string strip = lastMessage.message.text.StripSingleWord();
 
 			if (DateTime.TryParse(strip, out DateTime result))
 			{
@@ -29,7 +29,7 @@ namespace SuiBot_Core.Components
 				var estTimeConverted = TimeZoneInfo.ConvertTime(result, GetTimeZoneWrapped("Eastern Standard Time", "America/New_York"));
 				var calishitTime = TimeZoneInfo.ConvertTime(result, GetTimeZoneWrapped("Pacific Standard Time", "America/Los_Angeles"));
 
-				var text = $"{result.ToShortTimeString()} ({GetUTCMark(result)}) is {japsTimeConverted.ToShortTimeString()} in Tokyo Time, {sydneyTimeConverted.ToShortTimeString()} in Sedney (East Australia), {europeanTimeConverted.ToShortTimeString()} in Central Europe (CET), {estTimeConverted.ToShortTimeString()} on Eastern Coast of US (EST) and {calishitTime.ToShortTimeString()} on the Western Coast of US (PT).";
+				var text = $"{result.ToShortTimeString()} ({GetUTCMark(result)}) is {japsTimeConverted.ToShortTimeString()} in Tokyo Time, {sydneyTimeConverted.ToShortTimeString()} in Sydney (East Australia), {europeanTimeConverted.ToShortTimeString()} in Central Europe (CET), {estTimeConverted.ToShortTimeString()} on Eastern Coast of US (EST) and {calishitTime.ToShortTimeString()} on the Western Coast of US (PT).";
 				ChannelInstance.SendChatMessageResponse(lastMessage, text);
 			}
 			else

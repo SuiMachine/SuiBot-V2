@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Xml.Serialization;
 
 namespace SuiBot_Core.Storage
@@ -11,18 +10,13 @@ namespace SuiBot_Core.Storage
 		/// <summary>
 		/// Name of the channel - used for figuring out config paths etc.
 		/// </summary>
-		[XmlIgnore]
-		private string Channel { get; set; }
+		[XmlIgnore]	private string Channel { get; set; }
 
 		/// <summary>
 		/// List of interval messages for the channel
 		/// </summary>
-		[XmlArrayItem]
-		public List<IntervalMessage> Messages { get; set; }
+		[XmlArrayItem] public List<IntervalMessage> Messages { get; set; }
 
-		/// <summary>
-		/// Default contructor
-		/// </summary>
 		public IntervalMessages()
 		{
 			Channel = "";
@@ -85,7 +79,7 @@ namespace SuiBot_Core.Storage
 		public string Message { get; set; }
 
 		/// <summary>
-		/// Default consttructor for Interval Message - do not use!
+		/// Default constructor for Interval Message - do not use!
 		/// </summary>
 		public IntervalMessage()
 		{

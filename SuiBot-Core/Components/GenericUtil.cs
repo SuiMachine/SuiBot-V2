@@ -1,21 +1,21 @@
-﻿using System;
+﻿using SuiBot_TwitchSocket.API.EventSub;
+using System;
+using static SuiBot_TwitchSocket.API.EventSub.ES_ChatMessage;
 
 namespace SuiBot_Core.Components
 {
 	public class GenericUtil
 	{
 		private SuiBot_ChannelInstance ChannelInstance;
-		private TwitchAPI TwitchUpdateInstance;
 
-		public GenericUtil(SuiBot_ChannelInstance ChannelInstance, TwitchAPI TwitchUpdateInstance)
+		public GenericUtil(SuiBot_ChannelInstance ChannelInstance)
 		{
 			this.ChannelInstance = ChannelInstance;
-			this.TwitchUpdateInstance = TwitchUpdateInstance;
 		}
 
-		public void GetUpTime(ChatMessage LastMessage)
+		public void GetUpTime(ES_ChatMessage LastMessage)
 		{
-			var startTime = this.TwitchUpdateInstance.StartTime;
+			DateTime startTime = this.ChannelInstance.StreamStatus.started_at;
 			if (startTime != DateTime.MinValue)
 			{
 				var lenght = DateTime.UtcNow - startTime;
@@ -33,22 +33,20 @@ namespace SuiBot_Core.Components
 			}
 		}
 
-		public void Shoutout(ChatMessage LastMessage)
+		public void Shoutout(ES_ChatMessage lastMessage)
 		{
-			if (LastMessage.UserRole <= Role.Mod)
+			if (lastMessage.UserRole <= Role.Mod)
 			{
-				if (LastMessage.Message.Contains(" "))
+				if (lastMessage.message.text.Contains(" "))
 				{
-					var split = LastMessage.Message.Split(new char[] { ' ' }, 2)[1].Trim();
+					var split = lastMessage.message.text.Split(new char[] { ' ' }, 2)[1].Trim();
 					if (split != "")
-					{
-						ChannelInstance.UserShoutout(split);
-					}
+						ChannelInstance.UserShoutout(lastMessage, split);
 					else
-						ChannelInstance.SendChatMessageResponse(LastMessage, "Invalid syntax! Needs to be \"!so  username\"");
+						ChannelInstance.SendChatMessageResponse(lastMessage, "Invalid syntax! Needs to be \"!so username\"");
 				}
 				else
-					ChannelInstance.SendChatMessageResponse(LastMessage, "Invalid syntax! Needs to be \"!so  username\"");
+					ChannelInstance.SendChatMessageResponse(lastMessage, "Invalid syntax! Needs to be \"!so username\"");
 			}
 		}
 	}

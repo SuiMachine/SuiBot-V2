@@ -1,4 +1,5 @@
 ﻿using SuiBot_Core.Extensions.SuiStringExtension;
+using SuiBot_TwitchSocket.API.EventSub;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -6,92 +7,15 @@ using System.Linq;
 using System.Reflection;
 using System.Xml;
 using System.Xml.Serialization;
+using static SuiBot_TwitchSocket.API.EventSub.ES_ChatMessage;
 
 namespace SuiBot_Core.Storage
 {
 	/*
-     * Comparing to first iteration one of the fundemental changes planned from get-go was offloading the login information
-     * to a seperate config file and using more of a "high" level syntax. Thus serialized XML was chosen in place of custom
+     * Comparing to first iteration one of the fundamental changes planned from get-go was offloading the login information
+     * to a separate config file and using more of a "high" level syntax. Thus serialized XML was chosen in place of custom
      * and quite frankly pointless syntax.
-    */
-
-	/// <summary>
-	/// Config struct storing essential information for joining the IRC server (Twitch). New settings require creating new object.
-	/// </summary>
-	[Serializable]
-	public class ConnectionConfig
-	{
-		[XmlElement]
-		public string Server { get; set; }
-		[XmlElement]
-		public int Port { get; set; }
-		[XmlElement]
-		public string Username { get; set; }
-		[XmlElement]
-		public string Password { get; set; }
-		[XmlElement]
-		public string ImgBBApiKey { get; set; }
-
-		public ConnectionConfig()
-		{
-			this.Server = "irc.chat.twitch.tv";
-			this.Port = 6667;
-			this.Username = "";
-			this.Password = "";
-			this.ImgBBApiKey = "";
-		}
-
-		public ConnectionConfig(string Server, int Port, string Username, string Password, string ImgBBApiKey)
-		{
-			this.Server = Server;
-			this.Port = Port;
-			this.Username = Username;
-			this.Password = Password;
-			this.ImgBBApiKey = ImgBBApiKey;
-		}
-
-		public bool IsValidConfig() => Server != null && Port != 0 && Username != null && Password != null && Username != "" && Password != "";
-
-		public static bool ConfigExists()
-		{
-			return File.Exists("Bot/ConnectionConfig.suixml");
-		}
-
-		/// <summary>
-		/// Loads config from Bot/Config.suixml.
-		/// </summary>
-		/// <returns>SuiBot_Config object</returns>
-		public static ConnectionConfig Load()
-		{
-			var obj = XML_Utils.Load("Bot/ConnectionConfig.suixml", new ConnectionConfig());
-			obj.FillEmpty();
-			return obj;
-		}
-
-		/// <summary>
-		/// Filling is needed in case of bot updates, since it would be a pain to write checks each time a bot function is used after bot update.
-		/// </summary>
-		private void FillEmpty()
-		{
-			if (Server == null)
-				this.Server = "irc.twitch.tv";
-			if (Port == 0)
-				Port = 6667;
-			if (Username == null)
-				Username = "";
-			if (Password == null)
-				Password = "";
-			if (ImgBBApiKey == null)
-				ImgBBApiKey = "";
-		}
-
-
-		/// <summary>
-		/// Saves config to Bot/Config.suixml.
-		/// </summary>
-		/// <param name="obj">Instance of SuiBot_Config object.</param>
-		public void Save() => XML_Utils.Save("Bot/ConnectionConfig.suixml", this);
-	}
+    */	
 
 	/// <summary>
 	/// Config storing universal settings shared between all channels. This also serves as a way of isolating login information for set property functions.
@@ -131,11 +55,6 @@ namespace SuiBot_Core.Storage
 		public void Save() => XML_Utils.Save("Bot/Config.xml", this);
 	}
 
-	/*
-     * Another drastic change compared to original SuiBot was standardizing names of modules and properties. In case of Channel Config, schema is:
-     * ModuleEnabled, where Module is a name of module, thus for Quotes to be enabled we have QuotesEnabled. With both Words sarting with uppercase.
-     * If the property is different like Amount of coins, it always follows same schema - CoinsAmount.
-     */
 	/// <summary>
 	/// Config struct for channel specific settings (generally which functions are enabled)
 	/// </summary>
@@ -151,19 +70,15 @@ namespace SuiBot_Core.Storage
 		//Rest of roles we get from Twitch IRC
 		#endregion
 
-		[XmlElement]
-		public bool QuotesEnabled { get; set; }
-		[XmlElement]
-		public bool CustomCvarsEnabled { get; set; }
-		[XmlElement]
-		public MemeConfig MemeComponents { get; set; }
-		[XmlElement]
-		public GenericUtilConfig GenericUtil { get; set; }
-		//bool AskCleverbot { get; set; }
-		[XmlElement]
-		public bool FilteringEnabled { get; set; }
-		[XmlElement]
-		public bool FilterLinks { get; set; }
+		[XmlElement] public bool QuotesEnabled { get; set; }
+		[XmlElement] public bool CustomCvarsEnabled { get; set; }
+		[XmlElement] public MemeConfig MemeComponents { get; set; }
+		[XmlElement] public GenericUtilConfig GenericUtil { get; set; }
+		[XmlElement] public bool AskAI { get; set; }
+
+		[XmlElement] public bool FilteringEnabled { get; set; }
+		[XmlElement] public bool FilterLinks { get; set; }
+		[XmlElement] public bool FilterUsingAI { get; set; }
 		[XmlIgnore]
 		public ChatFilters Filters { get; set; }
 		[XmlElement]
@@ -188,6 +103,7 @@ namespace SuiBot_Core.Storage
 			GenericUtil = new GenericUtilConfig();
 			FilteringEnabled = false;
 			FilterLinks = false;
+			FilterUsingAI = false;
 			Filters = new ChatFilters();
 			IntervalMessageEnabled = false;
 			LeaderboardsEnabled = false;
@@ -197,11 +113,11 @@ namespace SuiBot_Core.Storage
 			LeaderboardsUpdateProxyNames = true;
 		}
 
-		internal void GetProperty(SuiBot_ChannelInstance channelInstance, ChatMessage lastMessage)
+		internal void GetProperty(SuiBot_ChannelInstance channelInstance, ES_ChatMessage lastMessage)
 		{
 			if (lastMessage.UserRole <= Role.Mod)
 			{
-				var msg = lastMessage.Message.StripSingleWord().ToLower();
+				var msg = lastMessage.message.text.StripSingleWord().ToLower();
 				if (msg != "")
 				{
 					try
@@ -216,7 +132,7 @@ namespace SuiBot_Core.Storage
 						}
 						else
 						{
-							channelInstance.SendChatMessageResponse(lastMessage, "No proparty was found");
+							channelInstance.SendChatMessageResponse(lastMessage, "No property was found");
 						}
 					}
 					catch
@@ -227,9 +143,9 @@ namespace SuiBot_Core.Storage
 			}
 		}
 
-		internal void SetPropety(SuiBot_ChannelInstance channelInstance, ChatMessage lastMessage)
+		internal void SetPropety(SuiBot_ChannelInstance channelInstance, ES_ChatMessage lastMessage)
 		{
-			var msg = lastMessage.Message.StripSingleWord();
+			var msg = lastMessage.message.text.StripSingleWord();
 			if (msg != "")
 			{
 				try
@@ -408,43 +324,80 @@ namespace SuiBot_Core.Storage
 	[Serializable]
 	public class MemeConfig
 	{
-		[XmlElement]
-		public bool ENABLE { get; set; }
-		[XmlElement]
-		public bool AskAI { get; set; }
-		[XmlElement]
-		public bool AskAILurk { get; set; }
-		[XmlElement]
-		public bool RatsBirthday { get; set; }
-		[XmlElement]
-		public bool Tombstone { get; set; }
-		[XmlElement]
-		public bool Lurk { get; set; }
-		[XmlElement]
-		public bool Hug { get; set; }
-
+		[XmlElement] public bool ENABLE { get; set; }
+		[XmlElement] public bool AskAILurk { get; set; }
+		[XmlElement] public bool RatsBirthday { get; set; }
+		[XmlElement] public bool Lurk { get; set; }
+		[XmlElement] public bool Hug { get; set; }
 
 		public MemeConfig()
 		{
 			ENABLE = false;
-			AskAI = false;
-			AskAILurk = true;
+			AskAILurk = false;
 			RatsBirthday = false;
-			Tombstone = false;
 			Lurk = false;
 			Hug = false;
 		}
 	}
 
+	/// <summary>
+	/// Config struct storing essential information for joining the IRC server (Twitch). New settings require creating new object.
+	/// </summary>
+	[Serializable]
+	public class ConnectionConfig
+	{
+		[XmlElement] public string Password { get; set; }
+
+		public ConnectionConfig()
+		{
+			this.Password = "";
+		}
+
+		public ConnectionConfig(string Username, string Password)
+		{
+			this.Password = Password;
+		}
+
+		public bool IsValidConfig() => !string.IsNullOrEmpty(Password);
+
+		public static bool ConfigExists()
+		{
+			return File.Exists("Bot/ConnectionConfig.suixml");
+		}
+
+		/// <summary>
+		/// Loads config from Bot/Config.suixml.
+		/// </summary>
+		/// <returns>SuiBot_Config object</returns>
+		public static ConnectionConfig Load()
+		{
+			var obj = XML_Utils.Load("Bot/ConnectionConfig.suixml", new ConnectionConfig());
+			obj.FillEmpty();
+			return obj;
+		}
+
+		/// <summary>
+		/// Filling is needed in case of bot updates, since it would be a pain to write checks each time a bot function is used after bot update.
+		/// </summary>
+		private void FillEmpty()
+		{
+			if (Password == null)
+				Password = "";
+		}
+
+		/// <summary>
+		/// Saves config to Bot/Config.suixml.
+		/// </summary>
+		/// <param name="obj">Instance of SuiBot_Config object.</param>
+		public void Save() => XML_Utils.Save("Bot/ConnectionConfig.suixml", this);
+	}
+
 	[Serializable]
 	public class GenericUtilConfig
 	{
-		[XmlElement]
-		public bool ENABLE { get; set; }
-		[XmlElement]
-		public bool UptimeEnabled { get; set; }
-		[XmlElement]
-		public bool Shoutout { get; set; }
+		[XmlElement] public bool ENABLE { get; set; }
+		[XmlElement] public bool UptimeEnabled { get; set; }
+		[XmlElement] public bool Shoutout { get; set; }
 
 		public GenericUtilConfig()
 		{

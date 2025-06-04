@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>SuiBot_Core</RootNamespace>
     <AssemblyName>SuiBot-Core</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
     <TargetFrameworkProfile />
@@ -31,10 +31,16 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug_LocalAPI|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Debug_LocalAPI\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;LOCAL_API</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Meebey.SmartIrc4net, Version=0.4.5.0, Culture=neutral, PublicKeyToken=7868485fbf407e0f, processorArchitecture=MSIL">
-      <HintPath>..\packages\SmartIrc4net.1.1\lib\Meebey.SmartIrc4net.dll</HintPath>
-    </Reference>
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -118,16 +124,18 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
+    <Reference Include="websocket-sharp, Version=1.0.2.59611, Culture=neutral, PublicKeyToken=5660b08a1845a91e, processorArchitecture=MSIL">
+      <HintPath>..\packages\WebSocketSharp.1.0.3-rc11\lib\websocket-sharp.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="API_Structs\API_Timeout.cs" />
     <Compile Include="Components\ChatFiltering.cs" />
     <Compile Include="Components\CustomCvars.cs" />
     <Compile Include="Components\GenericUtil.cs" />
     <Compile Include="Components\IntervalMessages.cs" />
     <Compile Include="Components\Leaderboards.cs" />
     <Compile Include="Components\LeaderboardsProxyNames.cs" />
-    <Compile Include="Components\Other\GeminiAI.cs" />
+    <Compile Include="Components\GeminiAI.cs" />
     <Compile Include="Components\Other\Gemini\FunctionTypes\FunctionCalls.cs" />
     <Compile Include="Components\Other\Gemini\FunctionTypes\Parameters.cs" />
     <Compile Include="Components\Other\Gemini\GeminiContent.cs" />
@@ -136,19 +144,15 @@
     <Compile Include="Components\Other\Hug.cs" />
     <Compile Include="Components\Other\MemeComponent.cs" />
     <Compile Include="Components\Other\Lurk.cs" />
-    <Compile Include="Components\Other\Tombstone.cs" />
     <Compile Include="Components\Other\RatsBirthday.cs" />
     <Compile Include="Components\Other\_MemeComponents.cs" />
     <Compile Include="Components\PCGW.cs" />
     <Compile Include="Components\Quotes.cs" />
     <Compile Include="Components\SRL.cs" />
+    <Compile Include="Components\StreamInformation.cs" />
     <Compile Include="Components\Timezones.cs" />
     <Compile Include="ErrorLogging.cs" />
     <Compile Include="Events\BotEvents.cs" />
-    <Compile Include="Extensions\SuiStringExtansions.cs" />
-    <Compile Include="ImgUploader.cs" />
-    <Compile Include="HttpWebRequestHandlers.cs" />
-    <Compile Include="ChatMessage.cs" />
     <Compile Include="Components\RNG.cs" />
     <Compile Include="Storage\ChatFilters.cs" />
     <Compile Include="Storage\ChatFilterUsersDB.cs" />
@@ -161,10 +165,12 @@
     <Compile Include="SuiBot_ChannelInstance.cs" />
     <Compile Include="Storage\Config.cs" />
     <Compile Include="Storage\IntervalMessages.cs" />
-    <Compile Include="TwitchAPI.cs" />
-    <Compile Include="XML_Utils.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\SuiBot-TwitchSocket\SuiBot-TwitchSocket.csproj">
+      <Project>{eefd4d67-fa06-4a2a-804f-31851cb06a3e}</Project>
+      <Name>SuiBot-TwitchSocket</Name>
+    </ProjectReference>
     <ProjectReference Include="..\SpeedrunComSharp\SpeedrunComSharp\SpeedrunComSharp.csproj">
       <Project>{924aaffe-5b89-49e2-99ad-ec9373cc838d}</Project>
       <Name>SpeedrunComSharp</Name>
