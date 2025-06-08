@@ -191,8 +191,7 @@ namespace SuiBot_Core
 					await Task.Delay(2000);
 					var offlineSub = await HelixAPI.SubscribeToOfflineStatus(channel.condition.broadcaster_user_id, TwitchSocket.SessionID);
 					await Task.Delay(2000);
-					/*					var adSub = await HelixAPI.SubscribeToChannelAdBreak(channel.condition.broadcaster_user_id, TwitchSocket.SessionID);
-										await Task.Delay(2000);*/
+
 					var automodHold = await HelixAPI.SubscribeToAutoModHold(channel.condition.broadcaster_user_id, TwitchSocket.SessionID);
 					await Task.Delay(2000);
 					var susMessage = await HelixAPI.SubscribeToChannelSuspiciousUserMessage(channel.condition.broadcaster_user_id, TwitchSocket.SessionID);

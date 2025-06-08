@@ -101,7 +101,6 @@ namespace SuiBot_Core.Components
 				sb.AppendLine(Character_And_Knowledge);
 				sb.AppendLine();
 				sb.AppendLine(AI_Filter);
-				sb.AppendLine();
 				sb.AppendLine($"Username is {lastMessage.chatter_user_name}.");
 
 				return new GeminiMessage()
@@ -148,17 +147,6 @@ namespace SuiBot_Core.Components
 			{
 				contents = new List<GeminiMessage>(),
 				generationConfig = new GeminiContent.GenerationConfig(),
-				systemInstruction = new GeminiMessage()
-				{
-					role = Role.user,
-					parts = new GeminiResponseMessagePart[]
-					{
-						new GeminiResponseMessagePart()
-						{
-							text = ""
-						}
-					}
-				}
 			});
 
 			m_AI_Instance = new SuiBotAIProcessor(InstanceConfig.API_Key, InstanceConfig.Model);
