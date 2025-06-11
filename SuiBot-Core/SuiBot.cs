@@ -409,5 +409,17 @@ namespace SuiBot_Core
 		{
 			//Nothing?
 		}
+
+		public void TwitchSocket_AdBreakBegin(ES_AdBreakBeginNotification infoAboutAd)
+		{
+		}
+
+		public void TwitchSocket_AdBreakFinished(ES_AdBreakBeginNotification infoAboutAd)
+		{
+		}
+
+		public void TwitchSocket_ChannelRaid(ES_ChannelRaid raidInfo)
+		{
+		}
 	}
 }

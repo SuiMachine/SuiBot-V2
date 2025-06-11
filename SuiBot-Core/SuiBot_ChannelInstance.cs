@@ -20,7 +20,7 @@ namespace SuiBot_Core
 
 		public Storage.ChannelConfig ConfigInstance { get; set; }
 		private Storage.CoreConfig CoreConfigInstance { get; set; }
-		private SuiBot SuiBotInstance { get; set; }
+		public SuiBot SuiBotInstance { get; private set; }
 		#region Components
 		internal Components.Quotes QuotesInstance { get; private set; }
 		internal Components.IntervalMessages IntervalMessagesInstance { get; private set; }
@@ -28,7 +28,6 @@ namespace SuiBot_Core
 		internal Components.Leaderboards Leaderboards { get; private set; }
 		internal Components.CustomCvars Cvars { get; private set; }
 		internal Components.GenericUtil GenericUtil { get; private set; }
-		internal Components.PCGW PCGW { get; private set; }
 		internal Components.Timezones Timezones { get; private set; }
 		internal Components.GeminiAI GeminiAI { get; private set; }
 
@@ -63,7 +62,6 @@ namespace SuiBot_Core
 			this.Cvars = new Components.CustomCvars(this);
 			this.UserCooldowns = new Dictionary<string, DateTime>();
 			this.LastUserActivity = new Dictionary<string, DateTime>();
-			this.PCGW = new Components.PCGW(this);
 			this.GenericUtil = new Components.GenericUtil(this);
 			this.Timezones = new Components.Timezones(this);
 			this.GeminiAI = new Components.GeminiAI(this);
@@ -255,13 +253,6 @@ namespace SuiBot_Core
 			{
 				Components.SRL.GetRaces(this);
 				SetUserCooldown(messageToProcess, DefaultCooldown);
-				return;
-			}
-
-			//PCGW
-			if (messageLazy.StartsWith("pcgw"))
-			{
-				PCGW.DoWork(messageToProcess);
 				return;
 			}
 

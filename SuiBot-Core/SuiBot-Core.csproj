@@ -138,12 +138,12 @@
     <Compile Include="Components\GeminiAI.cs" />
     <Compile Include="Components\Other\Gemini\FunctionCalls.cs" />
     <Compile Include="Components\Other\Gemini\Parameters.cs" />
+    <Compile Include="Components\Other\Gemini\FunctionCallsSpeedrun.cs" />
     <Compile Include="Components\Other\Hug.cs" />
     <Compile Include="Components\Other\MemeComponent.cs" />
     <Compile Include="Components\Other\Lurk.cs" />
     <Compile Include="Components\Other\RatsBirthday.cs" />
     <Compile Include="Components\Other\_MemeComponents.cs" />
-    <Compile Include="Components\PCGW.cs" />
     <Compile Include="Components\Quotes.cs" />
     <Compile Include="Components\SRL.cs" />
     <Compile Include="Components\StreamInformation.cs" />

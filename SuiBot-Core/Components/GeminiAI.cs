@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static SuiBotAI.Components.SuiBotAIProcessor;
 
 namespace SuiBot_Core.Components
 {
@@ -163,6 +164,18 @@ namespace SuiBot_Core.Components
 					{
 						var info = m_ChannelInstance.StreamStatus;
 						var systemInstruction = InstanceConfig.GetSystemInstruction(m_ChannelInstance.Channel, info.IsOnline, info.game_name, info.title);
+						StreamerContent.tools = new List<GeminiTools>()
+						{
+							new GeminiTools()
+							{
+								functionDeclarations = new List<GeminiTools.GeminiFunction>()
+								{
+									GeminiFunctionCall.CreateWRFunction(),
+									GeminiFunctionCall.CreatePBFunction()
+								}
+							}
+						};
+						StreamerContent.StorePath = StreamerPath;
 						GeminiResponse result = await m_AI_Instance.GetAIResponse(StreamerContent, systemInstruction, lastMessage.message.text.StripSingleWord());
 
 						if (result == null)
@@ -171,41 +184,50 @@ namespace SuiBot_Core.Components
 						}
 						else
 						{
-							if (result.candidates.Length > 0 && result.candidates.Last().content.parts.Length > 0)
+							if (result.candidates.Length == 0)
 							{
-								var lastResponse = result.candidates.Last().content;
+								m_ChannelInstance.SendChatMessageResponse(lastMessage, "Failed to get a response. Response candidates were 0! Please debug me :(");
+								return;
+							}
+
+							foreach (var candidate in result.candidates)
+							{
 								StreamerContent.generationConfig.TokenCount = result.usageMetadata.totalTokenCount;
-								StreamerContent.contents.Add(lastResponse);
-								var text = lastResponse.parts.Last().text;
-								if (text != null)
+								StreamerContent.contents.Add(candidate.content);
+								foreach(var part in candidate.content.parts)
 								{
-									SuiBotAIProcessor.CleanupResponse(ref text);
-
-									m_ChannelInstance.SendChatMessageResponse(lastMessage, text);
-
-									while (StreamerContent.generationConfig.TokenCount > InstanceConfig.TokenLimit)
+									if (part.text != null)
 									{
-										if (StreamerContent.contents.Count > 2)
-										{
-											//This isn't weird - we want to make sure we start from user message
-											if (StreamerContent.contents[0].role == Role.user)
-											{
-												StreamerContent.contents.RemoveAt(0);
-											}
+										var text = part.text;
 
-											if (StreamerContent.contents[0].role == Role.model)
+										SuiBotAIProcessor.CleanupResponse(ref text);
+										m_ChannelInstance.SendChatMessageResponse(lastMessage, text);
+
+										while (StreamerContent.generationConfig.TokenCount > InstanceConfig.TokenLimit)
+										{
+											if (StreamerContent.contents.Count > 2)
 											{
-												StreamerContent.contents.RemoveAt(0);
+												//This isn't weird - we want to make sure we start from user message
+												if (StreamerContent.contents[0].role == Role.user)
+												{
+													StreamerContent.contents.RemoveAt(0);
+												}
+
+												if (StreamerContent.contents[0].role == Role.model)
+												{
+													StreamerContent.contents.RemoveAt(0);
+												}
 											}
 										}
+
+										XML_Utils.Save(StreamerPath, StreamerContent);
 									}
 
-									XML_Utils.Save(StreamerPath, StreamerContent);
+									if(part.functionCall != null)
+									{
+										HandleChatFunctionCall(m_ChannelInstance, lastMessage, part.functionCall, StreamerContent);
+									}
 								}
-							}
-							else
-							{
-								m_ChannelInstance.SendChatMessageResponse(lastMessage, "Failed to get a response. Please debug me, Sui :(");
 							}
 						}
 					}
@@ -226,6 +248,63 @@ namespace SuiBot_Core.Components
 				m_ChannelInstance.SendChatMessageResponse(lastMessage, "Sorry, this command is available to streamer only!");
 			}
 		}
+
+		internal void GetSecondaryAnswer(SuiBot_ChannelInstance channelInstance, ES_ChatMessage message, GeminiContent content, string appendContent, Role role = Role.user)
+		{
+			SuiBot bot = channelInstance.SuiBotInstance;
+
+			Task.Run(async () =>
+			{
+				try
+				{
+					var result = await m_AI_Instance.GetAIResponse(content, content.systemInstruction, appendContent, role);
+					if (result == null)
+					{
+						channelInstance.SendChatMessage($"{message.chatter_user_name} - Failed to get secondary response. :(");
+						return;
+					}
+					else
+					{
+						content.generationConfig.TokenCount = result.usageMetadata.totalTokenCount;
+						var candidate = result?.candidates.LastOrDefault();
+						if (candidate != null)
+						{
+							content.contents.Add(candidate.content);
+							foreach (var part in candidate.content.parts)
+							{
+								var text = part.text;
+								if (text != null)
+								{
+									SuiBotAIProcessor.CleanupResponse(ref text);
+
+									channelInstance?.SendChatMessageResponse(message, text);
+									if (!string.IsNullOrEmpty(content.StorePath))
+										XML_Utils.Save(content.StorePath, content);
+								}
+
+								var func = part.functionCall;
+								if (func != null)
+								{
+									HandleChatFunctionCall(channelInstance, message, func, content);
+								}
+							}
+
+						}
+					}
+				}
+				catch (SafetyFilterTrippedException ex)
+				{
+					channelInstance?.SendChatMessage($"Failed to get a response. Safety filter tripped!");
+					//ErrorLogging.WriteLine($"Safety was tripped {ex}", LineType.GeminiAI));
+				}
+				catch (Exception ex)
+				{
+					channelInstance?.SendChatMessage($"Failed to get a response. Something was written in log. Help! :(");
+					//MainForm.Instance.ThreadSafeAddPreviewText($"There was an error trying to do AI: {ex}", LineType.GeminiAI);
+				}
+			});
+		}
+
 
 		internal void GetResponseLurk(SuiBot_ChannelInstance channelInstance, ES_ChatMessage lastMessage, string strippedMessage)
 		{
@@ -276,7 +355,7 @@ namespace SuiBot_Core.Components
 							var func = lastResponse.parts.Last().functionCall;
 							if (func != null)
 							{
-								HandleChatFunctionCall(channelInstance, lastMessage, func);
+								HandleChatFunctionCall(channelInstance, lastMessage, func, content);
 							}
 						}
 						else
@@ -335,7 +414,7 @@ namespace SuiBot_Core.Components
 							var func = lastResponse.parts.Last().functionCall;
 							if (func != null)
 							{
-								HandleChatFunctionCall(channelInstance, lastMessage, func);
+								HandleChatFunctionCall(channelInstance, lastMessage, func, content);
 							}
 						}
 						else
@@ -352,12 +431,16 @@ namespace SuiBot_Core.Components
 			});
 		}
 
-		private void HandleChatFunctionCall(SuiBot_ChannelInstance channelInstance, ES_ChatMessage message, GeminiResponseFunctionCall func)
+		private void HandleChatFunctionCall(SuiBot_ChannelInstance channelInstance, ES_ChatMessage message, GeminiResponseFunctionCall func, GeminiContent content)
 		{
 			if (func.name == "timeout")
-				func.args.ToObject<TimeOutUser>().Perform(channelInstance, message);
+				func.args.ToObject<TimeOutUser>().Perform(channelInstance, message, content);
 			else if (func.name == "ban")
-				func.args.ToObject<BanUser>().Perform(channelInstance, message);
+				func.args.ToObject<BanUser>().Perform(channelInstance, message, content);
+			else if (func.name == "world_record")
+				func.args.ToObject<Other.Gemini.Speedrun.SpeedrunWR>().Perform(channelInstance, message, content);
+			else if (func.name == "personal_best")
+				func.args.ToObject<Other.Gemini.Speedrun.SpeedrunPB>().Perform(channelInstance, message, content);
 		}
 	}
 }

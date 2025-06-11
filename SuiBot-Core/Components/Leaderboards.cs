@@ -11,7 +11,7 @@ using System.Xml.Serialization;
 
 namespace SuiBot_Core.Components
 {
-	internal class Leaderboards
+	public class Leaderboards
 	{
 		public const string PROXYFILENAMESURL = "https://raw.githubusercontent.com/SuiMachine/SuiBot-V2/master/Release/Bot/SpeedrunProxyNames.xml";
 		public const string PROXYNAMESFILE = "Bot/SpeedrunProxyNames.xml";
