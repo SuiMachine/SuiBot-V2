@@ -160,7 +160,19 @@ namespace SuiBot_Core
 			}
 		}
 
-		public void UserShoutout(ES_ChatMessage lastMessage, string username) => SuiBotInstance.HelixAPI.RequestShoutout(lastMessage, username);
+		public void UserShoutout(ES_ChatMessage lastMessage, string username)
+		{
+			Task.Run(async () =>
+			{
+				var user = await SuiBotInstance.HelixAPI.GetUserInfoByUserLogin(username);
+				if (user == null)
+					return;
+
+				await SuiBotInstance.HelixAPI.SendShoutout(lastMessage.broadcaster_user_id, user.id);
+			});
+
+
+		}
 		public void RemoveUserMessage(ES_ChatMessage lastMassage) => SuiBotInstance.HelixAPI.RequestRemoveMessage(lastMassage);
 		public void UserTimeout(ES_ChatMessage lastMassage, uint length, string reason = null) => SuiBotInstance.HelixAPI.RequestTimeout(lastMassage, length, reason);
 		public void UserTimeout(ES_ChatMessage lastMassage, TimeSpan length, string reason = null) => SuiBotInstance.HelixAPI.RequestTimeout(lastMassage, length, reason);

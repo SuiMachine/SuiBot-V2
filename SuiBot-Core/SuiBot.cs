@@ -52,7 +52,7 @@ namespace SuiBot_Core
 		public Storage.CoreConfig BotCoreConfig { get; set; }
 		public Dictionary<string, SuiBot_ChannelInstance> ActiveChannels { get; set; }
 		public Dictionary<string, SuiBot_ChannelInstance> ChannelInstances { get; set; }
-		public string BotName => HelixAPI.BotLoginName;
+		public string BotName => HelixAPI.User_LoginName;
 
 		public bool IsAfterFirstStatusUpdate = false;
 
