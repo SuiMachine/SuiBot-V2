@@ -172,7 +172,7 @@ namespace SuiBot_Core
 					await Task.Delay(2000);
 				}
 
-				Response_SubscribeTo currentSubscriptionChecks = await HelixAPI.GetCurrentSubscriptions();
+				Response_SubscribeTo currentSubscriptionChecks = await HelixAPI.GetCurrentEventSubscriptions();
 				foreach (var subscription in currentSubscriptionChecks.data)
 				{
 					if (subscription.status != "enabled" || subscription.transport.session_id != TwitchSocket.SessionID)
