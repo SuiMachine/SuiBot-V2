@@ -1,6 +1,7 @@
 ﻿using SuiBot_Core.Components.Other.Gemini;
 using SuiBot_Core.Extensions.SuiStringExtension;
 using SuiBot_TwitchSocket.API.EventSub;
+using SuiBotAI;
 using SuiBotAI.Components;
 using SuiBotAI.Components.Other.Gemini;
 using System;
@@ -31,10 +32,6 @@ namespace SuiBot_Core.Components
 				sb.AppendLine(Character_And_Knowledge);
 				sb.AppendLine(Instruction_Streamer);
 				sb.AppendLine("");
-
-				System.Globalization.CultureInfo globalizationOverride = new System.Globalization.CultureInfo("en-US");
-				sb.AppendLine($"The current local time is {DateTime.Now:H:mm}. The local date is {DateTime.Now.ToString("MMMM dd, yyy", globalizationOverride)}.");
-				sb.AppendLine($"The current UTC time {DateTime.UtcNow:H:mm}. The UTC date is {DateTime.Now.ToString("MMMM dd, yyy", globalizationOverride)}.");
 
 				if (isLive)
 				{
@@ -176,7 +173,11 @@ namespace SuiBot_Core.Components
 							}
 						};
 						StreamerContent.StorePath = StreamerPath;
-						GeminiResponse result = await m_AI_Instance.GetAIResponse(StreamerContent, systemInstruction, lastMessage.message.text.StripSingleWord());
+
+
+						var full = AIMessageUtils.AppendDateTimePrefix(lastMessage.message.text.StripSingleWord());
+
+						GeminiResponse result = await m_AI_Instance.GetAIResponse(StreamerContent, systemInstruction, full);
 
 						if (result == null)
 						{

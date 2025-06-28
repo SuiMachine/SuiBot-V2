@@ -125,11 +125,20 @@ namespace SuiBot_Core
 		{
 			SetUserCooldown(messageToRespondTo, DefaultCooldown);
 
-
 			//string msgResponse = $"@{messageToRespondTo.chatter_user_name}: {message}";
 			Task.Run(async () =>
 			{
-				await SuiBotInstance.HelixAPI.SendResponseAsync(messageToRespondTo, message);
+				if (message.Length <= 500)
+					await SuiBotInstance.HelixAPI.SendResponseAsync(messageToRespondTo, message);
+				else
+				{
+					var messages = message.SplitMessage(500);
+					foreach (var subMessage in messages)
+					{
+						SuiBotInstance.SendChatMessageFeedback("#" + Channel, subMessage);
+						await SuiBotInstance.HelixAPI.SendResponseAsync(messageToRespondTo, subMessage);
+					}
+				}
 			});
 
 			SuiBotInstance.SendChatMessageFeedback("#" + Channel, $"{messageToRespondTo.reply} -> {message}");
