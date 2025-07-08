@@ -1,6 +1,11 @@
 ﻿using SuiBot_Core.Extensions.SuiStringExtension;
 using SuiBot_TwitchSocket.API.EventSub;
+using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using System.Text;
+using System.Text.RegularExpressions;
 using static SuiBot_TwitchSocket.API.EventSub.ES_ChatMessage;
 
 namespace SuiBot_Core.Components
@@ -144,6 +149,118 @@ namespace SuiBot_Core.Components
 						message.IntervalTick = message.Interval;
 					}
 				}
+			}
+		}
+
+		public string AddMessage(int interval, string message)
+		{
+			if (interval < 1)
+				return "Interval can't be lower than 1 minute";
+			else if (interval > 240)
+				return "Interval can't be longer than 4 hours";
+
+			if (message.Trim().Length <= 0)
+				return "Provided interval message was empty";
+
+			lock (IntervalMessagesStorage.Messages)
+			{
+				IntervalMessagesStorage.Messages.Add(new Storage.IntervalMessage(interval, message.Trim()));
+				IntervalMessagesStorage.Save();
+			}
+
+			return "Successfully added a message";
+		}
+
+		internal string GetMessages()
+		{
+			StringBuilder sb = new StringBuilder();
+			sb.AppendLine("Current messages are (in format Interval in minutes | Message):");
+			lock (IntervalMessagesStorage.Messages)
+			{
+				foreach (var message in IntervalMessagesStorage.Messages)
+				{
+					sb.AppendLine($"{message.Interval} | {message.Message}");
+				}
+			}
+			return sb.ToString();
+		}
+
+		internal string RemoveMessageByID(int index)
+		{
+			if (IntervalMessagesStorage.Messages.Count < 0)
+				return "Can't remove the interval message, because no interval messages exist!";
+
+			if (index >= 0 || index < IntervalMessagesStorage.Messages.Count)
+				return "Can't remove the interval message, because no message with that ID exists!";
+			lock (IntervalMessagesStorage.Messages)
+			{
+				var message = IntervalMessagesStorage.Messages[index];
+				IntervalMessagesStorage.Messages.RemoveAt(index);
+				IntervalMessagesStorage.Save();
+				return $"Removed interval message {message.Message} with an interval of {message.Interval} minutes";
+			}
+		}
+
+		internal string RemoveMessage(string interval_Message)
+		{
+			var message = IntervalMessagesStorage.Messages.FirstOrDefault(x => x.Message.ToLower().Trim() == interval_Message.ToLower().Trim());
+			if (message != null)
+			{
+				lock(IntervalMessagesStorage.Messages)
+				{
+					IntervalMessagesStorage.Messages.Remove(message);
+					IntervalMessagesStorage.Save();
+				}
+				return $"Removed interval message {message.Message} with an interval of {message.Interval} minutes";
+			}
+
+			var searchRegex = new Regex(interval_Message, RegexOptions.Compiled);
+
+			List<Storage.IntervalMessage> messages = IntervalMessagesStorage.Messages.FindAll(x => searchRegex.IsMatch(x.Message));
+			if(messages.Count == 0)
+				return $"Nothing found:\r\n" + GetMessages();
+			else if(messages.Count == 1)
+				return $"No direct message was found. Found message \"{message.Message}\" with index {IntervalMessagesStorage.Messages.IndexOf(message)}";
+			else
+			{
+				var l = string.Join(",", messages.Select(x => IntervalMessagesStorage.Messages.IndexOf(x)));
+				return $"More than one message was found. Their indexes are index {l}";
+			}
+		}
+
+		internal string FindMessageByID(int index)
+		{
+			if (IntervalMessagesStorage.Messages.Count < 0)
+				return "Can't find the interval message, because no interval messages exist!";
+
+			if (index >= 0 || index < IntervalMessagesStorage.Messages.Count)
+				return "Can't find the interval message, because no message with that index exists!";
+			lock (IntervalMessagesStorage.Messages)
+			{
+				var message = IntervalMessagesStorage.Messages[index];
+				return $"Found interval message {message.Message} with an interval of {message.Interval} minutes";
+			}
+		}
+
+		internal string FindMessage(string interval_Message)
+		{
+			var message = IntervalMessagesStorage.Messages.FirstOrDefault(x => x.Message.ToLower().Trim() == interval_Message.ToLower().Trim());
+			if (message != null)
+			{
+				return $"Found exact message with an interval of {message.Interval} minutes and index of {IntervalMessagesStorage.Messages.IndexOf(message)}";
+			}
+
+			var searchRegex = new Regex(interval_Message, RegexOptions.Compiled);
+
+			List<Storage.IntervalMessage> messages = IntervalMessagesStorage.Messages.FindAll(x => searchRegex.IsMatch(x.Message));
+			if (messages.Count == 0)
+				return $"Nothing found:\r\n" + GetMessages();
+			else if (messages.Count == 1)
+				return $"Found message containing regex. Message content \"{message.Message}\" with index {IntervalMessagesStorage.Messages.IndexOf(message)}";
+			else
+			{
+				var l = string.Join(",", messages.Select(x => IntervalMessagesStorage.Messages.IndexOf(x)));
+				return $"More than one message was found. Their indexes are index {l}";
 			}
 		}
 	}

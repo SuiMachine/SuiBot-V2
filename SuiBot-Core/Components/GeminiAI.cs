@@ -1,6 +1,8 @@
 ﻿using SuiBot_Core.Components.Other.Gemini;
+using SuiBot_Core.Components.Other.Gemini.Speedrun;
 using SuiBot_Core.Extensions.SuiStringExtension;
 using SuiBot_TwitchSocket.API.EventSub;
+using SuiBot_TwitchSocket.Interfaces;
 using SuiBotAI;
 using SuiBotAI.Components;
 using SuiBotAI.Components.Other.Gemini;
@@ -9,6 +11,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
 using static SuiBotAI.Components.SuiBotAIProcessor;
 
 namespace SuiBot_Core.Components
@@ -163,20 +167,18 @@ namespace SuiBot_Core.Components
 						var systemInstruction = InstanceConfig.GetSystemInstruction(m_ChannelInstance.Channel, info.IsOnline, info.game_name, info.title);
 						StreamerContent.tools = new List<GeminiTools>()
 						{
-							new GeminiTools()
-							{
-								functionDeclarations = new List<GeminiTools.GeminiFunction>()
-								{
-									GeminiFunctionCall.CreateWRFunction(),
-									GeminiFunctionCall.CreatePBFunction()
-								}
-							}
+							new GeminiTools(
+								new SpeedrunWRCall(),
+								new SpeedrunPBCall(),
+								new CurrentDateTimeCall(),
+								new IntervalMessageAddCall(),
+								new IntervalMessageFindCall(),
+								new IntervalMessageRemoveCall()
+								)
 						};
 						StreamerContent.StorePath = StreamerPath;
 
-
 						var full = AIMessageUtils.AppendDateTimePrefix(lastMessage.message.text.StripSingleWord());
-
 						GeminiResponse result = await m_AI_Instance.GetAIResponse(StreamerContent, systemInstruction, full);
 
 						if (result == null)
@@ -226,7 +228,15 @@ namespace SuiBot_Core.Components
 
 									if(part.functionCall != null)
 									{
-										HandleChatFunctionCall(m_ChannelInstance, lastMessage, part.functionCall, StreamerContent);
+										var type = StreamerContent.tools[0].Calls[part.functionCall.name];
+										if (type == null)
+											return;
+										var converted = part.functionCall.args.ToObject(type);
+										if (converted.GetType().IsSubclassOf(typeof(SuiBotFunctionCall)))
+										{
+											var callableCast = (SuiBotFunctionCall)converted;
+											callableCast.Perform(this.m_ChannelInstance, lastMessage, StreamerContent);
+										}
 									}
 								}
 							}
@@ -250,7 +260,7 @@ namespace SuiBot_Core.Components
 			}
 		}
 
-		internal void GetSecondaryAnswer(SuiBot_ChannelInstance channelInstance, ES_ChatMessage message, GeminiContent content, string appendContent, Role role = Role.user)
+		internal void GetSecondaryAnswer(SuiBot_ChannelInstance channelInstance, ES_ChatMessage message, GeminiContent content, string appendContent, Role role)
 		{
 			SuiBot bot = channelInstance.SuiBotInstance;
 
@@ -286,7 +296,15 @@ namespace SuiBot_Core.Components
 								var func = part.functionCall;
 								if (func != null)
 								{
-									HandleChatFunctionCall(channelInstance, message, func, content);
+									var type = content.tools[0].Calls[part.functionCall.name];
+									if (type == null)
+										return;
+									var converted = part.functionCall.args.ToObject(type);
+									if (converted.GetType().IsSubclassOf(typeof(SuiBotFunctionCall)))
+									{
+										var callableCast = (SuiBotFunctionCall)converted;
+										callableCast.Perform(this.m_ChannelInstance, message, content);
+									}
 								}
 							}
 
@@ -320,14 +338,10 @@ namespace SuiBot_Core.Components
 						contents = new List<GeminiMessage>(),
 						tools = new List<GeminiTools>()
 						{
-							new GeminiTools()
-							{
-								functionDeclarations = new List<GeminiTools.GeminiFunction>()
-								{
-									GeminiFunctionCall.CreateTimeoutFunction(),
-									GeminiFunctionCall.CreateBanFunction(),
-								}
-							}
+							new GeminiTools(
+								new TimeOutUserCall(),
+								new BanUserCall()
+							)
 						},
 						generationConfig = new GeminiContent.GenerationConfig(),
 					};
@@ -356,7 +370,15 @@ namespace SuiBot_Core.Components
 							var func = lastResponse.parts.Last().functionCall;
 							if (func != null)
 							{
-								HandleChatFunctionCall(channelInstance, lastMessage, func, content);
+								var type = content.tools[0].Calls[func.name];
+								if (type == null)
+									return;
+								var converted = func.args.ToObject(type);
+								if (converted.GetType().IsSubclassOf(typeof(SuiBotFunctionCall)))
+								{
+									var callableCast = (SuiBotFunctionCall)converted;
+									callableCast.Perform(this.m_ChannelInstance, lastMessage, content);
+								}
 							}
 						}
 						else
@@ -386,14 +408,10 @@ namespace SuiBot_Core.Components
 						contents = new List<GeminiMessage>(),
 						tools = new List<GeminiTools>()
 						{
-							new GeminiTools()
-							{
-								functionDeclarations = new List<GeminiTools.GeminiFunction>()
-								{
-									GeminiFunctionCall.CreateTimeoutFunction(),
-									GeminiFunctionCall.CreateBanFunction(),
-								}
-							}
+							new GeminiTools(
+								new BanUserCall(),
+								new TimeOutUserCall()
+								)
 						},
 						generationConfig = new GeminiContent.GenerationConfig(),
 					};
@@ -415,7 +433,15 @@ namespace SuiBot_Core.Components
 							var func = lastResponse.parts.Last().functionCall;
 							if (func != null)
 							{
-								HandleChatFunctionCall(channelInstance, lastMessage, func, content);
+								var type = content.tools[0].Calls[func.name];
+								if (type == null)
+									return;
+								var converted = func.args.ToObject(type);
+								if (converted.GetType().IsSubclassOf(typeof(SuiBotFunctionCall)))
+								{
+									var callableCast = (SuiBotFunctionCall)converted;
+									callableCast.Perform(this.m_ChannelInstance, lastMessage, content);
+								}
 							}
 						}
 						else
@@ -430,18 +456,6 @@ namespace SuiBot_Core.Components
 					ErrorLogging.WriteLine($"There was an error trying to do AI: {ex}");
 				}
 			});
-		}
-
-		private void HandleChatFunctionCall(SuiBot_ChannelInstance channelInstance, ES_ChatMessage message, GeminiResponseFunctionCall func, GeminiContent content)
-		{
-			if (func.name == "timeout")
-				func.args.ToObject<TimeOutUser>().Perform(channelInstance, message, content);
-			else if (func.name == "ban")
-				func.args.ToObject<BanUser>().Perform(channelInstance, message, content);
-			else if (func.name == "world_record")
-				func.args.ToObject<Other.Gemini.Speedrun.SpeedrunWR>().Perform(channelInstance, message, content);
-			else if (func.name == "personal_best")
-				func.args.ToObject<Other.Gemini.Speedrun.SpeedrunPB>().Perform(channelInstance, message, content);
 		}
 	}
 }

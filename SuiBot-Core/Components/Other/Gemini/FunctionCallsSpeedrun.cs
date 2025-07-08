@@ -1,8 +1,7 @@
 ﻿using SpeedrunComSharp;
 using SuiBot_TwitchSocket.API.EventSub;
-using SuiBotAI.Components.Other.Gemini.FunctionTypes;
+using SuiBotAI.Components.Other.Gemini;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
@@ -10,45 +9,16 @@ namespace SuiBot_Core.Components.Other.Gemini.Speedrun
 {
 
 	[Serializable]
-	public class WorldRecordRequest : GeminiProperty
+	public class SpeedrunWRCall : SuiBotFunctionCall
 	{
-		public Parameter_String game_name;
-		public Parameter_String category;
-
-
-		public WorldRecordRequest()
-		{
-			this.game_name = new Parameter_String();
-			this.category = new Parameter_String();
-		}
-
-		public override List<string> GetRequiredFieldsNames() => new List<string>() { nameof(game_name) };
-	}
-
-	[Serializable]
-	public class PersonalBestRequest : GeminiProperty
-	{
-		public Parameter_String username;
-		public Parameter_String game_name;
-		public Parameter_String category;
-
-
-		public PersonalBestRequest()
-		{
-			username = new Parameter_String();
-			this.game_name = new Parameter_String();
-			this.category = new Parameter_String();
-		}
-
-		public override List<string> GetRequiredFieldsNames() => new List<string>() { nameof(username), nameof(game_name) };
-	}
-
-
-	[Serializable]
-	public class SpeedrunWR : FunctionCall
-	{
+		[FunctionCallParameter(true)]
 		public string game_name = null;
+		[FunctionCallParameter(false)]
 		public string category = null;
+
+		public override string FunctionDescription() => "Gets best time (world record) speedrunning leaderboard if it exists";
+
+		public override string FunctionName() => "speedrun_world_record";
 
 		public override void Perform(SuiBot_ChannelInstance channelInstance, ES_ChatMessage message, SuiBotAI.Components.Other.Gemini.GeminiContent content)
 		{
@@ -57,7 +27,7 @@ namespace SuiBot_Core.Components.Other.Gemini.Speedrun
 			var speedrunClient = new SpeedrunComClient();
 			var game = speedrunClient.Games.SearchGame(game_name);
 			if (game == null)
-				channelInstance?.GeminiAI?.GetSecondaryAnswer(channelInstance, message, content, "No game was found.", SuiBotAI.Components.Other.Gemini.Role.tool);
+				channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, "No game was found.", SuiBotAI.Components.Other.Gemini.Role.tool);
 			else
 			{
 				var categories = game.FullGameCategories;
@@ -80,7 +50,7 @@ namespace SuiBot_Core.Components.Other.Gemini.Speedrun
 						sb.AppendLine($"* {category.Name}");
 					}
 					sb.AppendLine($"The default category is: {game.FullGameCategories.ElementAt(0)}");
-					channelInstance?.GeminiAI?.GetSecondaryAnswer(channelInstance, message, content, sb.ToString(), SuiBotAI.Components.Other.Gemini.Role.tool);
+					channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, sb.ToString(), SuiBotAI.Components.Other.Gemini.Role.tool);
 				}
 				else
 				{
@@ -90,18 +60,26 @@ namespace SuiBot_Core.Components.Other.Gemini.Speedrun
 					else
 						sb.AppendLine($"Category {foundCategory.Name} doesn't have any records.");
 
-					channelInstance?.GeminiAI?.GetSecondaryAnswer(channelInstance, message, content, sb.ToString(), SuiBotAI.Components.Other.Gemini.Role.tool);
+					channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, sb.ToString(), SuiBotAI.Components.Other.Gemini.Role.tool);
 				}
 			}
 		}
 	}
 
 	[Serializable]
-	public class SpeedrunPB : FunctionCall
+	public class SpeedrunPBCall : SuiBotFunctionCall
 	{
+		[FunctionCallParameter(true)]
 		public string username = null;
+		[FunctionCallParameter(true)]
 		public string game_name = null;
+		[FunctionCallParameter(false)]
 		public string category = null;
+
+		public override string FunctionDescription() => "Gets user's personal best from speedrunning leaderboard if it exists";
+
+		public override string FunctionName() => "speedrun_personal_best";
+
 		public override void Perform(SuiBot_ChannelInstance channelInstance, ES_ChatMessage message, SuiBotAI.Components.Other.Gemini.GeminiContent content)
 		{
 			if (game_name == null)
