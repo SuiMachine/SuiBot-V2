@@ -3,12 +3,13 @@ using SuiBot_TwitchSocket.API.EventSub;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using static SuiBot_TwitchSocket.API.EventSub.ES_ChatMessage;
 
 namespace SuiBot_Core.Components
 {
-	internal class Quotes : IDisposable
+	internal class Quotes
 	{
 		//Magick
 		const string RegexFindID = "(id(:|=)\\\")(\\w+)\\\"|id(:|=)\\w+";
@@ -80,7 +81,7 @@ namespace SuiBot_Core.Components
 				Regex quoteRegex = null;
 				try
 				{
-					if(authorFilter != "")
+					if (authorFilter != "")
 						authorRegex = new Regex(authorFilter, RegexOptions.IgnoreCase);
 				}
 				catch
@@ -109,7 +110,7 @@ namespace SuiBot_Core.Components
 					if (advSearchQuotes.Length > 1)
 					{
 						List<int> ids = new List<int>();
-						foreach(var foundQuote in advSearchQuotes)
+						foreach (var foundQuote in advSearchQuotes)
 						{
 							ids.Add(ChannelQuotes.QuotesList.IndexOf(foundQuote));
 						}
@@ -251,7 +252,7 @@ namespace SuiBot_Core.Components
 						{
 							Regex searchRegex = new Regex(strippedMessage, RegexOptions.IgnoreCase);
 							var possibleQuotes = ChannelQuotes.QuotesList.Where(x => searchRegex.IsMatch(x.Text)).ToList();
-							if(possibleQuotes.Count > 0)
+							if (possibleQuotes.Count > 0)
 							{
 								int randomQuoteId = rng.Next(possibleQuotes.Count);
 								ChannelInstance.SendChatMessageResponse(lastMessage, possibleQuotes[randomQuoteId].ToString());
@@ -356,8 +357,120 @@ namespace SuiBot_Core.Components
 			}
 		}
 
-		public void Dispose()
+		internal string AddQuote(string author, string quote)
 		{
+			ChannelQuotes.QuotesList.Add(new Storage.Quote(author, quote));
+			ChannelQuotes.Save();
+			if (string.IsNullOrEmpty(author))
+				return $"Added quote \"{quote}\" with index {ChannelQuotes.QuotesList.Count - 1}";
+			else
+				return $"Added quote \"{quote}\" - {author} with index {ChannelQuotes.QuotesList.Count - 1}";
+		}
+
+		internal string FindQuote(string author, string quote)
+		{
+			var quotesList = ChannelQuotes.QuotesList;
+			if (!string.IsNullOrEmpty(author))
+			{
+				Regex reg = new Regex(author, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Compiled);
+				quotesList = quotesList.Where(x => reg.IsMatch(x.Author)).ToList();
+			}
+
+			if (!string.IsNullOrEmpty(quote))
+			{
+				Regex reg = new Regex(quote, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Compiled);
+				quotesList = quotesList.Where(x => reg.IsMatch(x.Text)).ToList();
+			}
+
+			if (quotesList.Count == 0)
+				return $"Couldn't find a specified quote";
+			else if (quotesList.Count == 1)
+			{
+				var foundQuote = quotesList[0];
+				var index = ChannelQuotes.QuotesList.IndexOf(foundQuote);
+				if (string.IsNullOrEmpty(foundQuote.Author))
+					return $"Found quote at index {index}. The quote is \"{foundQuote.Text}\".";
+				else
+					return $"Found quote at index {index}. The quote is \"{foundQuote.Text}\" by {foundQuote.Author}.";
+			}
+			else
+			{
+				var foundIndexes = string.Join(", ", quotesList.Select(x => ChannelQuotes.QuotesList.IndexOf(x)));
+				return $"Found more than 1 quote matching. Found quotes have indexes: {foundIndexes}";
+			}
+		}
+
+		internal string RemoveQuote(string author, string quote)
+		{
+			var quotesList = ChannelQuotes.QuotesList;
+			if (!string.IsNullOrEmpty(author))
+			{
+				Regex reg = new Regex(author, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Compiled);
+				quotesList = quotesList.Where(x => reg.IsMatch(x.Author)).ToList();
+			}
+
+			if (!string.IsNullOrEmpty(quote))
+			{
+				Regex reg = new Regex(quote, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Compiled);
+				quotesList = quotesList.Where(x => reg.IsMatch(x.Text)).ToList();
+			}
+
+			if (quotesList.Count == 0)
+				return $"Couldn't find a specified quote";
+			else if (quotesList.Count == 1)
+			{
+				var foundQuote = quotesList[0];
+				var index = ChannelQuotes.QuotesList.IndexOf(foundQuote);
+				ChannelQuotes.QuotesList.Remove(foundQuote);
+				ChannelQuotes.Save();
+				if (string.IsNullOrEmpty(foundQuote.Author))
+					return $"Deleted quote at index {index}. The quote was {foundQuote.Text}.";
+				else
+					return $"Deleted quote at index {index}. The quote was {foundQuote.Text} by {foundQuote.Author}.";
+			}
+			else
+			{
+				var foundIndexes = string.Join(", ", quotesList.Select(x => ChannelQuotes.QuotesList.IndexOf(x)));
+				return $"Found more than 1 quote matching. Found quotes have indexes: {foundIndexes}";
+			}
+		}
+
+		internal string FindQuoteByIndex(int index)
+		{
+			if (ChannelQuotes.QuotesList.Count == 0)
+				return "Can't find a quote, because there are no quotes at all!";
+
+			if(index >= 0 && index <  ChannelQuotes.QuotesList.Count)
+			{
+				var quote = ChannelQuotes.QuotesList[index];
+				if (string.IsNullOrEmpty(quote.Author))
+					return $"Found quote at index {index}. The quote is \"{quote.Text}\".";
+				else
+					return $"Found quote at index {index}. The quote is \"{quote.Text}\" by {quote.Author}.";
+			}
+			else
+				return $"Can't find a quote, because it's outside the available range {0} - {ChannelQuotes.QuotesList.Count-1}";
+		}
+
+		internal string RemoveQuoteByIndex(int index)
+		{
+			if (ChannelQuotes.QuotesList.Count == 0)
+				return "Can't delete a quote, because there are no quotes at all!";
+
+			if (index >= 0 && index < ChannelQuotes.QuotesList.Count)
+			{
+				var quote = ChannelQuotes.QuotesList[index];
+				ChannelQuotes.QuotesList.Remove(quote);
+				ChannelQuotes.Save();
+				if (string.IsNullOrEmpty(quote.Author))
+				{
+					return $"Deleted quote: \"{quote.Text}\".";
+				}
+				else
+					return $"Deleted quote \"{quote.Text}\" by {quote.Author}.";
+			}
+			else
+				return $"Can't delete a quote, because it's outside the available range {0} - {ChannelQuotes.QuotesList.Count - 1}";
 		}
 	}
 }

@@ -128,11 +128,11 @@ namespace SuiBot_Core
 			//string msgResponse = $"@{messageToRespondTo.chatter_user_name}: {message}";
 			Task.Run(async () =>
 			{
-				if (message.Length <= 500)
+				if (message.Length <= 480)
 					await SuiBotInstance.HelixAPI.SendResponseAsync(messageToRespondTo, message);
 				else
 				{
-					var messages = message.SplitMessage(500);
+					var messages = message.SplitMessage(480);
 					foreach (var subMessage in messages)
 					{
 						SuiBotInstance.SendChatMessageFeedback("#" + Channel, subMessage);
@@ -399,7 +399,6 @@ namespace SuiBot_Core
 		internal void ShutdownTask()
 		{
 			ConfigInstance.Save();
-			QuotesInstance.Dispose();
 			ChatFiltering.Dispose();
 			Cvars.Dispose();
 		}

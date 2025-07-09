@@ -171,9 +171,12 @@ namespace SuiBot_Core.Components
 								new SpeedrunWRCall(),
 								new SpeedrunPBCall(),
 								new CurrentDateTimeCall(),
-								new IntervalMessageAddCall(),
-								new IntervalMessageFindCall(),
-								new IntervalMessageRemoveCall()
+								new IntervalMessageCalls.IntervalMessageAddCall(),
+								new IntervalMessageCalls.IntervalMessageFindCall(),
+								new IntervalMessageCalls.IntervalMessageRemoveCall(),
+								new QuoteCalls.QuoteAddCall(),
+								new QuoteCalls.QuoteFindCall(),
+								new QuoteCalls.QuoteRemoveCall()
 								)
 						};
 						StreamerContent.StorePath = StreamerPath;

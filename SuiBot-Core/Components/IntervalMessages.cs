@@ -1,9 +1,7 @@
 ﻿using SuiBot_Core.Extensions.SuiStringExtension;
 using SuiBot_TwitchSocket.API.EventSub;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using static SuiBot_TwitchSocket.API.EventSub.ES_ChatMessage;
@@ -214,7 +212,7 @@ namespace SuiBot_Core.Components
 				return $"Removed interval message {message.Message} with an interval of {message.Interval} minutes";
 			}
 
-			var searchRegex = new Regex(interval_Message, RegexOptions.Compiled);
+			var searchRegex = new Regex(interval_Message, RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
 			List<Storage.IntervalMessage> messages = IntervalMessagesStorage.Messages.FindAll(x => searchRegex.IsMatch(x.Message));
 			if(messages.Count == 0)
@@ -250,7 +248,7 @@ namespace SuiBot_Core.Components
 				return $"Found exact message with an interval of {message.Interval} minutes and index of {IntervalMessagesStorage.Messages.IndexOf(message)}";
 			}
 
-			var searchRegex = new Regex(interval_Message, RegexOptions.Compiled);
+			var searchRegex = new Regex(interval_Message, RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
 
 			List<Storage.IntervalMessage> messages = IntervalMessagesStorage.Messages.FindAll(x => searchRegex.IsMatch(x.Message));
 			if (messages.Count == 0)
