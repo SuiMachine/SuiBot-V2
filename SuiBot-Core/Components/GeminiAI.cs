@@ -2,7 +2,6 @@
 using SuiBot_Core.Components.Other.Gemini.Speedrun;
 using SuiBot_Core.Extensions.SuiStringExtension;
 using SuiBot_TwitchSocket.API.EventSub;
-using SuiBot_TwitchSocket.Interfaces;
 using SuiBotAI;
 using SuiBotAI.Components;
 using SuiBotAI.Components.Other.Gemini;
@@ -11,8 +10,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web.UI.WebControls;
-using System.Web.UI.WebControls.WebParts;
 using static SuiBotAI.Components.SuiBotAIProcessor;
 
 namespace SuiBot_Core.Components
