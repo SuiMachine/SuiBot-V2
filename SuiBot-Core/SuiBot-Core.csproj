@@ -3,7 +3,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>SuiBot_Core</RootNamespace>
     <Configurations>Debug with API Calls;Debug_LocalAPI;Debug;Release</Configurations>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <AssemblyTitle>SuiBot-Core</AssemblyTitle>
     <Company>SuicideMachine</Company>
     <Product>SuiBot-Core</Product>

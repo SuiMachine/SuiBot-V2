@@ -68,3 +68,4 @@ SuiBot-V2/Release/*
 SuiBot-V2-Windows/Release/*
 Release/7za.exe
 Release/net9.0/*
+Release/net8.0/*

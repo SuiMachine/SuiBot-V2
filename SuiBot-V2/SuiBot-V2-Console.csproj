@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net9.0-windows10.0.26100.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <OutputType>Exe</OutputType>
     <RootNamespace>SuiBot_V2</RootNamespace>
     <AssemblyName>SuiBot-V2</AssemblyName>
@@ -9,7 +9,7 @@
     <AssemblyTitle>SuiBot-V2</AssemblyTitle>
     <Company>SuicideMachine</Company>
     <Product>SuiBot-V2</Product>
-    <Copyright>Copyright © SuicideMachine 2020</Copyright>
+    <Copyright>Copyright © SuicideMachine 2025</Copyright>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <FileVersion>1.0.0.0</FileVersion>
   </PropertyGroup>
