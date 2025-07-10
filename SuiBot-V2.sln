@@ -9,11 +9,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SuiBot-Core", "SuiBot-Core\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SuiBot-V2-Windows", "SuiBot-V2-Windows\SuiBot-V2-Windows.csproj", "{85C8D8DB-5875-4456-BE92-8EC84EA85141}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpeedrunComSharp", "SpeedrunComSharp\SpeedrunComSharp\SpeedrunComSharp.csproj", "{924AAFFE-5B89-49E2-99AD-EC9373CC838D}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SuiBot-TwitchSocket", "..\SuiBot-TwitchSocket\SuiBot-TwitchSocket.csproj", "{EEFD4D67-FA06-4A2A-804F-31851CB06A3E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SuiBot-AI", "..\SuiBot-AI\SuiBot-AI.csproj", "{22F63E69-76D9-451E-8329-46A8B41C12CB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpeedrunComSharp", "..\SpeedrunComSharp\src\SpeedrunComSharp\SpeedrunComSharp.csproj", "{B0D5B37E-77C0-C5A8-37FB-DBB41CFFEB89}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -47,14 +47,6 @@ Global
 		{85C8D8DB-5875-4456-BE92-8EC84EA85141}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{85C8D8DB-5875-4456-BE92-8EC84EA85141}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{85C8D8DB-5875-4456-BE92-8EC84EA85141}.Release|Any CPU.Build.0 = Release|Any CPU
-		{924AAFFE-5B89-49E2-99AD-EC9373CC838D}.Debug with API Calls|Any CPU.ActiveCfg = Debug with API Calls|Any CPU
-		{924AAFFE-5B89-49E2-99AD-EC9373CC838D}.Debug with API Calls|Any CPU.Build.0 = Debug with API Calls|Any CPU
-		{924AAFFE-5B89-49E2-99AD-EC9373CC838D}.Debug_LocalAPI|Any CPU.ActiveCfg = Debug_LocalAPI|Any CPU
-		{924AAFFE-5B89-49E2-99AD-EC9373CC838D}.Debug_LocalAPI|Any CPU.Build.0 = Debug_LocalAPI|Any CPU
-		{924AAFFE-5B89-49E2-99AD-EC9373CC838D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{924AAFFE-5B89-49E2-99AD-EC9373CC838D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{924AAFFE-5B89-49E2-99AD-EC9373CC838D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{924AAFFE-5B89-49E2-99AD-EC9373CC838D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{EEFD4D67-FA06-4A2A-804F-31851CB06A3E}.Debug with API Calls|Any CPU.ActiveCfg = Debug|Any CPU
 		{EEFD4D67-FA06-4A2A-804F-31851CB06A3E}.Debug with API Calls|Any CPU.Build.0 = Debug|Any CPU
 		{EEFD4D67-FA06-4A2A-804F-31851CB06A3E}.Debug_LocalAPI|Any CPU.ActiveCfg = Debug|Any CPU
@@ -71,6 +63,14 @@ Global
 		{22F63E69-76D9-451E-8329-46A8B41C12CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{22F63E69-76D9-451E-8329-46A8B41C12CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{22F63E69-76D9-451E-8329-46A8B41C12CB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B0D5B37E-77C0-C5A8-37FB-DBB41CFFEB89}.Debug with API Calls|Any CPU.ActiveCfg = Debug|Any CPU
+		{B0D5B37E-77C0-C5A8-37FB-DBB41CFFEB89}.Debug with API Calls|Any CPU.Build.0 = Debug|Any CPU
+		{B0D5B37E-77C0-C5A8-37FB-DBB41CFFEB89}.Debug_LocalAPI|Any CPU.ActiveCfg = Debug|Any CPU
+		{B0D5B37E-77C0-C5A8-37FB-DBB41CFFEB89}.Debug_LocalAPI|Any CPU.Build.0 = Debug|Any CPU
+		{B0D5B37E-77C0-C5A8-37FB-DBB41CFFEB89}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B0D5B37E-77C0-C5A8-37FB-DBB41CFFEB89}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B0D5B37E-77C0-C5A8-37FB-DBB41CFFEB89}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B0D5B37E-77C0-C5A8-37FB-DBB41CFFEB89}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

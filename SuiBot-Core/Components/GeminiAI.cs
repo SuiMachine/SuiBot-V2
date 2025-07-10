@@ -179,7 +179,7 @@ namespace SuiBot_Core.Components
 						StreamerContent.StorePath = StreamerPath;
 
 						var full = AIMessageUtils.AppendDateTimePrefix(lastMessage.message.text.StripSingleWord());
-						GeminiResponse result = await m_AI_Instance.GetAIResponse(StreamerContent, systemInstruction, full);
+						GeminiResponse result = await m_AI_Instance.GetAIResponse(StreamerContent, systemInstruction, full, Role.user);
 
 						if (result == null)
 						{
@@ -347,7 +347,7 @@ namespace SuiBot_Core.Components
 					};
 
 					var instruction = InstanceConfig.GetLurkSystemInstruction(channelInstance.Channel, lastMessage.chatter_user_name, streamInfo.IsOnline, streamInfo.game_name, streamInfo.title);
-					var result = await m_AI_Instance.GetAIResponse(content, instruction, lastMessage.message.text);
+					var result = await m_AI_Instance.GetAIResponse(content, instruction, lastMessage.message.text, Role.user);
 
 					if (result == null)
 					{
@@ -416,7 +416,7 @@ namespace SuiBot_Core.Components
 						generationConfig = new GeminiContent.GenerationConfig(),
 					};
 
-					GeminiResponse result = await m_AI_Instance.GetAIResponse(content, InstanceConfig.GetFilterInstruction(lastMessage), lastMessage.message.text);
+					GeminiResponse result = await m_AI_Instance.GetAIResponse(content, InstanceConfig.GetFilterInstruction(lastMessage), lastMessage.message.text, Role.user);
 
 					if (result == null)
 					{
