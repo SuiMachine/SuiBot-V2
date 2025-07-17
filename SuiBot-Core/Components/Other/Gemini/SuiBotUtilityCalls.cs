@@ -20,24 +20,24 @@ namespace SuiBot_Core.Components.Other.Gemini
 			{
 				if (message.UserRole > ES_ChatMessage.Role.Mod)
 				{
-					channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, "Can not add. User that request a message isn't a streamer or moderator!", Role.tool);
+					channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, GeminiMessage.CreateFunctionCallResponse(FunctionName(), "Can not add. User that request a message isn't a streamer or moderator!"));
 					return;
 				}
 				else
 				{
 					if (!channelInstance.ConfigInstance.IntervalMessageEnabled)
 					{
-						channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, "Interval message component is disabled - it needs to be enabled first!", Role.tool);
+						channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, GeminiMessage.CreateFunctionCallResponse(FunctionName(), "Interval message component is disabled - it needs to be enabled first!"));
 						return;
 					}
 
 					if (Interval == null)
 					{
-						channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, "Interval length is required to add an interval message!", Role.tool);
+						channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, GeminiMessage.CreateFunctionCallResponse(FunctionName(), "Interval length is required to add an interval message!"));
 						return;
 					}
 
-					channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, channelInstance.IntervalMessagesInstance.AddMessage(Interval.Value, Interval_Message), Role.tool);
+					channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, GeminiMessage.CreateFunctionCallResponse(FunctionName(), channelInstance.IntervalMessagesInstance.AddMessage(Interval.Value, Interval_Message)));
 				}
 			}
 		}
@@ -57,23 +57,23 @@ namespace SuiBot_Core.Components.Other.Gemini
 			{
 				if (message.UserRole > ES_ChatMessage.Role.Mod)
 				{
-					channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, "Can not use find. User that request a message isn't a streamer or moderator!", Role.tool);
+					channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, GeminiMessage.CreateFunctionCallResponse(FunctionName(), "Can not use find. User that request a message isn't a streamer or moderator!"));
 					return;
 				}
 				else
 				{
 					if(!channelInstance.ConfigInstance.IntervalMessageEnabled)
 					{
-						channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, "Interval message component is disabled - it needs to be enabled first!", Role.tool);
+						channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, GeminiMessage.CreateFunctionCallResponse(FunctionName(), "Interval message component is disabled - it needs to be enabled first!"));
 						return;
 					}
 
 					if (Message_Index == null && string.IsNullOrEmpty(Interval_Message))
-						channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, channelInstance.IntervalMessagesInstance.GetMessages(), Role.tool);
+						channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, GeminiMessage.CreateFunctionCallResponse(FunctionName(),  channelInstance.IntervalMessagesInstance.GetMessages()));
 					else if (Message_Index != null)
-						channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, channelInstance.IntervalMessagesInstance.FindMessageByID(Message_Index.Value), Role.tool);
+						channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, GeminiMessage.CreateFunctionCallResponse(FunctionName(), channelInstance.IntervalMessagesInstance.FindMessageByID(Message_Index.Value)));
 					else
-						channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, channelInstance.IntervalMessagesInstance.FindMessage(Interval_Message), Role.tool);
+						channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, GeminiMessage.CreateFunctionCallResponse(FunctionName(), channelInstance.IntervalMessagesInstance.FindMessage(Interval_Message)));
 				}
 			}
 		}
@@ -93,23 +93,23 @@ namespace SuiBot_Core.Components.Other.Gemini
 			{
 				if (message.UserRole > ES_ChatMessage.Role.Mod)
 				{
-					channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, "Can not remove. User that request a message isn't a streamer or moderator!", Role.tool);
+					channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, GeminiMessage.CreateFunctionCallResponse(FunctionName(), "Can not remove. User that request a message isn't a streamer or moderator!"));
 					return;
 				}
 				else
 				{
 					if (!channelInstance.ConfigInstance.IntervalMessageEnabled)
 					{
-						channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, "Interval message component is disabled - it needs to be enabled first!", Role.tool);
+						channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, GeminiMessage.CreateFunctionCallResponse(FunctionName(), "Interval message component is disabled - it needs to be enabled first!"));
 						return;
 					}
 
 					if (Message_Index == null && string.IsNullOrEmpty(Interval_Message))
-						channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, channelInstance.IntervalMessagesInstance.GetMessages(), Role.tool);
+						channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, GeminiMessage.CreateFunctionCallResponse(FunctionName(), channelInstance.IntervalMessagesInstance.GetMessages()));
 					else if (Message_Index != null)
-						channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, channelInstance.IntervalMessagesInstance.RemoveMessageByID(Message_Index.Value), Role.tool);
+						channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, GeminiMessage.CreateFunctionCallResponse(FunctionName(), channelInstance.IntervalMessagesInstance.RemoveMessageByID(Message_Index.Value)));
 					else
-						channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, channelInstance.IntervalMessagesInstance.RemoveMessage(Interval_Message), Role.tool);
+						channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, GeminiMessage.CreateFunctionCallResponse(FunctionName(), channelInstance.IntervalMessagesInstance.RemoveMessage(Interval_Message)));
 				}
 			}
 		}
@@ -131,11 +131,11 @@ namespace SuiBot_Core.Components.Other.Gemini
 			{
 				if (message.UserRole > ES_ChatMessage.Role.Mod)
 				{
-					channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, "Can not add. User that request a message isn't a streamer or moderator!", Role.tool);
+					channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, GeminiMessage.CreateFunctionCallResponse(FunctionName(), "Can not add. User that request a message isn't a streamer or moderator!"));
 					return;
 				}
 
-				channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, channelInstance.QuotesInstance.AddQuote(Author, Quote), Role.tool);
+				channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, GeminiMessage.CreateFunctionCallResponse(FunctionName(), channelInstance.QuotesInstance.AddQuote(Author, Quote)));
 			}
 		}
 
@@ -155,14 +155,14 @@ namespace SuiBot_Core.Components.Other.Gemini
 			{
 				if (message.UserRole > ES_ChatMessage.Role.Mod)
 				{
-					channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, "Can not perform find. User that request a message isn't a streamer or moderator!", Role.tool);
+					channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, GeminiMessage.CreateFunctionCallResponse(FunctionName(), "Can not perform find. User that request a message isn't a streamer or moderator!"));
 					return;
 				}
 
 				if(Index != null)
-					channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, channelInstance.QuotesInstance.FindQuoteByIndex(Index.Value), Role.tool);
+					channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, GeminiMessage.CreateFunctionCallResponse(FunctionName(), channelInstance.QuotesInstance.FindQuoteByIndex(Index.Value)));
 				else
-					channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, channelInstance.QuotesInstance.FindQuote(Author, Quote), Role.tool);
+					channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, GeminiMessage.CreateFunctionCallResponse(FunctionName(), channelInstance.QuotesInstance.FindQuote(Author, Quote)));
 			}
 		}
 
@@ -182,14 +182,14 @@ namespace SuiBot_Core.Components.Other.Gemini
 			{
 				if (message.UserRole > ES_ChatMessage.Role.Mod)
 				{
-					channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, "Can not remove. User that request a message isn't a streamer or moderator!", Role.tool);
+					channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, GeminiMessage.CreateFunctionCallResponse(FunctionName(), "Can not remove. User that request a message isn't a streamer or moderator!"));
 					return;
 				}
 
 				if(Index != null)
-					channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, channelInstance.QuotesInstance.RemoveQuoteByIndex(Index.Value), Role.tool);
+					channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, GeminiMessage.CreateFunctionCallResponse(FunctionName(), channelInstance.QuotesInstance.RemoveQuoteByIndex(Index.Value)));
 				else
-					channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, channelInstance.QuotesInstance.RemoveQuote(Author, Quote), Role.tool);
+					channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, GeminiMessage.CreateFunctionCallResponse(FunctionName(), channelInstance.QuotesInstance.RemoveQuote(Author, Quote)));
 			}
 		}
 	}

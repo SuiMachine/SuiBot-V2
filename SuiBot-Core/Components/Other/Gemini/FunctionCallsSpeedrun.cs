@@ -20,14 +20,14 @@ namespace SuiBot_Core.Components.Other.Gemini.Speedrun
 
 		public override string FunctionName() => "speedrun_world_record";
 
-		public override void Perform(SuiBot_ChannelInstance channelInstance, ES_ChatMessage message, SuiBotAI.Components.Other.Gemini.GeminiContent content)
+		public override void Perform(SuiBot_ChannelInstance channelInstance, ES_ChatMessage message, GeminiContent content)
 		{
 			if (game_name == null)
 				return;
 			var speedrunClient = new SpeedrunComClient();
 			var game = speedrunClient.Games.SearchGame(game_name);
 			if (game == null)
-				channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, "No game was found.", SuiBotAI.Components.Other.Gemini.Role.tool);
+				channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, GeminiMessage.CreateFunctionCallResponse(FunctionName(), "No game was found."));
 			else
 			{
 				var categories = game.FullGameCategories;
@@ -50,7 +50,7 @@ namespace SuiBot_Core.Components.Other.Gemini.Speedrun
 						sb.AppendLine($"* {category.Name}");
 					}
 					sb.AppendLine($"The default category is: {game.FullGameCategories.ElementAt(0)}");
-					channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, sb.ToString(), SuiBotAI.Components.Other.Gemini.Role.tool);
+					channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, GeminiMessage.CreateFunctionCallResponse(FunctionName(), sb.ToString()));
 				}
 				else
 				{
@@ -60,7 +60,7 @@ namespace SuiBot_Core.Components.Other.Gemini.Speedrun
 					else
 						sb.AppendLine($"Category {foundCategory.Name} doesn't have any records.");
 
-					channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, sb.ToString(), SuiBotAI.Components.Other.Gemini.Role.tool);
+					channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, GeminiMessage.CreateFunctionCallResponse(FunctionName(), sb.ToString()));
 				}
 			}
 		}
@@ -87,7 +87,7 @@ namespace SuiBot_Core.Components.Other.Gemini.Speedrun
 			var speedrunClient = new SpeedrunComClient();
 			var game = speedrunClient.Games.SearchGame(game_name);
 			if (game == null)
-				channelInstance?.GeminiAI?.GetSecondaryAnswer(channelInstance, message, content, "No game was found.", SuiBotAI.Components.Other.Gemini.Role.tool);
+				channelInstance?.GeminiAI?.GetSecondaryAnswer(channelInstance, message, content, GeminiMessage.CreateFunctionCallResponse(FunctionName(), "No game was found."));
 			else
 			{
 				var categories = game.FullGameCategories;
@@ -109,7 +109,7 @@ namespace SuiBot_Core.Components.Other.Gemini.Speedrun
 						sb.AppendLine($"* {category.Name}");
 					}
 					sb.AppendLine($"The default category is: {game.FullGameCategories.ElementAt(0)}");
-					channelInstance?.GeminiAI?.GetSecondaryAnswer(channelInstance, message, content, sb.ToString(), SuiBotAI.Components.Other.Gemini.Role.tool);
+					channelInstance?.GeminiAI?.GetSecondaryAnswer(channelInstance, message, content, GeminiMessage.CreateFunctionCallResponse(FunctionName(), sb.ToString()));
 				}
 				else
 				{
@@ -117,7 +117,7 @@ namespace SuiBot_Core.Components.Other.Gemini.Speedrun
 					if (pbs.Count == 0)
 					{
 						string response = $"{username} has not done any runs in this game.";
-						channelInstance?.GeminiAI?.GetSecondaryAnswer(channelInstance, message, content, response, SuiBotAI.Components.Other.Gemini.Role.tool);
+						channelInstance?.GeminiAI?.GetSecondaryAnswer(channelInstance, message, content, GeminiMessage.CreateFunctionCallResponse(FunctionName(), response));
 						return;
 					}
 
@@ -125,13 +125,13 @@ namespace SuiBot_Core.Components.Other.Gemini.Speedrun
 					if (matchingPB == null)
 					{
 						string response = $"{username} has not done any runs in category {foundCategory.Name}.";
-						channelInstance?.GeminiAI?.GetSecondaryAnswer(channelInstance, message, content, response, SuiBotAI.Components.Other.Gemini.Role.tool);
+						channelInstance?.GeminiAI?.GetSecondaryAnswer(channelInstance, message, content, GeminiMessage.CreateFunctionCallResponse(FunctionName(), response));
 					}
 					else
 					{
 						string response = $"{username} best time in {foundCategory.Name} is {matchingPB.Times.Primary.Value}.";
 
-						channelInstance?.GeminiAI?.GetSecondaryAnswer(channelInstance, message, content, response, SuiBotAI.Components.Other.Gemini.Role.tool);
+						channelInstance?.GeminiAI?.GetSecondaryAnswer(channelInstance, message, content, GeminiMessage.CreateFunctionCallResponse(FunctionName(), response));
 					}
 
 				}

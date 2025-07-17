@@ -147,9 +147,6 @@ namespace SuiBot_Core
 
 			ShouldRun = true;
 			TwitchSocket = new TwitchSocket(this);
-
-			IntervalTimer.Elapsed += IntervalTimer_Elapsed;
-			StatusUpdateTimer.Elapsed += StatusUpdateTimer_Elapsed;
 		}
 
 		public void TwitchSocket_Connected()
@@ -175,7 +172,7 @@ namespace SuiBot_Core
 				Response_SubscribeTo currentSubscriptionChecks = await HelixAPI.GetCurrentEventSubscriptions();
 				foreach (var subscription in currentSubscriptionChecks.data)
 				{
-					if (subscription.status != "enabled" || subscription.transport.session_id != TwitchSocket.SessionID)
+					if (subscription.status != "enabled")
 					{
 						Console.WriteLine($"Unsubscribing from {subscription.type} ({subscription.status})");
 						await HelixAPI.CloseSubscription(subscription);

@@ -65,7 +65,7 @@ namespace SuiBot_Core.Components.Other.Gemini
 			sb.AppendLine($"Current local date is {DateTime.Now.ToString("MMMM d, yyy", globalizationOverride)} and time is {DateTime.Now.ToString("hh:mm:ss tt", globalizationOverride)}");
 			sb.AppendLine($"Current UTC date is {DateTime.UtcNow.ToString("MMMM d, yyy", globalizationOverride)} and UTC time is {DateTime.UtcNow.ToString("hh:mm:ss tt", globalizationOverride)}");
 
-			channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, sb.ToString(), Role.tool);
+			channelInstance.GeminiAI.GetSecondaryAnswer(channelInstance, message, content, GeminiMessage.CreateFunctionCallResponse(FunctionName(), sb.ToString()));
 		}
 	}
 }

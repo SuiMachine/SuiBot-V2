@@ -179,7 +179,7 @@ namespace SuiBot_Core.Components
 						StreamerContent.StorePath = StreamerPath;
 
 						var full = AIMessageUtils.AppendDateTimePrefix(lastMessage.message.text.StripSingleWord());
-						GeminiResponse result = await m_AI_Instance.GetAIResponse(StreamerContent, systemInstruction, full, Role.user);
+						GeminiResponse result = await m_AI_Instance.GetAIResponse(StreamerContent, systemInstruction, GeminiMessage.CreateMessage(full, Role.user));
 
 						if (result == null)
 						{
@@ -260,7 +260,7 @@ namespace SuiBot_Core.Components
 			}
 		}
 
-		internal void GetSecondaryAnswer(SuiBot_ChannelInstance channelInstance, ES_ChatMessage message, GeminiContent content, string appendContent, Role role)
+		internal void GetSecondaryAnswer(SuiBot_ChannelInstance channelInstance, ES_ChatMessage message, GeminiContent content, GeminiMessage appendContent)
 		{
 			SuiBot bot = channelInstance.SuiBotInstance;
 
@@ -268,7 +268,7 @@ namespace SuiBot_Core.Components
 			{
 				try
 				{
-					var result = await m_AI_Instance.GetAIResponse(content, content.systemInstruction, appendContent, role);
+					var result = await m_AI_Instance.GetAIResponse(content, content.systemInstruction, appendContent);
 					if (result == null)
 					{
 						channelInstance.SendChatMessage($"{message.chatter_user_name} - Failed to get secondary response. :(");
@@ -347,7 +347,7 @@ namespace SuiBot_Core.Components
 					};
 
 					var instruction = InstanceConfig.GetLurkSystemInstruction(channelInstance.Channel, lastMessage.chatter_user_name, streamInfo.IsOnline, streamInfo.game_name, streamInfo.title);
-					var result = await m_AI_Instance.GetAIResponse(content, instruction, lastMessage.message.text, Role.user);
+					var result = await m_AI_Instance.GetAIResponse(content, instruction, GeminiMessage.CreateMessage(lastMessage.message.text, Role.user));
 
 					if (result == null)
 					{
@@ -416,7 +416,7 @@ namespace SuiBot_Core.Components
 						generationConfig = new GeminiContent.GenerationConfig(),
 					};
 
-					GeminiResponse result = await m_AI_Instance.GetAIResponse(content, InstanceConfig.GetFilterInstruction(lastMessage), lastMessage.message.text, Role.user);
+					GeminiResponse result = await m_AI_Instance.GetAIResponse(content, InstanceConfig.GetFilterInstruction(lastMessage), GeminiMessage.CreateMessage(lastMessage.message.text, Role.user));
 
 					if (result == null)
 					{
