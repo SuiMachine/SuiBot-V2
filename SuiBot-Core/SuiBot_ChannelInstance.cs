@@ -424,9 +424,9 @@ namespace SuiBot_Core
 			{
 				var response = await SuiBotInstance.HelixAPI.GetChatSharedSession(this.ChannelID);
 				if (response != null)
-				{
 					IsSharedChat = true;
-				}
+				else
+					IsSharedChat = false;
 
 			}, CancellationTokenSource.Token);
 		}
