@@ -146,6 +146,8 @@ namespace SuiBot_Core.Components
 		public void SetPreferredCategory(string StreamTitle, bool isAfterFirstUpdate, bool vocal)
 		{
 			var currentTitleLC = StreamTitle.ToLower();
+			if (m_ChannelInstance.IsSharedChat)
+				vocal = false;
 
 			try
 			{
@@ -165,7 +167,9 @@ namespace SuiBot_Core.Components
 								PreferredCategory = category.Name;
 								LastUpdateSuccessful = true;
 								if (vocal || isAfterFirstUpdate)
+								{
 									m_ChannelInstance.SendChatMessage($"Set leaderboards category to: \"{PreferredCategory}\" based on stream title");
+								}
 							}
 							return;
 						}

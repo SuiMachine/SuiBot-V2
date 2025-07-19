@@ -136,6 +136,9 @@ namespace SuiBot_Core.Components
 		/// </summary>
 		internal void DoTickWork()
 		{
+			if (ChannelInstance.IsSharedChat)
+				return;
+
 			lock (IntervalMessagesStorage.Messages)
 			{
 				foreach (var message in IntervalMessagesStorage.Messages)
@@ -204,7 +207,7 @@ namespace SuiBot_Core.Components
 			var message = IntervalMessagesStorage.Messages.FirstOrDefault(x => x.Message.ToLower().Trim() == interval_Message.ToLower().Trim());
 			if (message != null)
 			{
-				lock(IntervalMessagesStorage.Messages)
+				lock (IntervalMessagesStorage.Messages)
 				{
 					IntervalMessagesStorage.Messages.Remove(message);
 					IntervalMessagesStorage.Save();
@@ -215,9 +218,9 @@ namespace SuiBot_Core.Components
 			var searchRegex = new Regex(interval_Message, RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
 			List<Storage.IntervalMessage> messages = IntervalMessagesStorage.Messages.FindAll(x => searchRegex.IsMatch(x.Message));
-			if(messages.Count == 0)
+			if (messages.Count == 0)
 				return $"Nothing found:\r\n" + GetMessages();
-			else if(messages.Count == 1)
+			else if (messages.Count == 1)
 				return $"No direct message was found. Found message \"{message.Message}\" with index {IntervalMessagesStorage.Messages.IndexOf(message)}";
 			else
 			{

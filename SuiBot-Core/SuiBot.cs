@@ -147,6 +147,11 @@ namespace SuiBot_Core
 
 			ShouldRun = true;
 			TwitchSocket = new TwitchSocket(this);
+			StatusUpdateTimer.Elapsed -= StatusUpdateTimer_Elapsed;
+			IntervalTimer.Elapsed -= IntervalTimer_Elapsed;
+
+			StatusUpdateTimer.Elapsed += StatusUpdateTimer_Elapsed;
+			IntervalTimer.Elapsed += IntervalTimer_Elapsed;
 		}
 
 		public void TwitchSocket_Connected()
@@ -183,16 +188,25 @@ namespace SuiBot_Core
 				foreach (var channel in channelsToSubScribeAdditionalInformationTo)
 				{
 					Console.WriteLine($"Subscribing to additional events for {channel.condition.broadcaster_user_id}");
-
 					var onLineSub = await HelixAPI.SubscribeToOnlineStatus(channel.condition.broadcaster_user_id, TwitchSocket.SessionID);
 					await Task.Delay(2000);
 					var offlineSub = await HelixAPI.SubscribeToOfflineStatus(channel.condition.broadcaster_user_id, TwitchSocket.SessionID);
 					await Task.Delay(2000);
-
 					var automodHold = await HelixAPI.SubscribeToAutoModHold(channel.condition.broadcaster_user_id, TwitchSocket.SessionID);
 					await Task.Delay(2000);
 					var susMessage = await HelixAPI.SubscribeToChannelSuspiciousUserMessage(channel.condition.broadcaster_user_id, TwitchSocket.SessionID);
 					await Task.Delay(2000);
+					var sharedSessionBegin = await HelixAPI.SubscribeToSharedChatBegin(channel.condition.broadcaster_user_id, TwitchSocket.SessionID);
+					await Task.Delay(2000);
+					var sharedSessionUpdate = await HelixAPI.SubscribeToSharedChatUpdate(channel.condition.broadcaster_user_id, TwitchSocket.SessionID);
+					await Task.Delay(2000);
+					var sharedSessionEnd = await HelixAPI.SubscribeToSharedChatEnd(channel.condition.broadcaster_user_id, TwitchSocket.SessionID);
+					await Task.Delay(2000);
+
+					//Might need to move to encoding channels in dictionary by id
+					var channelFound = ActiveChannels.Values.FirstOrDefault(x => x != null && x.ChannelID == channel.condition.broadcaster_user_id);
+					if (channelFound != null)
+						channelFound.PerformPostJoinRequests();
 				}
 				Console.WriteLine($"Done!");
 			});
@@ -245,12 +259,14 @@ namespace SuiBot_Core
 			ErrorLogging.WriteLine($"Subscribed to read: {channelToJoin}");
 			if (ChannelInstances.TryGetValue(channelToJoin, out var channel))
 			{
+				channel.CancellationTokenSource = new CancellationTokenSource();
 				this.OnChannelJoining?.Invoke(channelToJoin);
 				ActiveChannels[channelToJoin] = channel;
 			}
 			else
 			{
 				var channelInstance = new SuiBot_ChannelInstance(channelToJoin, result.condition.broadcaster_user_id, this, Storage.ChannelConfig.Load(channelToJoin));
+				channelInstance.CancellationTokenSource = new CancellationTokenSource();
 				ActiveChannels.Add(channelToJoin, channelInstance);
 				ChannelInstances.Add(channelToJoin, channelInstance);
 				this.OnChannelJoining?.Invoke(channelToJoin);
@@ -417,6 +433,30 @@ namespace SuiBot_Core
 
 		public void TwitchSocket_ChannelRaid(ES_ChannelRaid raidInfo)
 		{
+		}
+
+		public void TwitchSocket_SharedChatBegin(ES_SharedChatEnd sharedChatBegin)
+		{
+			if (!ChannelInstances.TryGetValue(sharedChatBegin.broadcaster_user_login, out var channelInstance))
+				return;
+
+			channelInstance.SetSharedChatFlag(true);
+		}
+
+		public void TwitchSocket_SharedChatUpdate(ES_SharedChatUpdate sharedChatUpdate)
+		{
+			if (!ChannelInstances.TryGetValue(sharedChatUpdate.broadcaster_user_login, out var channelInstance))
+				return;
+
+			channelInstance.SetSharedChatFlag(true);
+		}
+
+		public void TwitchSocket_SharedChatEnd(ES_SharedChatBegin sharedChatEnd)
+		{
+			if (!ChannelInstances.TryGetValue(sharedChatEnd.broadcaster_user_login, out var channelInstance))
+				return;
+
+			channelInstance.SetSharedChatFlag(false);
 		}
 	}
 }

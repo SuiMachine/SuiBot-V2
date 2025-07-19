@@ -5,6 +5,7 @@ using SuiBot_TwitchSocket.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 using static SuiBot_TwitchSocket.API.EventSub.ES_ChatMessage;
 
@@ -13,10 +14,12 @@ namespace SuiBot_Core
 	[DebuggerDisplay(nameof(SuiBot_ChannelInstance) + " {Channel}")]
 	public class SuiBot_ChannelInstance : IChannelInstance
 	{
+		public CancellationTokenSource CancellationTokenSource = new CancellationTokenSource();
 		private const int DefaultCooldown = 30;
 		public static string CommandPrefix = "!";
 		public string Channel { get; set; }
 		public string ChannelID { get; set; }
+		public bool IsSharedChat { get; private set; }
 
 		public Storage.ChannelConfig ConfigInstance { get; set; }
 		private Storage.CoreConfig CoreConfigInstance { get; set; }
@@ -223,6 +226,9 @@ namespace SuiBot_Core
 			//Quotes
 			if (ConfigInstance.QuotesEnabled && (messageLazy.StartsWith("quote") || messageLazy.StartsWith("quotes")))
 			{
+				if (IsSharedChat && messageToProcess.UserRole > Role.Mod)
+					return;
+
 				QuotesInstance.DoWork(messageToProcess);
 				return;
 			}
@@ -239,16 +245,25 @@ namespace SuiBot_Core
 			{
 				if (messageLazy == "wr" || messageLazy.StartsWithWordLazy("wr"))
 				{
+					if (IsSharedChat && messageToProcess.UserRole > Role.Mod)
+						return;
+
 					Leaderboards.DoWorkWR(messageToProcess);
 					return;
 				}
 				else if (messageLazy == "pb" || messageLazy.StartsWithWordLazy("pb"))
 				{
+					if (IsSharedChat && messageToProcess.UserRole > Role.Mod)
+						return;
+
 					Leaderboards.DoWorkPB(messageToProcess);
 					return;
 				}
-				else if (messageToProcess.UserRole <= Role.Mod && messageLazy.StartsWithWordLazy(new string[] { "leaderboard", "leaderboards" }))
+				else if (messageToProcess.UserRole <= Role.Mod && messageLazy.StartsWithWordLazy(["leaderboard", "leaderboards"]))
 				{
+					if (IsSharedChat && messageToProcess.UserRole > Role.Mod)
+						return;
+
 					Leaderboards.DoModWork(messageToProcess);
 					return;
 				}
@@ -257,7 +272,7 @@ namespace SuiBot_Core
 			//Interval Messages
 			if (ConfigInstance.IntervalMessageEnabled)
 			{
-				if (messageLazy.StartsWithWordLazy(new string[] { "intervalmessage", "intervalmessages" }))
+				if (messageLazy.StartsWithWordLazy(["intervalmessage", "intervalmessages"]))
 				{
 					if (messageToProcess.UserRole <= Role.Mod)
 					{
@@ -269,18 +284,17 @@ namespace SuiBot_Core
 				}
 			}
 
-			//Srl
-			if (messageLazy.StartsWith("srl"))
-			{
-				Components.SRL.GetRaces(this);
-				SetUserCooldown(messageToProcess, DefaultCooldown);
-				return;
-			}
-
 			//Timezones
 			if (messageLazy.StartsWith("time"))
 			{
-				Timezones.DoWork(messageToProcess);
+				if (IsSharedChat)
+				{
+					if (messageToProcess.UserRole <= Role.Mod)
+						Timezones.DoWork(messageToProcess);
+				}
+				else
+					Timezones.DoWork(messageToProcess);
+				return;
 			}
 
 			//Twitch update
@@ -316,7 +330,7 @@ namespace SuiBot_Core
 			//MemeCompoenents
 			if (ConfigInstance.MemeComponents.ENABLE)
 			{
-				if (MemeComponents.DoWork(messageToProcess))
+				if (!IsSharedChat && MemeComponents.DoWork(messageToProcess))
 				{
 					SetUserCooldown(messageToProcess, DefaultCooldown);
 					return;
@@ -398,9 +412,39 @@ namespace SuiBot_Core
 
 		internal void ShutdownTask()
 		{
+			CancellationTokenSource.Cancel();
 			ConfigInstance.Save();
 			ChatFiltering.Dispose();
 			Cvars.Dispose();
+		}
+
+		internal void PerformPostJoinRequests()
+		{
+			Task.Run(async () =>
+			{
+				var response = await SuiBotInstance.HelixAPI.GetChatSharedSession(this.ChannelID);
+				if (response != null)
+				{
+					IsSharedChat = true;
+				}
+
+			}, CancellationTokenSource.Token);
+		}
+
+		internal void SetSharedChatFlag(bool newStatus)
+		{
+			if (IsSharedChat != newStatus)
+			{
+				IsSharedChat = newStatus;
+				if (newStatus)
+				{
+					SendChatMessage("Shared chat enabled - entering limited mode. Have fun collabing! GivePLZ");
+				}
+				else
+				{
+					SendChatMessage("Shared chat disabled - exiting limited mode");
+				}
+			}
 		}
 	}
 }
