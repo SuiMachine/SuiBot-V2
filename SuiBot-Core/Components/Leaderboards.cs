@@ -146,7 +146,7 @@ namespace SuiBot_Core.Components
 		public void SetPreferredCategory(string StreamTitle, bool isAfterFirstUpdate, bool vocal)
 		{
 			var currentTitleLC = StreamTitle.ToLower();
-			if (m_ChannelInstance.IsSharedChat)
+			if (m_ChannelInstance.IsSafeMod)
 				vocal = false;
 
 			try

@@ -19,7 +19,8 @@ namespace SuiBot_Core
 		public static string CommandPrefix = "!";
 		public string Channel { get; set; }
 		public string ChannelID { get; set; }
-		public bool IsSharedChat { get; private set; }
+		public bool IsSafeMod { get; private set; }
+		public int SharedChatUsers { get; private set; }
 
 		public Storage.ChannelConfig ConfigInstance { get; set; }
 		private Storage.CoreConfig CoreConfigInstance { get; set; }
@@ -226,7 +227,7 @@ namespace SuiBot_Core
 			//Quotes
 			if (ConfigInstance.QuotesEnabled && (messageLazy.StartsWith("quote") || messageLazy.StartsWith("quotes")))
 			{
-				if (IsSharedChat && messageToProcess.UserRole > Role.Mod)
+				if (IsSafeMod && messageToProcess.UserRole > Role.Mod)
 					return;
 
 				QuotesInstance.DoWork(messageToProcess);
@@ -245,7 +246,7 @@ namespace SuiBot_Core
 			{
 				if (messageLazy == "wr" || messageLazy.StartsWithWordLazy("wr"))
 				{
-					if (IsSharedChat && messageToProcess.UserRole > Role.Mod)
+					if (IsSafeMod && messageToProcess.UserRole > Role.Mod)
 						return;
 
 					Leaderboards.DoWorkWR(messageToProcess);
@@ -253,7 +254,7 @@ namespace SuiBot_Core
 				}
 				else if (messageLazy == "pb" || messageLazy.StartsWithWordLazy("pb"))
 				{
-					if (IsSharedChat && messageToProcess.UserRole > Role.Mod)
+					if (IsSafeMod && messageToProcess.UserRole > Role.Mod)
 						return;
 
 					Leaderboards.DoWorkPB(messageToProcess);
@@ -261,7 +262,7 @@ namespace SuiBot_Core
 				}
 				else if (messageToProcess.UserRole <= Role.Mod && messageLazy.StartsWithWordLazy(["leaderboard", "leaderboards"]))
 				{
-					if (IsSharedChat && messageToProcess.UserRole > Role.Mod)
+					if (IsSafeMod && messageToProcess.UserRole > Role.Mod)
 						return;
 
 					Leaderboards.DoModWork(messageToProcess);
@@ -287,7 +288,7 @@ namespace SuiBot_Core
 			//Timezones
 			if (messageLazy.StartsWith("time"))
 			{
-				if (IsSharedChat)
+				if (IsSafeMod)
 				{
 					if (messageToProcess.UserRole <= Role.Mod)
 						Timezones.DoWork(messageToProcess);
@@ -330,7 +331,7 @@ namespace SuiBot_Core
 			//MemeCompoenents
 			if (ConfigInstance.MemeComponents.ENABLE)
 			{
-				if (!IsSharedChat && MemeComponents.DoWork(messageToProcess))
+				if (!IsSafeMod && MemeComponents.DoWork(messageToProcess))
 				{
 					SetUserCooldown(messageToProcess, DefaultCooldown);
 					return;
@@ -424,25 +425,52 @@ namespace SuiBot_Core
 			{
 				var response = await SuiBotInstance.HelixAPI.GetChatSharedSession(this.ChannelID);
 				if (response != null)
-					IsSharedChat = true;
+				{
+					SharedChatUsers = response.participants.Length;
+					IsSafeMod = SharedChatUsers > 2;
+				}
 				else
-					IsSharedChat = false;
+				{
+					IsSafeMod = false;
+					SharedChatUsers = 0;
+				}
 
 			}, CancellationTokenSource.Token);
 		}
 
-		internal void SetSharedChatFlag(bool newStatus)
+		internal void SetSharedChatUsers(int users)
 		{
-			if (IsSharedChat != newStatus)
+			if (SharedChatUsers != users)
 			{
-				IsSharedChat = newStatus;
-				if (newStatus)
+				SharedChatUsers = users;
+
+				if(users == 0)
 				{
-					SendChatMessage("Shared chat enabled - entering limited mode. Have fun collabing! GivePLZ");
+					SendChatMessage($"Shared chat disabled");
+					IsSafeMod = false;
 				}
-				else
+				else if (users == 1)
 				{
-					SendChatMessage("Shared chat disabled - exiting limited mode");
+					SendChatMessage($"A single user shared chat. HUH? WHAT?!");
+					IsSafeMod = false;
+				}
+				else if(SharedChatUsers == 2)
+				{
+					if(IsSafeMod)
+						SendChatMessage($"Less than 3 shared chat users - exiting limited mode.");
+					else
+						SendChatMessage($"There is now 2 users in shared chat.");
+
+					IsSafeMod = false;
+
+				}
+				else if (SharedChatUsers > 2)
+				{
+					if (!IsSafeMod)
+					{
+						SendChatMessage($"Current amount of shared chat users {users} - entering limited mode. Have fun collabing! GivePLZ");
+						IsSafeMod = true;
+					}
 				}
 			}
 		}

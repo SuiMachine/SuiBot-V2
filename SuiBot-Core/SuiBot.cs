@@ -435,12 +435,12 @@ namespace SuiBot_Core
 		{
 		}
 
-		public void TwitchSocket_SharedChatBegin(ES_SharedChatEnd sharedChatBegin)
+		public void TwitchSocket_SharedChatBegin(ES_SharedChatBegin sharedChatBegin)
 		{
 			if (!ChannelInstances.TryGetValue(sharedChatBegin.broadcaster_user_login, out var channelInstance))
 				return;
 
-			channelInstance.SetSharedChatFlag(true);
+			channelInstance.SetSharedChatUsers(sharedChatBegin.participants.Length);
 		}
 
 		public void TwitchSocket_SharedChatUpdate(ES_SharedChatUpdate sharedChatUpdate)
@@ -448,15 +448,15 @@ namespace SuiBot_Core
 			if (!ChannelInstances.TryGetValue(sharedChatUpdate.broadcaster_user_login, out var channelInstance))
 				return;
 
-			channelInstance.SetSharedChatFlag(true);
+			channelInstance.SetSharedChatUsers(sharedChatUpdate.participants.Length);
 		}
 
-		public void TwitchSocket_SharedChatEnd(ES_SharedChatBegin sharedChatEnd)
+		public void TwitchSocket_SharedChatEnd(ES_SharedChatEnd sharedChatEnd)
 		{
 			if (!ChannelInstances.TryGetValue(sharedChatEnd.broadcaster_user_login, out var channelInstance))
 				return;
 
-			channelInstance.SetSharedChatFlag(false);
+			channelInstance.SetSharedChatUsers(0);
 		}
 	}
 }

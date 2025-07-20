@@ -136,7 +136,7 @@ namespace SuiBot_Core.Components
 		/// </summary>
 		internal void DoTickWork()
 		{
-			if (ChannelInstance.IsSharedChat)
+			if (ChannelInstance.IsSafeMod)
 				return;
 
 			lock (IntervalMessagesStorage.Messages)
