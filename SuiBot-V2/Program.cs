@@ -42,6 +42,7 @@ namespace SuiBot_V2
 		private static void Console_CancelKeyPress(object sender, ConsoleCancelEventArgs e)
 		{
 			bot.Shutdown();
+			Environment.Exit(0);
 		}
 	}
 }

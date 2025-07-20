@@ -302,7 +302,7 @@ namespace SuiBot_Core
 
 			//MeebyIrcClient.Disconnect();
 			System.Threading.Thread.Sleep(2000);
-			this.OnShutdown();
+			this.OnShutdown?.Invoke();
 		}
 
 		public void SendChatMessageFeedback(string channel, string message)
