@@ -13,7 +13,11 @@ namespace SuiBot_Core
 {
 	public class SuiBot : IBotInstance
 	{
+#if LOCAL_API
+		public const string CLIENT_ID = "c5a8b23a075251ced03987aecc495e";
+#else
 		public const string CLIENT_ID = "rmi9m0sheo4pp5882o8s24zu7h09md";
+#endif
 		private static SuiBot m_Instance;
 		internal TwitchSocket TwitchSocket { get; private set; }
 		internal SuiBot_TwitchSocket.API.HelixAPI HelixAPI { get; private set; }
@@ -111,17 +115,21 @@ namespace SuiBot_Core
 				});
 		public void Connect()
 		{
+#if !LOCAL_API
 			if (!BotConnectionConfig.IsValidConfig())
 				throw new Exception("Invalid config!");
 			if (BotCoreConfig.ChannelsToJoin.Count == 0)
 				throw new Exception("At least 1 channel is required to join.");
+#endif
 
 #if LOCAL_API
 
-			HelixAPI = new API.HelixAPI(this, "2ae883f289a6106");
-			//var validationResult = HelixAPI.ValidateToken();
+			HelixAPI = new SuiBot_TwitchSocket.API.HelixAPI(CLIENT_ID, this, "2ac2a655ce09d5d");
+			//secret: 0f562ff3c8eaeea5a32fe856cea262
+			//token: 2ac2a655ce09d5d
 #else
 			HelixAPI = new SuiBot_TwitchSocket.API.HelixAPI(CLIENT_ID, this, BotConnectionConfig.Password);
+
 			var validationResult = HelixAPI.ValidateToken();
 			if (validationResult != SuiBot_TwitchSocket.API.HelixAPI.ValidationResult.Successful)
 			{
@@ -143,7 +151,6 @@ namespace SuiBot_Core
 				}
 			}
 #endif
-
 
 			ShouldRun = true;
 			TwitchSocket = new TwitchSocket(this);
@@ -175,15 +182,19 @@ namespace SuiBot_Core
 				}
 
 				Response_SubscribeTo currentSubscriptionChecks = await HelixAPI.GetCurrentEventSubscriptions();
-				foreach (var subscription in currentSubscriptionChecks.data)
+				if (currentSubscriptionChecks != null)
 				{
-					if (subscription.status != "enabled")
+					foreach (var subscription in currentSubscriptionChecks.data)
 					{
-						Console.WriteLine($"Unsubscribing from {subscription.type} ({subscription.status})");
-						await HelixAPI.CloseSubscription(subscription);
-						await Task.Delay(100);
+						if (subscription.status != "enabled")
+						{
+							Console.WriteLine($"Unsubscribing from {subscription.type} ({subscription.status})");
+							await HelixAPI.CloseSubscription(subscription);
+							await Task.Delay(100);
+						}
 					}
 				}
+
 
 				foreach (var channel in channelsToSubScribeAdditionalInformationTo)
 				{

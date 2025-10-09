@@ -193,6 +193,12 @@ namespace SuiBot_Core
 
 		internal void DoWork(ES_ChatMessage messageToProcess)
 		{
+			if (messageToProcess.source_broadcaster_user_id != null)
+			{
+				if (messageToProcess.source_broadcaster_user_id != this.ChannelID)
+					return;
+			}
+
 			UpdateActiveUser(messageToProcess.chatter_user_login);
 
 			//If Filtering is enabled and timeouted or banned, we don't need to do anything else
@@ -444,7 +450,7 @@ namespace SuiBot_Core
 			{
 				SharedChatUsers = users;
 
-				if(users == 0)
+				if (users == 0)
 				{
 					SendChatMessage($"Shared chat disabled");
 					IsSafeMod = false;
@@ -454,9 +460,9 @@ namespace SuiBot_Core
 					SendChatMessage($"A single user shared chat. HUH? WHAT?!");
 					IsSafeMod = false;
 				}
-				else if(SharedChatUsers == 2)
+				else if (SharedChatUsers == 2)
 				{
-					if(IsSafeMod)
+					if (IsSafeMod)
 						SendChatMessage($"Less than 3 shared chat users - exiting limited mode.");
 					else
 						SendChatMessage($"There is now 2 users in shared chat.");
